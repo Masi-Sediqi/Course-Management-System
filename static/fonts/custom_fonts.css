@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'Al_Qalam_Quran_Majeed';
+    src: url('../fonts/Al_Qalam_Quran_Majeed.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Bahij_Uthman_Taha_Regular';
+    src: url('../fonts/Bahij_Uthman_Taha_Regular.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'XW_Zar_Bd_0';
+    src: url('../fonts/XW_Zar_Bd_0.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'xb-khoramshahr-bold-1_0';
+    src: url('../fonts/xb-khoramshahr-bold-1_0.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'XW_Zar_Bd_0';
+    src: url('../fonts/XW_Zar_Bd_0.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}

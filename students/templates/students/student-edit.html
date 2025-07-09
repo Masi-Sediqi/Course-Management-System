@@ -1,0 +1,130 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block content %}
+<div class="main-wrapper">
+    <div class="page-wrapper">
+        <div class="content container-fluid" style="font-family: XW_Zar_Bd_0; padding-top: 20px;">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} text-center h3" role="alert">
+                {{ message }}
+            </div>
+            <script>
+                setTimeout(function () {
+                    $('.alert').fadeOut('slow');
+                }, 3000); // 3 seconds
+            </script>
+            {% endfor %}
+            {% endif %}
+            <div class="page-header">
+                <div class="row" style="padding: 6px;">
+                    <div class="col">
+
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">داشبورد</a></li>
+                        
+                            <li class="breadcrumb-item active">بخش اصلاح</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <form action="{% url 'students:edit_students' id=get_student_id.id %}" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-0">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0"> اصلاح فورم ثبت نام {{ get_student_id.first_name }} {{ get_student_id.last_name }}</h4>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="firstName1">نام مکمل</label>
+                                        {{ form.first_name }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="lastName1">تخلص</label>
+                                        {{ form.last_name }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="email">ایمیل</label>
+                                        {{ form.email }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="phone">شماره تماس</label>
+                                        {{ form.phone }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="date_of_registration">تاریخ ثبت نام</label>
+                                        {{ form.date_of_registration }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="gender">جنسیت</label>
+                                        {{ form.gender }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="fees">مقدار اصلی فیس</label>
+                                        {{ form.orginal_fees }}
+                                    </div>
+                                    <div class="col-md-6 form-group mb-3">
+                                        <label for="fees">مقدار فیس داده شده</label>
+                                        {{ form.give_fees }}
+                                    </div>
+                                    </div>
+                               
+                                  
+                           
+
+           
+
+                    <style>
+                        .add-btn {
+                            background-color: #003473;
+                            color: white;
+                            border: 1px solid white;
+                            padding: 5px 10px;
+                            cursor: pointer;
+                            transition: background-color 0.3s, box-shadow 0.3s;
+                        }
+
+                        .add-btn:hover {
+                            background-color: #0056b3;
+                        }
+
+                        .add-btn.active {
+                            box-shadow: 0 0 20px 10px rgba(0, 0, 255, 0.5);
+                        }
+
+                        .small-btn {
+                            padding: 3px 6px;
+                        }
+                    </style>
+               
+                    <div class="col-auto float-end ms-auto">
+                        <button type="submit" class="btn add-btn m-r-5" onclick="addShadow(this)"
+                            style="padding: 3px;
+                        width: 159px; content: initial; text-shadow: red; text-justify: distribute-all-lines; text-decoration: none;">ذخیره کردن<i
+                                class="fa-solid fa-arrow-alt-right"></i></button>
+                        <input class="btn add-btn m-r-5 small-btn" value="برگشت" onclick="javascript:history.go(-1);"
+                            onclick="addShadow(this)">
+                    </div>
+
+                    <script>
+                        function addShadow(element) {
+                            element.classList.add('active');
+                            setTimeout(function () {
+                                element.classList.remove('active');
+                            }, 200);
+                        }
+                    </script>
+              
+            </form>
+
+
+       
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block content%}
+
+
+
+
+<body class="text-left" style="font-family: XW_Zar_Bd_0;">
+                  
+    <div class="main-content pt-4">
+        
+        <div class="row mb-4">
+            
+      
+            <div class="col-lg-8 col-xl-8 mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="ul-widget__head v-margin">
+                            <div class="ul-widget__head-label">
+                                <h3 class="ul-widget__head-title">د کاروونکو د مدیریت برخه  </h3>
+                            </div>
+                            <div class="dropdown mb-2">
+                            
+                                <button class="btn btn-outline-info m-1" type="button" data-toggle="modal" data-target="#exampleModalCenter2">نوی کاروونکی</button>
+                            </div>
+
+                          
+                        </div>
+                        <div class="ul-widget-body">
+                            <div class="ul-widget3">
+                                <div class="ul-widget6__item--table">
+                                    <table class="table">
+                                        <thead>
+                                            <tr class="ul-widget6__tr--sticky-th">
+                                                <th scope="col">#</th>
+                                                <th scope="col">کاروونکی ډول</th>
+                                                <th scope="col">برخه</th>
+                                                <th scope="col">نوم</th>
+                                                <th scope="col">دنده</th>
+                                                <th scope="col">موبایل</th>
+                                                <th scope="col">ایمیل</th>
+                                                <th scope="col">عملیات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- start tr-->
+                                        {% for i in saved_emp%}
+                                            <tr>
+                                                <th scope="row">
+                                                {{i.id}}
+                                                </th>
+                                                <td>
+                                                    {{i.emp_type}}
+                                                </td>
+                                                <td>{{i.branch}}</td>
+                                                <td>{{i.name}}</td>
+                                                <td>{{i.position}}</td>
+                                                <td>{{i.phone_number}}</td>
+                                                <td>{{i.email}}</td>
+
+                                                <td>
+                                                    <button class="btn bg-white _r_btn border-0" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="_dot _inline-dot bg-primary"></span><span class="_dot _inline-dot bg-primary"></span><span class="_dot _inline-dot bg-primary"></span></button>
+                                                    <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 33px, 0px); top: 0px; left: 0px; will-change: transform;"><a class="dropdown-item ul-widget__link--font" href="#"><i class="i-Bar-Chart-4"> </i>اکونټ جوړول</a><a class="dropdown-item ul-widget__link--font" href="#"><i class="i-Data-Save"> </i> تغیرات</a><a class="dropdown-item ul-widget__link--font" href="#"><i class="i-Duplicate-Layer"></i> پاکول</a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                           
+                                            {% endfor %}
+                                           
+                                          
+                                           
+                                            
+                                           
+                                        </tbody>
+                                    </table>
+                                </div>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-xl-4 mt-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="ul-widget__head">
+                            <div class="ul-widget__head-label">
+                                <h3 class="ul-widget__head-title">د کاروونکو اکونټونه</h3>
+                            </div>
+                           
+                        </div>
+                        <div class="ul-widget__body">
+                            <div class="tab-content">
+                                <div class="tab-pane active show" id="__g-widget4-tab1-content">
+                                    <div class="ul-widget1">
+                                        {% for i in all_users%}
+
+                                        <div class="ul-widget4__item ul-widget4__users">
+                                            <div class="ul-widget2__info ul-widget4__users-info"><a class="ul-widget2__title" href="#">{{i.name}}</a><span class="ul-widget2__username" href="#">{{i.email}}</span></div>
+                                            <div class="ul-widget4__actions">
+                                                <button class="btn btn-outline-info m-1" type="button">مکمل معلومات</button>
+                                            </div>
+                                        </div>
+                                       
+                                         {% endfor %}
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+        </div>
+        
+    </div>
+    
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle-2" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle-2"> د کاروونکو ډولونه</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+
+
+                    
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">تړل</button>
+                    <button class="btn btn-primary ml-2" type="button">ذخیره کول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle-2" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle-2">نوی کاروونکی ذخیره کول</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'account:employee_info' %}" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12 form-group mb-3">
+                                <label for="firstName1"> د کاروونکی ډول</label>
+                                {{emp_form.emp_type}}
+                            </div>
+                            <div class="col-md-12 form-group mb-3">
+                                <label for="firstName1"> د کاروونکی برخه</label>
+                                {{emp_form.branch}}
+                            </div>
+                            <div class="col-md-12 form-group mb-3">
+                                <label for="firstName1">نوم</label>
+                                {{emp_form.name}}
+                            </div>
+                            <div class="col-md-12 form-group mb-3">
+                                <label for="firstName1">وظیفه</label>
+                                {{emp_form.position}}
+                            </div>
+                            <div class="col-md-12 form-group mb-3">
+                                <label for="firstName1">موبایل شمیره</label>
+                                {{emp_form.phone_number}}
+                            </div>
+                            <div class="col-md-12 form-group mb-3">
+                                <label for="firstName1">ایمیل</label>
+                                {{emp_form.email}}
+                            </div>
+
+
+                        </div>
+                    
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">ټړل</button>
+                    <button class="btn btn-primary ml-2" type="submit" >ذخیره کول</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+
+
+
+
+          
+{% endblock %}

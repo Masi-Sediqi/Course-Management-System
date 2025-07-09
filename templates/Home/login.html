@@ -1,0 +1,80 @@
+{% load static %}
+{% block content%}
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>مرکزی اداره</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,400i,600,700,800,900" rel="stylesheet" />
+    <link href="{% static 'css/themes/lite-purple.css'%} " rel="stylesheet" />
+    <link href="{% static 'css/plugins/perfect-scrollbar.css'%}" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/plugins/fontawesome-5.css'%}" />
+    <link href="{% static 'css/plugins/metisMenu.min.css'%}" rel="stylesheet" />
+  
+    <link rel="stylesheet" type="text/css" href="{% static 'fonts/custom_fonts.css' %}">
+  
+  
+  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مرکزی اداره</title>
+  
+  </head>
+<div class="auth-layout-wrap" style="background-image: url('{% static 'images/zakawat.jpeg' %}')">
+    <div class="auth-content" style="font-family: XW_Zar_Bd_0;">
+        <div class="card o-hidden">
+            <div class="row" >
+                <div class="col-md-12">
+                    <div class="p-4" >
+                        <div class="auth-logo text-center mb-4">
+                            <img src="{% static 'images/zakawat.png' %}" alt="" style="border-radius: 6px;">
+                        </div>
+                        <h1 class="mb-3 text-18" style="float: right;">داخل شدن به سیستم</h1>
+                    </br> </br>
+                    <form method="post" action="{% url 'account:login' %}" accept-charset="UTF-8">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="email" style="float: right;">ایمیل آدرس </label>
+                            {{ form.username }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" style="float: right;">پسورد</label>
+                            {{ form.password }}
+                        </div>
+                        
+                        <button class="btn btn-rounded btn-primary btn-block mt-2" type="submit">ورود</button>
+                    </form>
+                    
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/plugins/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'js/plugins/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/plugins/perfect-scrollbar.min.js' %}"></script>
+<script src="{% static 'js/scripts/tooltip.script.min.js' %}"></script>
+<script src="{% static 'js/scripts/script.min.js' %}"></script>
+<script src="{% static 'js/scripts/script_2.min.js' %}"></script>
+<script src="{% static 'js/scripts/sidebar.large.script.min.js' %}"></script>
+<script src="{% static 'js/plugins/feather.min.js' %}"></script>
+<script src="{% static 'js/plugins/metisMenu.min.js' %}"></script>
+<script src="{% static 'js/scripts/layout-sidebar-vertical.min.js' %}"></script>
+<script src="{% static 'js/plugins/echarts.min.js' %}"></script>
+<script src="{% static 'js/scripts/echart.options.min.js' %}"></script>
+<script src="{% static 'js/plugins/datatables.min.js' %}"></script>
+<script src="{% static 'js/scripts/dashboard.v4.script.min.js' %}"></script>
+<script src="{% static 'js/scripts/widgets-statistics.min.js' %}"></script>
+<script src="{% static 'js/plugins/apexcharts.min.js' %}"></script>
+<script src="{% static 'js/scripts/apexSparklineChart.script.min.js' %}"></script>
+
+</html>
+
+
+{% endblock %}
