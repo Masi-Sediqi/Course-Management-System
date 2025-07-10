@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="breadcrumb">
+        <h1>Todo List</h1>
+        <ul>
+            <li><a href="">UI Kits</a></li>
+            <li>Todo List</li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+    <!-- content goes here-->
+    <section class="ul-todo-list-content">
+
+      
+        <div class="ul-todo-content-right">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="ul-todo-mobile-menu mr-3 p-2"><i class="nav-icon i-Align-Justify-All text-25 ul-contact-mobile-icon"></i></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-success " type="button" data-toggle="modal" data-target=".bd-example-modal-lg">فیس جدید</button>
+                                    <a href="javascript:history.back()" class="btn btn-info ml-2">
+                                        بازگشت
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="ul-todo-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover table-striped mb-0">
+                                                <thead class="table-light">
+                                                    <tr class="text-center">
+                                                        <th>شماره</th>
+                                                        <th>عنوان</th>
+                                                        <th>شرح</th>
+                                                        <th>مقدار</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr class="text-center">
+                                                        <td>۱</td>
+                                                        <td>فیس اصلی</td>
+                                                        <td>فیس تعیینی برای مضمون</td>
+                                                        <td>۳۰۰۰ افغانی</td>
+                                                    </tr>
+                                                    <tr class="text-center">
+                                                        <td>۲</td>
+                                                        <td>فیس پرداخت‌شده</td>
+                                                        <td>مقداری که شاگرد پرداخت کرده</td>
+                                                        <td>۲۵۰۰ افغانی</td>
+                                                    </tr>
+                                                    <tr class="text-center table-warning">
+                                                        <td>۳</td>
+                                                        <td>باقی مانده</td>
+                                                        <td>مقدار باقی‌مانده برای پرداخت</td>
+                                                        <td>۵۰۰ افغانی</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- end of main-content -->
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <form method="POST" action="{% url 'students:student_fees_detail' student_id=student.id %}">
+          {% csrf_token %}
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content p-3">
+              <div class="card-title h5 mb-3">اضافه کردن فیس</div>
+              <div>
+                <div class="row">
+                  <div class="col-md-4 form-group mb-3">
+                    <label for="{{ form.date.id_for_label }}">تاریخ</label>
+                    {{ form.date }}
+                  </div>
+                  <div class="col-md-4 form-group mb-3">
+                    <label for="{{ form.orginal_fees.id_for_label }}">فیس اصلی</label>
+                    {{ form.orginal_fees }}
+                  </div>
+                  <div class="col-md-4 form-group mb-3 position-relative">
+                    <label for="{{ form.give_fees.id_for_label }}">مقدار فیس داده شده <span class="text-danger">*</span></label>
+                    {{ form.give_fees }}
+                    <div id="warning-msg" class="text-danger mt-1" style="display: none;">
+                      مقدار فیس داده شده نباید بزرگتر از مقدار اصلی فیس باشد!
+                    </div>
+                    <div id="overlay" style="
+                      display: none;
+                      position: absolute;
+                      top: 38px; /* adjust this if needed */
+                      left: 0;
+                      right: 0;
+                      height: 38px;
+                      background: rgba(255, 255, 255, 0.6);
+                      z-index: 10;
+                      pointer-events: none;
+                      border-radius: 4px;
+                    "></div>
+                  </div>
+                </div>
+      
+                <div class="col-md-12 form-group mb-3">
+                  <label for="{{ form.description.id_for_label }}">توضیحات</label>
+                  {{ form.description }}
+                </div>
+      
+                <div class="text-end">
+                  <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const orginalFeesInput = document.getElementById('id_orginal_fees');
+          const giveFeesInput = document.getElementById('id_give_fees');
+          const warningMsg = document.getElementById('warning-msg');
+          const overlay = document.getElementById('overlay');
+      
+          function validateFees() {
+            const orginalValue = parseFloat(orginalFeesInput.value);
+            const giveValue = parseFloat(giveFeesInput.value);
+      
+            if (!isNaN(orginalValue) && !isNaN(giveValue)) {
+              if (giveValue > orginalValue) {
+                warningMsg.style.display = 'block';
+                overlay.style.display = 'block';
+                giveFeesInput.style.borderColor = 'red';
+              } else {
+                warningMsg.style.display = 'none';
+                overlay.style.display = 'none';
+                giveFeesInput.style.borderColor = '';
+              }
+            } else {
+              warningMsg.style.display = 'none';
+              overlay.style.display = 'none';
+              giveFeesInput.style.borderColor = '';
+            }
+          }
+      
+          orginalFeesInput.addEventListener('input', validateFees);
+          giveFeesInput.addEventListener('input', validateFees);
+        });
+      </script>
+      
+</div>
+  
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker3').datepicker({});
+    });
+</script>
+
+{% endblock %}

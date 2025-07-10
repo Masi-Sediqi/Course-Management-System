@@ -76,7 +76,7 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
                                     <a class="dropdown-item text-info" href="{% url 'students:student_detail' i.id %}">معلومات کامل</a>
-                                    <a class="dropdown-item text-info" href="#">معلومات فیس</a>
+                                    <a class="dropdown-item text-info" href="{% url 'students:student_fees_detail' i.id %}">معلومات فیس</a>
                                     <a class="dropdown-item text-info" href="{% url 'students:student_bill' i.id %}">پرنت بل</a>
                                     <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تغیرات</a>
                                     <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">

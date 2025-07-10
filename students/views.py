@@ -62,11 +62,6 @@ def student_bill(request, id):
     })
 
 
-
-
-
-# ________________________________ view for students registration ________________________________________ info 
-
 def student_detail(request, student_id):
     student = get_object_or_404(Student, id=student_id)
 
@@ -74,3 +69,25 @@ def student_detail(request, student_id):
         'student': student,
     }
     return render(request, 'students/student-detail.html', context)
+
+
+def student_fees_detail(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == "POST":
+        form = Student_fess_infoForm(request.POST)
+        if form.is_valid():
+            fees_info = form.save(commit=False)
+            fees_info.student = student  # Link to the correct student
+            fees_info.save()
+            return redirect('students:student_fees_detail', student_id=student.id)
+    else:
+        form = Student_fess_infoForm(initial={
+            'orginal_fees': student.orginal_fees
+        })
+
+    context = {
+        'student': student,
+        'form': form,
+    }
+    return render(request, 'students/student-fees-detail.html', context)

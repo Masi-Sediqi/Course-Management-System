@@ -12,12 +12,15 @@ class Student(models.Model):
     time = models.CharField(max_length=30)
     subject = models.CharField(max_length=50)
     orginal_fees = models.FloatField()  # <--- This is your فیس
-    give_fees = models.FloatField()  # <--- This is your فیس
     registered_at = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def remaining_fees(self):
-        return self.orginal_fees - self.give_fees
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+class Student_fess_info(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    orginal_fees = models.FloatField(blank=False)  # <--- This is your فیس
+    give_fees = models.FloatField(blank=False)  # <--- This is your فیس
+    date = models.CharField(max_length=15, blank=False)
+    description = models.TextField(blank=True, null=True)
+    
