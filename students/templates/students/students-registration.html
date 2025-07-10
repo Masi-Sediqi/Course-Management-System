@@ -42,7 +42,8 @@
                             <tr>
                               <th scope="col">#</th>
                               <th scope="col">نام کامل</th>
-                              <th scope="col">ایمیل</th>
+                              <th scope="col">تایم</th>
+                              <th scope="col">مضمون</th>
                               <th scope="col">شماره تماس</th>
                               <th scope="col">تاریخ ثبت</th>
                               <th scope="col">جنسیت</th>
@@ -55,7 +56,8 @@
                             <tr>
                               <th scope="row">{{ i.id }}</th>
                               <td>{{ i.first_name }} {{ i.last_name }}</td>
-                              <td>{{ i.email|default:"ندارد" }}</td>
+                              <td>{{ i.time }}</td>
+                              <td>{{ i.subject }}</td>
                               <td>{{ i.phone|default:"ندارد" }}</td>
                               <td>{{ i.date_of_registration }}</td>
                               <td>
@@ -75,7 +77,7 @@
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
                                     <a class="dropdown-item text-info" href="#">معلومات کامل</a>
                                     <a class="dropdown-item text-info" href="#">معلومات فیس</a>
-                                    <a class="dropdown-item text-info" href="#">پرنت بل</a>
+                                    <a class="dropdown-item text-info" href="{% url 'students:student_bill' i.id %}">پرنت بل</a>
                                     <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تغیرات</a>
                                     <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
                                         حذف
@@ -137,7 +139,7 @@
                         aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-                <form action="" method="post">
+                <form action="{% url 'students:students_registration' %}" method="post">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-12">
@@ -145,29 +147,37 @@
                             <h5>معلومات شاگرد</h5>
                         </div>
                         <!-- Personal Info -->
-                        <div class="col-md-6 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="firstName1">نام مکمل<span style="color: red;">*</span></label>
                             {{ form.first_name }}
                         </div>
-                        <div class="col-md-6 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="lastName1">تخلص<span style="color: red;">*</span></label>
                             {{ form.last_name }}
                         </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label for="email">ایمیل</label>
-                            {{ form.email }}
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="email">نام پدر</label>
+                            {{ form.father_name }}
                         </div>
-                        <div class="col-md-6 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="phone">شماره تماس</label>
                             {{ form.phone }}
                         </div>
-                        <div class="col-md-6 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="date_of_registration">تاریخ ثبت نام<span style="color: red;">*</span></label>
                             {{ form.date_of_registration }}
                         </div>
-                        <div class="col-md-6 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="date_of_registration">مضمون<span style="color: red;">*</span></label>
+                            {{ form.subject }}
+                        </div>
+                        <div class="col-md-3 form-group mb-3">
                             <label for="gender">جنسیت<span style="color: red;">*</span></label>
                             {{ form.gender }}
+                        </div>
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="gender">تایم<span style="color: red;">*</span></label>
+                            {{ form.time }}
                         </div>
                 
                         <!-- Separator with Title -->

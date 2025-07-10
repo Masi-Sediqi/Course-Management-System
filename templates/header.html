@@ -21,28 +21,9 @@
               <ul class="metismenu" id="menu">
                 
                 <li class="Ul_li--hover"><a href="/"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">داشبورد</span></a></li>
-                
-                <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">مرکزي اداره</span></a>
-                    <ul class="mm-collapse">
-                        {% if perms.administrations.view_branches %}
-                        <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name">د څانګو مدیریت</span></a></li>
-                        {% endif %}
-                        <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name">مالی / محاسبه</span></a></li>
-                    </ul>
-                </li>
-                
-                {% if perms.income.view_income %}
+
                 <li class="Ul_li--hover"><a href="{% url 'students:students_registration' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">ثبت نام شاگردان</span></a></li>
-                {% endif %}
 
-                {% if perms.money_dist.view_dist_money_req %}
-                <li class="Ul_li--hover"><a href=""><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> د حوالو برخه</span></a></li>
-                {% endif %}
-
-
-                {% if perms.money_dist.view_req_approve %}
-                <li class="Ul_li--hover"><a href=""><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">د حوالو اجراعات</span></a></li>
-                {% endif %}
 
                 <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">مساعده او کرایه</span></a>
                     <ul class="mm-collapse0">
@@ -60,55 +41,6 @@
 
 
 
-                  <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">تنظیمات</span></a>
-                      <ul class="mm-collapse">
-                           {% if perms.income.view_currency %}
-                          <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">پولی اسعار</span></a></li>
-                            {% endif %}
-                           {% if perms.income.view_currency %}
-                          <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">مالی کال </span></a></li>
-                            {% endif %}
-                            <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">میاشت </span></a></li>
-
-                          {% if perms.account.view_related_employeement_info %}
-                          <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">مربوط کسان</span></a></li>
-                          {% endif %}
-                          {% if perms.account.view_approval_employeement_info %}
-                          <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name">حکم ورکونکی</span></a></li>
-                          {% endif %}
-                          {% if perms.account.view_taeed_employeement_info %}
-                          <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">حکم تایید کوونکی</span></a></li>
-                          {% endif %}
-                          <li class="item-name"></li>
-                          {% if perms.money_dist.view_req_type %}
-                          <li class="nav-item"><a href=""><i class="nav-icon "></i><span class="item-name">د حوالو ضرورت ډولونه</span></a></li>
-                          {% endif %}
-                      </ul>
-                  </li>
-                  
-                  <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">راپورونه</span></a>
-                      <ul class="mm-collapse">
-                          <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name">د عواید راپورونه</span></a></li>
-                          <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name"> د حوالو راپورونه</span></a></li>
-                          <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name"> د  ملګرو مساعده راپورونه</span></a></li>
-                          <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name"> د میاشتنی کرایه راپورونه</span></a></li>
-                      </ul>
-                  </li>
-                  <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">د کارونکو مدیریت</span></a>
-                    <ul class="mm-collapse">
-                        {% if perms.account.view_employeement_type %}
-                        <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">د کاروونکو ډولونه</span></a></li>
-                        {% endif %}
-                        {% if perms.account.view_employeement_info %}
-                        <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">اکونتونه</span></a></li>
-                        {% endif %}
-                        {% if perms.account.view_logentry %}
-                        <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">نظارتی برخه</span></a></li>
-                        {% endif %}
-                        <li class="nav-item"><a href=""><i class="nav-icon "></i><span class="item-name">گروپونه </span></a></li>
-                        
-                    </ul>
-                </li>
               </ul>
 
               <div class="ml-auto">

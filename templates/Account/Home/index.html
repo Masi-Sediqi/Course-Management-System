@@ -34,7 +34,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="p-4">
-                        <div class="auth-logo text-center mb-4"><img src="{% static 'images/logo.png' %}" alt=""></div>
+                        <img src="{% static 'images/logo.jpg' %}" alt="" style="border-radius: 6px;">
                         <h1 class="mb-3 text-18">سیستم ته دننه کیدل</h1>
                         <form method="post" action="{% url 'account:login' %}" accept-charset="UTF-8">
                             {% csrf_token %}

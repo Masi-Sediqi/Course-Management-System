@@ -13,6 +13,7 @@ def students_registration(request):
         form = StudentForm(request.POST)
         if form.is_valid():
             form.save()
+            return redirect('students:students_registration')
     else:
         form = StudentForm()
     
@@ -53,3 +54,9 @@ def edit_students(request, id):
         'form':form,
     }
     return render(request, 'students/student-edit.html', context)
+
+def student_bill(request, id):
+    student = Student.objects.get(id=id)
+    return render(request, 'students/student-bill.html', {
+        'student': student,
+    })
