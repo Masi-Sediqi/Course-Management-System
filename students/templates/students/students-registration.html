@@ -73,7 +73,7 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
-                                    <a class="dropdown-item text-info" href="#">معلومات کامل</a>
+                                    <a class="dropdown-item text-info" href="{% url 'students:student_detail' i.id %}">معلومات کامل</a>
                                     <a class="dropdown-item text-info" href="#">معلومات فیس</a>
                                     <a class="dropdown-item text-info" href="#">پرنت بل</a>
                                     <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تغیرات</a>

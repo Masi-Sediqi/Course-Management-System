@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect , get_object_or_404
 from .forms import *
 from .models import *
 from django.http import HttpResponse
@@ -53,3 +53,18 @@ def edit_students(request, id):
         'form':form,
     }
     return render(request, 'students/student-edit.html', context)
+
+
+
+
+
+
+# ________________________________ view for students registration ________________________________________ info 
+
+def student_detail(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    context = {
+        'student': student,
+    }
+    return render(request, 'students/student-detail.html', context)

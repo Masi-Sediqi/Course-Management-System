@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / </span> معلومات کامل شاگرد
+    </h4>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title mb-4 text-primary">مشخصات شاگرد</h5>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>نام مکمل:</strong> {{ student.first_name }} {{ student.last_name }}
+                </div>
+                <div class="col-md-6">
+                    <strong>ایمیل:</strong> {{ student.email|default:"ندارد" }}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>شماره تماس:</strong> {{ student.phone|default:"ندارد" }}
+                </div>
+                <div class="col-md-6">
+                    <strong>تاریخ ثبت:</strong> {{ student.date_of_registration }}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>جنسیت:</strong>
+                    {% if student.gender == 'Male' %}
+                        <span class="badge bg-primary">مرد</span>
+                    {% else %}
+                        <span class="badge bg-info">زن</span>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <strong>تاریخ ثبت سیستمی:</strong> {{ student.registered_at|date:"Y-m-d H:i" }}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>فیس اصلی:</strong> {{ student.orginal_fees }}
+                </div>
+                <div class="col-md-6">
+                    <strong>فیس پرداخت‌شده:</strong> {{ student.give_fees }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'students:students_registration' %}" class="btn btn-secondary">بازگشت</a>
+                <a href="{% url 'students:edit_students' student.id %}" class="btn btn-warning">ویرایش</a>
+                <a href="{% url 'students:delete_students' student.id %}" class="btn btn-danger">حذف</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
