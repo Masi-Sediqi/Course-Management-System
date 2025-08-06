@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'account',
     'students',
     'jalali_date',
+    'management',
+    'teachers',
+    'library',
 ]
 
 JALALI_DATE_DEFAULTS = {

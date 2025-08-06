@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content pt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+            </ul>
+            <div class="card">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+                        <!-- ====== Edit Station Form ====== -->
+                        <form method="POST" action="{% url 'library:edit_station' id=record.id %}" class="needs-validation" novalidate>
+                          {% csrf_token %}
+                          <div class="modal-body">
+                            <div class="container-fluid">
+                              <div class="row g-3">
+                                
+                                <!-- Station Name -->
+                                <div class="col-md-6">
+                                  <label for="{{ form.name.id_for_label }}" class="form-label">نام قرطاسیه <span class="text-danger">*</span></label>
+                                  {{ form.name }}
+                                </div>
+                      
+                                <!-- Category -->
+                                <div class="col-md-6">
+                                  <label for="{{ form.category.id_for_label }}" class="form-label">دسته‌بندی <span class="text-danger">*</span></label>
+                                  {{ form.category }}
+                                </div>
+                      
+                                <!-- Price -->
+                                <div class="col-md-6">
+                                  <label for="{{ form.price.id_for_label }}" class="form-label">قیمت <span class="text-danger">*</span></label>
+                                  {{ form.price }}
+                                </div>
+                      
+                                <!-- Description -->
+                                <div class="col-md-12">
+                                  <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
+                                  {{ form.description }}
+                                </div>
+                      
+                              </div>
+                            </div>
+                          </div>
+                      
+                          <div class="modal-footer mt-3 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                            <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
+                          </div>
+                        </form>
+                        <!-- ====== / Edit Station Form ====== -->
+                      </div>
+                      
+                </div>
+            </div>
+        </div>
+    </div><!-- end of main-content -->
+</div>
+
+{% endblock %}

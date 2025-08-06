@@ -60,18 +60,14 @@
                             <th>جنسیت</th>
                             <td>
                                 {% if student.gender == 'Male' %}
-                                    <span class="badge bg-primary">مرد</span>
+                                <span class="badge badge-pill badge-warning" style="font-size: 1rem;">مرد</span>
+
                                 {% else %}
-                                    <span class="badge bg-info text-dark">زن</span>
+                                <span class="badge badge-pill badge-warning" style="font-size: 1rem;">مرد</span>
                                 {% endif %}
                             </td>
                         </tr>
-                        <tr>
-                            <th>
-                                <button class="btn btn-warning btn-icon m-1" type="button"><span class="ul-btn__icon"><i class="fas fa-money-bill-wave"></i>
-                                </span><span class="ul-btn__text">معلومات فیس</span></button>
-                            </th>
-                        </tr>
+                      
                       
                     </tbody>
                 </table>
@@ -82,6 +78,48 @@
                 <a href="{% url 'students:edit_students' student.id %}" class="btn btn-warning me-2">تغیرات</a>
                 <a href="{% url 'students:delete_students' student.id %}" class="btn btn-danger"
                    onclick="return confirm('آیا مطمئن هستید که می‌خواهید این شاگرد را حذف کنید؟')">حذف</a>
+                   <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-warning btn-icon m-1" type="button"><span class="ul-btn__icon"><i class="fas fa-money-bill-wave"></i>
+                   </span><span class="ul-btn__text">معلومات فیس</span></a>
+               <!-- Button -->
+                <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote">
+                    <span class="text">ارتقاع شاگرد</span>
+                    <span class="icon">⬆️</span>
+                </a>
+                
+                <!-- Style -->
+                <style>
+                    .btn-promote {
+                    background-color: #bc12f0;
+                    color: white;
+                    font-size: 1rem;
+                    border: none;
+                    border-radius: 8px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s ease-in-out;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                    }
+                
+                    .btn-promote:hover {
+                    background-color: #218838;
+                    transform: translateY(-4px);
+                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+                    }
+                
+                    .btn-promote .icon {
+                    opacity: 0;
+                    transform: translateY(5px);
+                    transition: all 0.3s ease-in-out;
+                    }
+                
+                    .btn-promote:hover .icon {
+                    opacity: 1;
+                    transform: translateY(0);
+                    }
+                </style>
+  
             </div>
         </div>
     </div>

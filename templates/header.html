@@ -4,43 +4,33 @@
 
 <div class="app-admin-wrap layout-sidebar-vertical sidebar-full">
 <div class="sidebar-panel bg-white" style="font-family: XW_Zar_Bd_0;">
- 
-  <div class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center"><img class="pl-3" src="{% static 'images/logo.jpg'%}" alt="alt" />
+  <a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
+      <img class="pl-3" src="{% static 'images/logo.jpg'%}" alt="alt" />
      <!-- <span class=" item-name text-20 text-primary font-weight-700">GULL</span> -->
     <div class="sidebar-compact-switch ml-auto"><span></span></div>
-    
-
-</div>
+</a>
 <br>
   <hr>
   <!--  user -->
   <div class="scroll-nav ps ps--active-y" data-perfect-scrollbar="data-perfect-scrollbar" data-suppress-scroll-x="true">
-
       <div class="side-nav">
           <div class="main-menu">
               <ul class="metismenu" id="menu">
                 
                 <li class="Ul_li--hover"><a href="/"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">داشبورد</span></a></li>
 
-                <li class="Ul_li--hover"><a href="{% url 'students:students_registration' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">ثبت نام شاگردان</span></a></li>
-
-
-                <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">مساعده او کرایه</span></a>
-                    <ul class="mm-collapse0">
-                        {% if perms.payroll.view_employee_info %}
-                        <li class="item-name"><a href=""><i class="nav-icon"></i><span class="item-name"> د عامو ملګرو مساعده </span></a></li>
-                        {% endif %}
-                        {% if perms.payroll.view_rent_for_houses %}
-                        <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name"> میاشتینی کرایه </span></a></li>
-                        {% endif %}
-                        {% if perms.payroll.view_rental_book %}
-                        <li class="item-name"><a href=""><i class="nav-icon "></i><span class="item-name">  صحی برخه</span></a></li>
-                        {% endif %}
+                <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">شاگردان و استادان</span></a>
+                    <ul class="mm-collapse">
+                        <li class="item-name"><a href="{% url 'students:students_registration' %}"><i class="nav-icon"></i><span class="item-name">ثبت نام شاگردان</span></a></li>
+                        <li class="item-name"><a href="{% url 'teachers:teacher_registration' %}"><i class="nav-icon"></i><span class="item-name">ثبت نام استادان</span></a></li>
                     </ul>
                 </li>
-
-
-
+                <li class="Ul_li--hover"><a class="" href="{% url 'library:library_view' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> قرطاسیه و کتابها</span></a>
+                </li>
+                <li class="Ul_li--hover"><a class="" href="{% url 'management:Total_income' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">عواید و مصارف</span></a>
+                </li>
+                <li class="Ul_li--hover"><a class="" href="{% url 'management:Total_income' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">راپورها</span></a>
+                </li>
               </ul>
 
               <div class="ml-auto">

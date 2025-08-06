@@ -99,13 +99,13 @@
         </tr>
         <tr>
             <td class="label">فیس:</td>
-            <td>${{ student.orginal_fees }}</td>
+            <td>{{ student.orginal_fees }}</td>
             <td class="label">پرداخت‌شده:</td>
-            <td>${{ student.give_fees }}</td>
+            <td>{{ get_student_fees.give_fees }}</td>
         </tr>
         <tr>
             <td class="label">باقی:</td>
-            <td colspan="3">${{ student.remaining_fees }}</td>
+            <td colspan="3">{{ get_student_fees.remain_fees|default:"0" }}</td>
         </tr>
     </table>
 

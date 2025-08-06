@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} text-center h3"  style="font-family: XW_Zar_Bd_0;" role="alert">
+                        {{ message }}
+                    </div>
+                    <script>
+                        setTimeout(function () {
+                            $('.alert').fadeOut('slow');
+                        }, 3000); // 3 seconds
+                    </script>
+                    {% endfor %}
+                    {% endif %}
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> بخش عواید 
+    </h4>
+
+
+    <div class="row">
+        <!-- ICON BG-->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Add-User"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">عواید</p>
+                        <p class="lead text-success text-24 mb-2">{{get_total_income.total_amount}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Financial"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">مصارف</p>
+                        <p class="lead text-danger text-24 mb-2">{{get_total_expenses.total_amount}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">Orders</p>
+                        <p class="lead text-primary text-24 mb-2">80</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Money-2"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">Expense</p>
+                        <p class="lead text-primary text-24 mb-2">120</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-body">
+            <div class="col-lg-12 text-right">
+                        
+                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
+                    data-target="#exampleModal">
+                    عاید جدید
+                </button>
+                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
+                    data-target="#exampleModal1">
+                    مصرف جدید
+                </button>
+        
+            </div>
+            <!-- Tabs Header -->
+            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">عواید</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">مصارف</a>
+                </li>
+               
+            </ul>
+    
+            <!-- Tabs Content -->
+            <div class="tab-content mt-4" id="incomeTabsContent">
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>تاریخ</th>
+                                    <th>مقدار</th>
+                                    <th>توضیحات</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {% for i in get_total_otherinceom %}
+                                <tr>
+                                    <td>{{ i.id }}</td>
+                                    <td>{{ i.date }}</td>
+                                    <td>{{ i.amount }}</td>
+                                    <td>{{ i.description }}</td>
+                                    <td>
+                                        <!-- Actions like edit/delete buttons go here -->
+                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
+                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+    
+                <!-- Tab 2: Extra Content -->
+                <div class="tab-pane fade" id="extra" role="tabpanel">
+                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>تاریخ</th>
+                                    <th>مقدار</th>
+                                    <th>توضیحات</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {% for i in get_total_expens %}
+                                <tr>
+                                    <td>{{ i.id }}</td>
+                                    <td>{{ i.date }}</td>
+                                    <td>{{ i.amount }}</td>
+                                    <td>{{ i.description }}</td>
+                                    <td>
+                                        <!-- Actions like edit/delete buttons go here -->
+                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
+                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+ 
+    
+</div>
+
+<!--  Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت عواید</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true"></span></button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'management:Total_income' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                            <label for="validationCustom01">تاریخ</label>
+                            {{ form.date }}
+                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
+                            <div class="valid-feedback">
+
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                $('#datepicker3').datepicker({
+                            
+                                });
+                            });
+                        </script>
+                       
+                        <div class="col-md-6 mb-3">
+                            <label for="validationCustom02">مقدار</label>
+                            {{ form.amount }}
+                            <div class="valid-feedback">
+
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="form-row">
+        
+                        <div class="col-md-12 mb-3">
+                            <label for="validationCustom03">تفصیل</label>
+                            {{ form.description }}
+                            <div class="invalid-feedback">
+
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="form_type" value="income">
+                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--  Modal -->
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مصارف</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true"></span></button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'management:Total_income' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                            <label for="validationCustom01">تاریخ</label>
+                            {{ x_form.date }}
+                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
+                            <div class="valid-feedback">
+
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                $('#datepicker12').datepicker({
+                            
+                                });
+                            });
+                        </script>
+                       
+                        <div class="col-md-6 mb-3">
+                            <label for="validationCustom02">مقدار</label>
+                            {{ x_form.amount }}
+                            <div class="valid-feedback">
+
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="form-row">
+        
+                        <div class="col-md-12 mb-3">
+                            <label for="validationCustom03">تفصیل</label>
+                            {{ x_form.description }}
+                            <div class="invalid-feedback">
+
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="form_type" value="expense">
+                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

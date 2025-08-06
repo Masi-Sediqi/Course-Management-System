@@ -9,18 +9,28 @@
     <h4 class="py-3 mb-4">
         <span class="text-muted fw-light">داشبورد / </span>ثبت شاگردان جدید
     </h4>
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} text-center h3" role="alert">
-        {{ message }}
-    </div>
-    <script>
-        setTimeout(function () {
-            $('.alert').fadeOut('slow');
-        }, 3000); // 3 seconds
-    </script>
-    {% endfor %}
-    {% endif %}
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+        <script>
+            {% if messages %}
+                {% for message in messages %}
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                        title: "{{ message|escapejs }}",
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                {% endfor %}
+            {% endif %}
+        </script>
     <div class="row">
         <div class="col-md-12 mb-3">
             <div class="card text-left">
@@ -31,13 +41,19 @@
                             data-target="#exampleModal">
                             شاگرد جدید
                         </button>
+                        <a href="{% url 'students:off_students' %}" class="btn btn-info btn-lg m-1">
+                            شاگرد غیر فعال
+                        </a>
                        
 
-                    </div>
+                   
                     <br>
                     <!-- <p>ستا سو ثبت سوی اسعار</p> -->
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
+                      <div class="mb-3">
+                        <input type="text" id="studentSearch" class="form-control" placeholder="جستجو در لیست دانش‌آموزان...">
+                      </div>
+                        <table class="table table-striped table-hover align-middle" id="studentsTable">
                           <thead class="table-dark">
                             <tr>
                               <th scope="col">#</th>
@@ -55,7 +71,7 @@
                             {% for i in students %}
                             <tr>
                               <th scope="row">{{ i.id }}</th>
-                              <td>{{ i.first_name }} {{ i.last_name }}</td>
+                              <td> <a href="{% url 'students:student_detail' i.id %}">{{ i.first_name }} {{ i.last_name }}</a></td>
                               <td>{{ i.time }}</td>
                               <td>{{ i.subject }}</td>
                               <td>{{ i.phone|default:"ندارد" }}</td>
@@ -77,10 +93,10 @@
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
                                     <a class="dropdown-item text-info" href="{% url 'students:student_detail' i.id %}">معلومات کامل</a>
                                     <a class="dropdown-item text-info" href="{% url 'students:student_fees_detail' i.id %}">معلومات فیس</a>
-                                    <a class="dropdown-item text-info" href="{% url 'students:student_bill' i.id %}">پرنت بل</a>
                                     <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تغیرات</a>
+                                    <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تاریخچه</a>
                                     <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                        حذف
+                                        غیر فعال
                                       </a>                                      
                                 </div>
                                 </div>
@@ -91,17 +107,17 @@
                                 <div class="modal-dialog modal-lg" role="document">
                                   <div class="modal-content text-center">
                                     <div class="modal-header">
-                                      <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">تایید حذف</h5>
+                                      <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">غیر فعال کردن</h5>
                                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                       </button>
                                     </div>
                                     <div class="modal-body">
-                                      <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                      <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                                      <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را غیر فعال کنید؟</p>
+                                      <div class="text-danger font-weight-bold mb-3">در حال غیر فعال ...</div>
                                       <div class="d-flex justify-content-center gap-2">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                        <a href="{% url 'students:delete_students' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                        <a href="{% url 'students:student_activate' i.id %}" class="btn btn-danger">بلی، غیر فعال کن</a>
                                       </div>
                                     </div>
                                   </div>
@@ -118,10 +134,26 @@
                             {% endfor %}
                           </tbody>
                         </table>
+                        <script>
+                          document.getElementById('studentSearch').addEventListener('keyup', function () {
+                            let searchValue = this.value.toLowerCase();
+                            let tableRows = document.querySelectorAll('#studentsTable tbody tr');
+                        
+                            tableRows.forEach(function (row) {
+                              let rowText = row.innerText.toLowerCase();
+                              if (rowText.includes(searchValue)) {
+                                row.style.display = '';
+                              } else {
+                                row.style.display = 'none';
+                              }
+                            });
+                          });
+                        </script>                        
                       </div>
                       
                 </div>
             </div>
+        </div>
         </div>
         <!-- end of col-->
 
@@ -139,7 +171,7 @@
                         aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-                <form action="{% url 'students:students_registration' %}" method="post">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:students_registration' %}" method="post">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-12">
@@ -147,107 +179,60 @@
                             <h5>معلومات شاگرد</h5>
                         </div>
                         <!-- Personal Info -->
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="firstName1">نام مکمل<span style="color: red;">*</span></label>
                             {{ form.first_name }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="lastName1">تخلص<span style="color: red;">*</span></label>
                             {{ form.last_name }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="email">نام پدر</label>
                             {{ form.father_name }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="phone">شماره تماس</label>
                             {{ form.phone }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="date_of_registration">تاریخ ثبت نام<span style="color: red;">*</span></label>
                             {{ form.date_of_registration }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="date_of_registration">مضمون<span style="color: red;">*</span></label>
                             {{ form.subject }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
+                          <label for="books">کتاب‌ها<span style="color: red;">*</span></label>
+                          {{ form.books }}
+                      </div>
+                        <div class="col-md-4 form-group mb-3">
                             <label for="gender">جنسیت<span style="color: red;">*</span></label>
                             {{ form.gender }}
                         </div>
-                        <div class="col-md-3 form-group mb-3">
+                        <div class="col-md-4 form-group mb-3">
                             <label for="gender">تایم<span style="color: red;">*</span></label>
                             {{ form.time }}
                         </div>
-                
-                        <!-- Separator with Title -->
-                        <div class="col-12">
-                           
-                            <h5>معلومات فیس شاگرد</h5>
+                        <div class="col-md-4 form-group mb-3">
+                            <label for="gender">استاد<span style="color: red;">*</span></label>
+                            {{ form.teacher }}
                         </div>
+                
+                       
                 
                         <!-- Fee Fields -->
-                        <div class="col-md-6 form-group mb-3">
-                            <label for="orginal_fees">مقدار اصلی فیس<span style="color: red;">*</span></label>
+                        <div class="col-md-4 form-group mb-3">
+                            <label for="orginal_fees">مقدار فیس<span style="color: red;">*</span></label>
                             {{ form.orginal_fees }}
                         </div>
-                        <div class="col-md-6 form-group mb-3" style="position: relative;">
-                            <label for="give_fees">مقدار فیس داده شده<span style="color: red;">*</span></label>
-                            {{ form.give_fees }}
-                            <div id="warning-msg" style="color: red; display: none; margin-top: 5px;">
-                                مقدار فیس داده شده نباید بزرگتر از مقدار اصلی فیس باشد!
-                            </div>
-                            <div id="overlay" style="
-                                display: none;
-                                position: absolute;
-                                top: 30px; /* adjust based on your label/input layout */
-                                left: 0;
-                                right: 0;
-                                bottom: 0;
-                                background: rgba(255, 255, 255, 0.7);
-                                z-index: 10;
-                                pointer-events: none;
-                            "></div>
-                        </div>
-                        
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const orginalFeesInput = document.getElementById('id_orginal_fees');
-                                const giveFeesInput = document.getElementById('id_give_fees');
-                                const warningMsg = document.getElementById('warning-msg');
-                                const overlay = document.getElementById('overlay');
-                        
-                                function validateFees() {
-                                    const orginalValue = parseFloat(orginalFeesInput.value);
-                                    const giveValue = parseFloat(giveFeesInput.value);
-                        
-                                    if (!isNaN(orginalValue) && !isNaN(giveValue)) {
-                                        if (giveValue > orginalValue) {
-                                            warningMsg.style.display = 'block';
-                                            overlay.style.display = 'block'; // show overlay on second input
-                                            giveFeesInput.style.borderColor = 'red';
-                                        } else {
-                                            warningMsg.style.display = 'none';
-                                            overlay.style.display = 'none';
-                                            giveFeesInput.style.borderColor = '';
-                                        }
-                                    } else {
-                                        warningMsg.style.display = 'none';
-                                        overlay.style.display = 'none';
-                                        giveFeesInput.style.borderColor = '';
-                                    }
-                                }
-                        
-                                orginalFeesInput.addEventListener('input', validateFees);
-                                giveFeesInput.addEventListener('input', validateFees);
-                            });
-                        </script>                        
-                        
+                     
                 
                         <!-- Submit Buttons -->
                         <div class="col-12 modal-footer">
-                            <button class="btn btn-secondary" type="button" data-dismiss="modal">وتل</button>
-                            <button class="btn btn-primary ml-2" type="submit">ذخیره کول</button>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
+                            <button class="btn btn-primary " type="submit">ذخیره کردن</button>
                         </div>
                     </div>
                 </form>

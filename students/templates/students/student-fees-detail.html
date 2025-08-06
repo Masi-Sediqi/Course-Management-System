@@ -4,10 +4,10 @@
 
 <div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
     <div class="breadcrumb">
-        <h1>Todo List</h1>
+        <h1>بخش جمع آوری فیس شاگردان</h1>
         <ul>
-            <li><a href="">UI Kits</a></li>
-            <li>Todo List</li>
+            <li><a href="" onclick="window.history.back();">برگشت</a></li>
+            <li>داشبورد</li>
         </ul>
     </div>
     <div class="separator-breadcrumb border-top"></div>
@@ -23,12 +23,18 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="ul-todo-mobile-menu mr-3 p-2"><i class="nav-icon i-Align-Justify-All text-25 ul-contact-mobile-icon"></i></div>
                                 <div class="btn-group">
-                                    <button class="btn btn-outline-success " type="button" data-toggle="modal" data-target=".bd-example-modal-lg">فیس جدید</button>
-                                    <a href="javascript:history.back()" class="btn btn-info ml-2">
-                                        بازگشت
-                                    </a>
-                                    
-                                </div>
+                                  <a href="javascript:history.back()" class="btn btn-info mr-2">
+                                    بازگشت
+                                </a>
+                                
+                                  <button class="btn btn-outline-success mr-2" type="button" data-toggle="modal" data-target=".bd-example-modal-lg">
+                                      فیس جدید
+                                  </button>
+                              
+                                  <button class="btn btn-outline-success" type="button" data-toggle="modal" data-target="#giveFeesModal">
+                                      جبران قرض داری
+                                  </button>
+                              </div>                              
                             </div>
                         </div>
                         <div class="card-body">
@@ -36,36 +42,60 @@
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item p-0">
                                         <div class="table-responsive">
-                                            <table class="table table-bordered table-hover table-striped mb-0">
-                                                <thead class="table-light">
-                                                    <tr class="text-center">
-                                                        <th>شماره</th>
-                                                        <th>عنوان</th>
-                                                        <th>شرح</th>
-                                                        <th>مقدار</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr class="text-center">
-                                                        <td>۱</td>
-                                                        <td>فیس اصلی</td>
-                                                        <td>فیس تعیینی برای مضمون</td>
-                                                        <td>۳۰۰۰ افغانی</td>
-                                                    </tr>
-                                                    <tr class="text-center">
-                                                        <td>۲</td>
-                                                        <td>فیس پرداخت‌شده</td>
-                                                        <td>مقداری که شاگرد پرداخت کرده</td>
-                                                        <td>۲۵۰۰ افغانی</td>
-                                                    </tr>
-                                                    <tr class="text-center table-warning">
-                                                        <td>۳</td>
-                                                        <td>باقی مانده</td>
-                                                        <td>مقدار باقی‌مانده برای پرداخت</td>
-                                                        <td>۵۰۰ افغانی</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                          <table class="table table-bordered table-hover table-striped mb-0">
+                                            <thead class="table-light">
+                                                <tr class="text-center">
+                                                    <th>تاریخ</th>
+                                                    <th>ماه</th>
+                                                    <th>فیس اصلی</th>
+                                                    <th>فیس داده شده</th>
+                                                    <th>باقی مانده</th>
+                                                    <th>توضیحات</th>
+                                                    <th>عملیات</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for i in fees_record_related_student %}
+                                                <tr class="text-center">
+                                                    <td>{{ i.date }}</td>
+                                                    <td>{{ i.month }}</td>
+                                                    <td>{{ i.orginal_fees }}</td>
+                                                    <td>{{ i.give_fees }}</td>
+                                                    <td>{{ i.remain_fees }}</td>
+                                                    <td>{{ i.description }}</td>
+                                                    <td class="text-center position-relative">
+                                                      <div class="dropdown">
+                                                          <button class="btn bg-gray _r_btn border-0" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                              <span class="_dot _inline-dot bg-primary"></span>
+                                                              <span class="_dot _inline-dot bg-primary"></span>
+                                                              <span class="_dot _inline-dot bg-primary"></span>
+                                                          </button>
+                                                          <div class="dropdown-menu dropdown-menu-left">
+                                                              <a class="dropdown-item text-success" href="#">
+                                                                  <i class="nav-icon i-Pen-2 mr-2"></i> ویرایش
+                                                              </a>
+                                                              <a class="dropdown-item text-danger" href="#">
+                                                                  <i class="nav-icon i-Close-Window mr-2"></i> حذف
+                                                              </a>
+                                                              <a class="dropdown-item text-primary" href="{% url 'students:student_bill' fees_id=i.id student_id=i.student.id %}">
+                                                                  <i class="nav-icon i-File-PDF mr-2"></i> چاپ بل
+                                                              </a>
+                                                          </div>
+                                                      </div>
+                                                  </td>
+                                                  
+                                                </tr>
+                                                {% endfor %}
+                                        
+                                                <!-- Total Remaining Row -->
+                                                <tr class="text-center font-weight-bold text-danger">
+                                                    <td colspan="3">مجموع باقیات فیس</td>
+                                                    <td>{{ get_remain_money.amount|default:"0" }}</td>
+                                                    <td colspan="2"> </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                       
                                         </div>
                                     </li>
                                 </ul>
@@ -119,6 +149,7 @@
                 </div>
       
                 <div class="text-end">
+                  <input type="hidden" name="form_type" value="givefees">
                   <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
                 </div>
               </div>
@@ -160,6 +191,69 @@
         });
       </script>
       
+      <div class="modal fade" id="giveFeesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <form method="POST" action="{% url 'students:student_fees_detail' student_id=student.id %}">
+          {% csrf_token %}
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content p-3">
+              <div class="card-title h5 mb-3">بخش جبران قرض داری های شاگرد {{ student.first_name }}</div>
+              <div>
+                <div class="row">
+                  <div class="col-md-4 form-group mb-3">
+                    <label for="">تاریخ</label>
+                    {{ g_form.date }}
+                  </div>
+                  <div class="col-md-4 form-group mb-3">
+                    <label for="">مقدار باقی مانده</label>
+                    <input id="remainAmount" class="form-control" type="number" value="{{ get_remain_money.amount }}" readonly>
+                  </div>
+                  <div class="col-md-4 form-group mb-3">
+                    <label for="{{ g_form.amount.id_for_label }}">مقدار</label>
+                    {{ g_form.amount }}
+                    <div id="amount-error" class="text-danger mt-1" style="display:none;">شما نمی‌توانید مقداری بزرگ‌تر از مقدار باقی‌مانده وارد کنید!</div>
+                  </div>
+                </div>
+                
+                <script>
+                  // Get elements
+                  const remainInput = document.getElementById('remainAmount');
+                  const amountInput = document.getElementById('{{ g_form.amount.id_for_label }}');
+                  const errorDiv = document.getElementById('amount-error');
+                
+                  // Validate on input change
+                  amountInput.addEventListener('input', () => {
+                    const remainValue = parseFloat(remainInput.value) || 0;
+                    const amountValue = parseFloat(amountInput.value) || 0;
+                
+                    if (amountValue > remainValue) {
+                      errorDiv.style.display = 'block';
+                      amountInput.setCustomValidity("Invalid field.");
+                    } else {
+                      errorDiv.style.display = 'none';
+                      amountInput.setCustomValidity("");
+                    }
+                  });
+                </script>                
+      
+                <div class="col-md-12 form-group mb-3">
+                  <label for="{{ form.description.id_for_label }}">توضیحات</label>
+                  {{ g_form.description }}
+                </div>
+
+                <script>
+                  document.addEventListener('DOMContentLoaded', function () {
+                      $('#datepicker21').datepicker({});
+                  });
+              </script>
+      
+                <div class="text-end">
+                  <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
 </div>
   
 
@@ -169,5 +263,10 @@
         $('#datepicker3').datepicker({});
     });
 </script>
+
+
+
+
+
 
 {% endblock %}

@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="breadcrumb">
+        <h1>بخش ارتقاع شاگرد</h1>
+        <ul>
+            <li><a href="href">داشبورد</a></li>
+            <li>ارتقاع شاگرد</li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="card-title">
+                        <button id="pwa-install-btn" data-toggle="modal"
+                        data-target="#exampleModal">ارتقاع جدید {{ student.first_name }}</button>
+                    </div>
+                </div>
+
+                <div class="col-md-12 mb-4">
+                    <div class="card text-left">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <div id="complex_header_table_wrapper"
+                                    class="dataTables_wrapper container-fluid dt-bootstrap4">
+                                 
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table class="display table table-striped table-bordered dataTable"
+                                                id="complex_header_table" style="width: 100%;" role="grid"
+                                                aria-describedby="complex_header_table_info">
+                                                <thead>
+           
+                                                    <tr role="row">
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
+                                                            style="width: 120px;"
+                                                            aria-label="Salary: activate to sort column ascending">
+                                                            تاریخ ارتقاع</th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
+                                                            style="width: 166px;"
+                                                            aria-label="Office: activate to sort column ascending">
+                                                            کتاب گذشته</th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
+                                                            style="width: 328px;"
+                                                            aria-label="E-mail: activate to sort column ascending">
+                                                            کتاب جدید</th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
+                                                            style="width: 328px;"
+                                                            aria-label="E-mail: activate to sort column ascending">
+                                                            تقدیر تامه</th>
+                                                        <th class="sorting" tabindex="0"
+                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
+                                                            style="width: 328px;"
+                                                            aria-label="E-mail: activate to sort column ascending">
+                                                            توضیحات</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for record in records %}
+                                                    <tr role="row" class="{% cycle 'odd' 'even' %}">
+                                                        <td>{{ record.date }}</td> <!-- or student full name -->
+                                                        <td>{{ record.past_book.name }}</td>
+                                                        <td>{{ record.change_book.name }}</td>
+                                                        <td>
+                                                            {% if record.file %}
+                                                                <a href="{{ record.file.url }}" target="_blank">Download</a>
+                                                            {% else %}
+                                                                No file
+                                                            {% endif %}
+                                                        </td>
+                                                        <td colspan="2">{{ record.description|default:"-" }}</td>
+                                                    </tr>
+                                                    {% empty %}
+                                                    <tr>
+                                                        <td colspan="6" class="text-center">No improvement records found.</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                                
+                                 
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row"></div><!-- end of main-content -->
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="font-family: XW_Zar_Bd_0;"
+aria-hidden="true">
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">ارتقاع شاگرد</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                    aria-hidden="true">×</span></button>
+        </div>
+        <div class="modal-body">
+            <form class="needs-validation" novalidate="novalidate"
+            action="{% url 'students:student_improvment' id=student.id %}"
+            method="post" enctype="multipart/form-data">
+                {% csrf_token %} 
+                <div class="row">
+                    <div class="col-12">
+                       
+                        <h5>معلومات ارتقاع </h5>
+                    </div>
+                    <!-- Personal Info -->
+                    <div class="col-md-6 form-group mb-3">
+                        <label for="firstName1">تاریخ ارتقاع<span style="color: red;">*</span></label>
+                        {{ form.date }}
+                    </div>
+                    <div class="col-md-6 form-group mb-3">
+                        <label for="lastName1">کتاب‌های قبلی<span style="color: red;">*</span></label>
+                       {{form.past_book}}
+                    </div>                    
+                    <div class="col-md-6 form-group mb-3">
+                        <label for="lastName1">کتاب بعدی<span style="color: red;">*</span></label>
+                        {{ form.change_book }}
+                    </div>
+                    <div class="col-md-6 form-group mb-3">
+                        <label for="email">تقدیر نامه </label>
+                        {{ form.file }}
+                    </div>
+                    <div class="col-md-12 form-group mb-3">
+                        <label for="phone">توضیحات</label>
+                        {{ form.description }}
+                    </div>
+            
+                    <!-- Submit Buttons -->
+                    <div class="col-12 modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
+                        <button class="btn btn-primary " type="submit">ذخیره کردن</button>
+                    </div>
+                </div>
+            </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    $('#datepicker21').datepicker({});
+                });
+            </script>
+            
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    /* Apply styles for all screen sizes */
+    #pwa-install-btn {
+        position: relative;
+        border-radius: 50px;
+        background: radial-gradient(circle at center, #ff6a00, #ff0080);
+        /* Starting blend */
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 10px 25px;
+        margin-top: 10px;
+        font-family: XW_Zar_Bd_0;
+        z-index: 1;
+        overflow: hidden;
+        animation: centerColorBlend 6s ease-in-out infinite;
+        background-size: 200% 200%;
+        border: none;
+    }
+
+    /* Animated multicolor border */
+    #pwa-install-btn:after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-radius: 50px;
+        background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        z-index: -1;
+        animation: animatedborder 3s linear infinite;
+        background-size: 300% 300%;
+    }
+
+    /* Border animation */
+    @keyframes animatedborder {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Center gradient animation */
+    @keyframes centerColorBlend {
+        0% {
+            background: radial-gradient(circle at center, #ff6a00, #ff0080);
+        }
+
+        33% {
+            background: radial-gradient(circle at center, #ff0080, #00c3ff);
+        }
+
+        66% {
+            background: radial-gradient(circle at center, #00c3ff, #00ff72);
+        }
+
+        100% {
+            background: radial-gradient(circle at center, #ff6a00, #ff0080);
+        }
+    }
+</style>
+
+{% endblock %}

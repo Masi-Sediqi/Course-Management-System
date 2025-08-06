@@ -9,8 +9,12 @@ class StudentForm(forms.ModelForm):
 
     class Meta:
         model = Student
-        fields = ["first_name","last_name","father_name","phone","date_of_registration","gender","orginal_fees","time","subject"]
+        fields = ["first_name","last_name","father_name","phone","date_of_registration","gender","orginal_fees","time","subject","teacher","books"]
 
+        # In forms.py
+        widgets = {
+            'books': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,6 +42,9 @@ class StudentForm(forms.ModelForm):
         self.fields["subject"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
+        self.fields["teacher"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
 
 
 class Student_fess_infoForm(forms.ModelForm):
@@ -57,5 +64,45 @@ class Student_fess_infoForm(forms.ModelForm):
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+
+
+class StudentGiveRemainMoneyForm(forms.ModelForm):
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker21",'class': 'form-control' }))
+
+    class Meta:
+        model = StudentGiveRemainMoney
+        fields = ["amount","description","date"]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["amount"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+
+class StudentImporvmentForm(forms.ModelForm):
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker21",'class': 'form-control' }))
+
+    class Meta:
+        model = StudentImporvment
+        fields = ["date","description","file","change_book","past_book"]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["file"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["change_book"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["past_book"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )

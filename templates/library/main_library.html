@@ -1,0 +1,526 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .gradient-purple-indigo {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 30px;
+        color: white;
+    }
+
+    .search-input {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        border-radius: 25px;
+        padding-left: 20px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .list-group-item {
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .list-group-item:hover {
+        background-color: #f1f1f1;
+    }
+
+    .dropdown-menu a {
+        display: flex;
+        align-items: center;
+    }
+
+    .dropdown-menu a i {
+        margin-right: 8px;
+    }
+
+    .modal-header, .modal-footer {
+        border: none;
+    }
+
+    .modal-content {
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="breadcrumb">
+        <h1>بخش قرطاسیه و کتابها</h1>
+        <ul>
+            <li><a href="/">داشبورد</a></li>
+            <li>قرطاسیه و کتابها</li>
+        </ul>
+    </div>
+
+    <div class="separator-breadcrumb border-top"></div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card text-left">
+                <!-- Header with gradient -->
+                <div class="gradient-purple-indigo">
+                    <div class="row align-items-center">
+                       <!-- SweetAlert2 CDN -->
+                       <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+                            <script>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                                            title: "{{ message|escapejs }}",
+                                            showConfirmButton: false,
+                                            timer: 4000,
+                                            timerProgressBar: true,
+                                            didOpen: (toast) => {
+                                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                            }
+                                        });
+                                    {% endfor %}
+                                {% endif %}
+                            </script>
+                        
+                        <div class="col-md-4 mt-3 mt-md-0">
+                          <div class="p-3 border rounded bg-light text-end">
+                            <button class="btn btn-success me-2" data-toggle="modal" data-target="#exampleModal">
+                              <i class="bi bi-plus-circle me-1"></i> قرطاسیه جدید
+                            </button>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal1">
+                              <i class="bi bi-tags-fill me-1"></i> کتگوری جدید
+                            </button>
+                            <button class="btn btn-info" data-toggle="modal" data-target="#bookModal">
+                              <i class="bi bi-tags-fill me-1"></i> کتاب جدید
+                            </button>
+                          </div>
+                        </div>
+                        
+                        
+                  
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body">
+                    <div class="row">
+
+                             <!-- Tabs Header -->
+            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">قرطاسیه ها</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">کتگوری</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="book-tab" data-toggle="tab" href="#book" role="tab">کتابها</a>
+                </li>
+               
+            </ul>
+    
+            <!-- Tabs Content -->
+            <div class="tab-content mt-4" id="incomeTabsContent">
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>نام</th>
+                                    <th>کتگوری</th>
+                                    <th>قیمت</th>
+                                    <th>توضیحات</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {% for i in stationeries %}
+                                <tr>
+                                    <td>{{ i.id }}</td>
+                                    <td>{{ i.name }}</td>
+                                    <td>{{ i.category }}</td>
+                                    <td>{{ i.price }}</td>
+                                    <td>{{ i.description }}</td>
+                                    <td>
+                                        <!-- Actions like edit/delete buttons go here -->
+                                        <a href="{% url 'library:edit_station' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
+                                        <button class="btn btn-sm btn-danger"
+                                        data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
+                                            حذف
+                                        </button> 
+                                    </td>
+                                </tr>
+                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                      <div class="modal-content text-center">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                          <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                            <a href="{% url 'library:delete_station' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+    
+                <!-- Tab 2: Extra Content -->
+                <div class="tab-pane fade" id="extra" role="tabpanel">
+                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>تام کتگوری</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {% for i in categories %}
+                                <tr>
+                                    <td>{{ i.id }}</td>
+                                    <td>{{ i.name }}</td>
+                                    
+                                  
+                                    <td>
+                                        <!-- Actions like edit/delete buttons go here -->
+                                        <a href="#" data-toggle="modal" data-target="#editModal{{ i.id }}" class="btn btn-sm btn-primary">تغییرات</a>
+                                        <!-- Delete Button (opens modal) -->
+                                        <button class="btn btn-sm btn-danger"
+                                        data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
+                                            حذف
+                                        </button> 
+                                    </td>
+                                </tr>
+                              
+
+
+                                <div class="modal fade" id="editModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ i.id }}" aria-hidden="true">
+                                  <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content text-center">
+                                      <form method="POST" action="{% url 'library:edit_category' i.id %}" class="needs-validation" novalidate>
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                          <h5 class="modal-title w-100" id="editModalLabel{{ i.id }}">تغییرات دسته‌بندی</h5>
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                        </div>
+                                
+                                        <div class="modal-body py-2">
+                                          <div class="form-group mb-2">
+                                            <label class="form-label" style="font-size: 0.9rem;">نام دسته‌بندی <span style="color: red;">*</span></label>
+                                            <input type="text" name="name" class="form-control" value="{{ i.name }}" required>
+                                          </div>
+                                        </div>
+                                
+                                        <div class="modal-footer py-2">
+                                          <input type="hidden" name="form_type" value="edit_category">
+                                          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">بستن</button>
+                                          <button type="submit" class="btn btn-sm btn-primary">ذخیره</button>
+                                        </div>
+                                      </form>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                    <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                          <div class="modal-content text-center">
+                                            <div class="modal-header">
+                                              <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
+                                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                              </button>
+                                            </div>
+                                            <div class="modal-body">
+                                              <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                              <div class="d-flex justify-content-center gap-2">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                                <a href="{% url 'library:delete_category' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+
+             
+            </div>
+            <div class="tab-pane fade" id="book" role="tabpanel">
+              <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+
+              <!-- your full code... -->
+              <div class="table-responsive">
+                  <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                      <thead class="thead-dark">
+                          <tr>
+                              <th>#</th>
+                              <th>تام کتاب</th>
+                              <th>قیمت</th>
+                              <th>توضیحات</th>
+                              <th>عملیات</th>
+                          </tr>
+                      </thead>
+                      <tbody id="table-body">
+                          {% for i in books %}
+                          <tr>
+                              <td>{{ i.id }}</td>
+                              <td>{{ i.name }}</td>
+                              <td>{{ i.price }}</td>
+                              <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
+                            
+                              <td>
+                                  <!-- Actions like edit/delete buttons go here -->
+                                  <a href="#" data-toggle="modal" data-target="#editBookModal{{ i.id }}" class="btn btn-sm btn-primary">تغییرات</a>
+                                  <!-- Delete Button (opens modal) -->
+                                  <button class="btn btn-sm btn-danger"
+                                  data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
+                                      حذف
+                                  </button> 
+                              </td>
+                          </tr>
+                        
+
+
+                          
+<div class="modal fade" id="editBookModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editBookModalLabel{{ i.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content text-center">
+      <form method="POST" action="{% url 'library:edit_book' i.id %}" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title w-100" id="editBookModalLabel{{ i.id }}">تغییرات کتاب</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body py-2">
+          <div class="row">
+            <div class="col-md-6 form-group mb-2">
+              <label class="form-label">نام کتاب <span style="color: red;">*</span></label>
+              <input type="text" name="name" class="form-control" value="{{ i.name }}" required>
+            </div>
+            <div class="col-md-6 form-group mb-2">
+              <label class="form-label">قیمت</label>
+              <input type="text" name="price" class="form-control" value="{{ i.price }}">
+            </div>
+          </div>
+      
+          <div class="form-group mb-2">
+            <label class="form-label">توضیحات</label>
+            <textarea name="description" class="form-control" rows="3">{{ i.description }}</textarea>
+          </div>
+        </div>
+      
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">بستن</button>
+          <button type="submit" class="btn btn-sm btn-primary">ذخیره</button>
+        </div>
+      </form>
+      
+    </div>
+  </div>
+</div>
+                          
+                              <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                  <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content text-center">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                        <div class="d-flex justify-content-center gap-2">
+                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                          <a href="{% url 'library:delete_book' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                          {% endfor %}
+                      </tbody>
+                      
+                  </table>
+              </div>
+            </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                      <div class="modal-content">
+                  
+                        <div class="modal-header bg-primary text-white">
+                          <h5 class="modal-title" id="exampleModalLabel">قرطاسیه جدید</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                  
+                        <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate="novalidate">
+                          {% csrf_token %}
+                          <div class="modal-body">
+                            <div class="container-fluid">
+                              <div class="row g-3">
+                  
+                                <div class="col-md-6">
+                                  <label for="{{ form.name.id_for_label }}" class="form-label">نام قرطاسیه<span class="text-danger">*</span></label>
+                                  {{ form.name }}
+                                </div>
+                  
+                                <div class="col-md-6">
+                                  <label for="{{ form.category.id_for_label }}" class="form-label">دسته‌بندی<span class="text-danger">*</span></label>
+                                  {{ form.category }}
+                                </div>
+                  
+                                <div class="col-md-6">
+                                  <label for="{{ form.price.id_for_label }}" class="form-label">قیمت<span class="text-danger">*</span></label>
+                                  {{ form.price }}
+                                </div>
+                  
+                                <div class="col-md-12">
+                                  <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
+                                  {{ form.description }}
+                                </div>
+                  
+                              </div>
+                            </div>
+                          </div>
+                  
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                            <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
+                          </div>
+                        </form>
+                  
+                      </div>
+                    </div>
+                  </div>
+                  
+
+                  
+                <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">  <!-- Changed from modal-lg to modal-sm -->
+                      <div class="modal-content">
+                  
+                        <div class="modal-header py-2"> <!-- Reduced vertical padding -->
+                          <h6 class="modal-title">دسته‌بندی جدید</h6> <!-- Smaller heading -->
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                  
+                        <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate="novalidate">
+                          {% csrf_token %}
+                          <div class="modal-body py-2">
+                  
+                            <div class="form-group mb-2">
+                              <label class="form-label" style="font-size: 0.9rem;">نام دسته‌بندی <span style="color: red;">*</span></label>
+                              {{ category_form.name }}
+                            </div>
+                  
+                          </div>
+                  
+                          <div class="modal-footer py-2">
+                              <input type="hidden" name="form_type" id="" value="category">
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">بستن</button>
+                            <button type="submit" class="btn btn-sm btn-primary">ذخیره</button>
+                          </div>
+                        </form>
+                  
+                      </div>
+                    </div>
+                  </div>
+                  
+
+                  <div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                      <div class="modal-content">
+                  
+                        <div class="modal-header bg-primary text-white">
+                          <h5 class="modal-title" id="exampleModalLabel">قرطاسیه جدید</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                  
+                        <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate>
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="book">
+                        
+                          <div class="modal-body">
+                            <div class="container-fluid">
+                              <div class="row g-3">
+                        
+                                <div class="col-md-6">
+                                  <label for="{{ book_form.name.id_for_label }}" class="form-label">نام کتاب <span class="text-danger">*</span></label>
+                                  {{ book_form.name }}
+                                </div>
+                        
+                                <div class="col-md-6">
+                                  <label for="{{ book_form.price.id_for_label }}" class="form-label">قیمت <span class="text-danger">*</span></label>
+                                  {{ book_form.price }}
+                                </div>
+                        
+                                <div class="col-md-12">
+                                  <label for="{{ book_form.description.id_for_label }}" class="form-label">توضیحات</label>
+                                  {{ book_form.description }}
+                                </div>
+                        
+                              </div>
+                            </div>
+                          </div>
+                        
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                            <button type="submit" class="btn btn-success">ذخیره کتاب</button>
+                          </div>
+                        </form>
+                        
+                  
+                      </div>
+                    </div>
+                  </div>
+                  
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
