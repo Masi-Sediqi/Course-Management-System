@@ -171,7 +171,7 @@
                         aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:students_registration' %}" method="post">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:students_registration' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-12">
@@ -220,12 +220,14 @@
                             {{ form.teacher }}
                         </div>
                 
-                       
-                
                         <!-- Fee Fields -->
                         <div class="col-md-4 form-group mb-3">
                             <label for="orginal_fees">مقدار فیس<span style="color: red;">*</span></label>
                             {{ form.orginal_fees }}
+                        </div>
+                        <div class="col-md-4 form-group mb-3">
+                            <label for="orginal_fees">عکس<span style="color: red;">*</span></label>
+                            {{ form.image }}
                         </div>
                      
                 

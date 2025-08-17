@@ -14,4 +14,5 @@ urlpatterns = [
     path('student/activation-on/<int:student_id>/', views.student_activate_on, name='student_activate_on'),
     path('student/activation/off!/', views.off_students, name='off_students'),
     path('student/improvment/top/<int:id>/', views.student_improvment, name='student_improvment'),
+    path('student/buy/book/<int:id>/', views.buy_book, name='buy_book'),
 ]

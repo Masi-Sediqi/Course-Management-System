@@ -9,11 +9,11 @@ class StudentForm(forms.ModelForm):
 
     class Meta:
         model = Student
-        fields = ["first_name","last_name","father_name","phone","date_of_registration","gender","orginal_fees","time","subject","teacher","books"]
+        fields = ["first_name","last_name","father_name","phone","date_of_registration","gender","image","classs"]
 
         # In forms.py
         widgets = {
-            'books': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
+            'classs': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -33,16 +33,7 @@ class StudentForm(forms.ModelForm):
         self.fields["gender"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
-        self.fields["orginal_fees"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["time"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["subject"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["teacher"].widget.attrs.update(
+        self.fields["image"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
 
@@ -104,5 +95,23 @@ class StudentImporvmentForm(forms.ModelForm):
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["past_book"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+
+class BuyBookForm(forms.ModelForm):
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker21",'class': 'form-control' }))
+
+    class Meta:
+        model = BuyBook
+        fields = ["date","description","paid_amount"]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["paid_amount"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )

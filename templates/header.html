@@ -7,7 +7,27 @@
   <a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
       <img class="pl-3" src="{% static 'images/logo.jpg'%}" alt="alt" />
      <!-- <span class=" item-name text-20 text-primary font-weight-700">GULL</span> -->
-    <div class="sidebar-compact-switch ml-auto"><span></span></div>
+     <div class="notification-badge ml-auto">5</div>
+    <style>
+        .notification-badge {
+        position: relative;
+        min-width: 18px;
+        height: 18px;
+        background: red;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px;
+        }
+
+    </style>
+
+ 
+
 </a>
 <br>
   <hr>
@@ -27,10 +47,16 @@
                 </li>
                 <li class="Ul_li--hover"><a class="" href="{% url 'library:library_view' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> قرطاسیه و کتابها</span></a>
                 </li>
+                <li class="Ul_li--hover"><a class="" href="{% url 'classes:main_classes' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> صنوف</span></a>
+                </li>
                 <li class="Ul_li--hover"><a class="" href="{% url 'management:Total_income' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">عواید و مصارف</span></a>
                 </li>
                 <li class="Ul_li--hover"><a class="" href="{% url 'management:Total_income' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">راپورها</span></a>
                 </li>
+                <li class="Ul_li--hover"><a class="" href="{% url 'home:colculator' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">ماشین حساب</span></a>
+                </li>
+                
+                            
               </ul>
 
               <div class="ml-auto">
@@ -48,7 +74,7 @@
                     </div>
                 </div>
 
-             
+         
         </div>
           </div>
       </div>

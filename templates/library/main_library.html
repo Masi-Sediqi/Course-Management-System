@@ -51,7 +51,7 @@
 
 <div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
     <div class="breadcrumb">
-        <h1>بخش قرطاسیه و کتابها</h1>
+        <h1>بخش خریداری قرطاسیه و کتابها</h1>
         <ul>
             <li><a href="/">داشبورد</a></li>
             <li>قرطاسیه و کتابها</li>
@@ -208,7 +208,8 @@
                                 {% for i in categories %}
                                 <tr>
                                     <td>{{ i.id }}</td>
-                                    <td>{{ i.name }}</td>
+                                    <td>
+                                      <a href="{% url 'library:find_category_item' i.id %}">{{ i.name }}</a></td>
                                     
                                   
                                     <td>
@@ -291,6 +292,7 @@
                           <tr>
                               <th>#</th>
                               <th>تام کتاب</th>
+                              <th>تعداد</th>
                               <th>قیمت</th>
                               <th>توضیحات</th>
                               <th>عملیات</th>
@@ -301,6 +303,7 @@
                           <tr>
                               <td>{{ i.id }}</td>
                               <td>{{ i.name }}</td>
+                              <td>{{ i.number }}</td>
                               <td>{{ i.price }}</td>
                               <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                             
@@ -475,7 +478,7 @@
                       <div class="modal-content">
                   
                         <div class="modal-header bg-primary text-white">
-                          <h5 class="modal-title" id="exampleModalLabel">قرطاسیه جدید</h5>
+                          <h5 class="modal-title" id="exampleModalLabel">کتاب جدید</h5>
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                   
@@ -487,15 +490,27 @@
                             <div class="container-fluid">
                               <div class="row g-3">
                         
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                   <label for="{{ book_form.name.id_for_label }}" class="form-label">نام کتاب <span class="text-danger">*</span></label>
                                   {{ book_form.name }}
                                 </div>
                         
-                                <div class="col-md-6">
-                                  <label for="{{ book_form.price.id_for_label }}" class="form-label">قیمت <span class="text-danger">*</span></label>
+                                <div class="col-md-3">
+                                  <label for="id_number_of_book" class="form-label">تعداد <span class="text-danger">*</span></label>
+                                  {{ book_form.number_of_book }}
+                                </div>
+                                
+                                <div class="col-md-3">
+                                  <label for="id_price" class="form-label">قیمت <span class="text-danger">*</span></label>
                                   {{ book_form.price }}
                                 </div>
+                                
+                                <div class="col-md-3">
+                                  <label for="id_price" class="form-label"> مقدار پرداخت شده <span class="text-danger">*</span></label>
+                                  {{ book_form.paid_price }}
+                                </div>
+                                
+
                         
                                 <div class="col-md-12">
                                   <label for="{{ book_form.description.id_for_label }}" class="form-label">توضیحات</label>
@@ -510,6 +525,7 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
                             <button type="submit" class="btn btn-success">ذخیره کتاب</button>
                           </div>
+           
                         </form>
                         
                   
@@ -522,5 +538,6 @@
         </div>
     </div>
 </div>
+
 
 {% endblock %}

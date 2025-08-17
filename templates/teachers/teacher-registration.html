@@ -92,8 +92,8 @@
                                       <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ i.id }}" style="max-height: 150px; overflow-y: auto;">
-                                      <a class="dropdown-item text-info" href="{% url 'students:student_detail' i.id %}">معلومات کامل</a>
-                                      <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تغیرات</a>
+                                      <a class="dropdown-item text-info" href="{% url 'teachers:teacher_detail' i.id %}">معلومات کامل</a>
+                                      <a class="dropdown-item text-info" href="{% url 'teachers:edit_teacher' i.id %}">تغیرات</a>
                                       <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
                                         غیر فعال
                                       </a>
@@ -148,7 +148,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">ثبت نام شاگردان</h5>
+                <h5 class="modal-title" id="exampleModalLabel">ثبت نام استادان</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">×</span></button>
             </div>
@@ -158,18 +158,18 @@
                     <div class="row">
                         <div class="col-12">
                            
-                            <h5>معلومات شاگرد</h5>
+                            <h5>معلومات استاد</h5>
                         </div>
                         <!-- Personal Info -->
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="firstName1">اسم<span style="color: red;">*</span></label>
                             {{ form.name }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="lastName1">تخلص</label>
                             {{ form.last_name }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="email">تاریخ تولد</label>
                             {{ form.birth_date }}
                         </div>

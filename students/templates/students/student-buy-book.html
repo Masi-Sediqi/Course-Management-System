@@ -21,59 +21,13 @@
         <span class="text-muted fw-light">داشبورد /</span> بخش عواید 
     </h4>
 
-
-    <div class="row">
-        <!-- ICON BG-->
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Add-User"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">عواید</p>
-                        <p class="lead text-success text-24 mb-2">{{get_total_income.total_amount}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Financial"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">مصارف</p>
-                        <p class="lead text-danger text-24 mb-2">{{get_total_expenses.total_amount}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">قرض</p>
-                        <p class="lead text-primary text-24 mb-2">{{get_total_stationery.total_amount}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Money-2"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">Expense</p>
-                        <p class="lead text-primary text-24 mb-2">120</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <div class="card">
         <div class="card-body">
             <div class="col-lg-12 text-right">
                         
                 <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
                     data-target="#exampleModal">
-                    عاید جدید
+                     خرید کتاب
                 </button>
                 <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
                     data-target="#exampleModal1">
@@ -84,10 +38,10 @@
             <!-- Tabs Header -->
             <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">عواید</a>
+                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">کتابها</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">مصارف</a>
+                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">قرطاسیه</a>
                 </li>
                
             </ul>
@@ -97,7 +51,6 @@
                 <!-- Tab 1: Income Table -->
                 <div class="tab-pane fade show active" id="income" role="tabpanel">
                     <!-- ✅ Paste your full income table & modals here -->
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
     
                     <!-- your full code... -->
                     <div class="table-responsive">
@@ -106,18 +59,26 @@
                                 <tr>
                                     <th>#</th>
                                     <th>تاریخ</th>
-                                    <th>مقدار</th>
+                                    <th>کتاب</th>
+                                    <th>مقدار پرداخت شده</th>
+                                    <th>مقدار باقی مانده</th>
                                     <th>توضیحات</th>
                                     <th>عملیات</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body">
-                                {% for i in get_total_otherinceom %}
+                                {% for i in buy_book_records %}
                                 <tr>
                                     <td>{{ i.id }}</td>
                                     <td>{{ i.date }}</td>
-                                    <td>{{ i.amount }}</td>
-                                    <td>{{ i.description }}</td>
+                                    <td>
+                                        {% for b in i.book.all %}
+                                            <span class="badge bg-primary">{{ b.name }}</span>{% if not forloop.last %} + {% endif %}
+                                        {% endfor %}
+                                    </td>                                    
+                                    <td>{{ i.paid_amount }}</td>
+                                    <td>{{ i.remain_amount }}</td>
+                                    <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                                     <td>
                                         <!-- Actions like edit/delete buttons go here -->
                                         <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
@@ -180,17 +141,17 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت عواید</h5>
+                <h5 class="modal-title" id="exampleModalLabel"> بخش خرید کتاب</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'management:Total_income' %}" method="POST">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:buy_book' student.id %}" method="POST">
                     {% csrf_token %}
                     <div class="form-row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="validationCustom01">تاریخ</label>
-                            {{ form.date }}
+                            {{ buy_book_form.date }}
                             <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
                             <div class="valid-feedback">
 
@@ -198,32 +159,59 @@
                         </div>
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker3').datepicker({
+                                $('#datepicker21').datepicker({
                             
                                 });
                             });
                         </script>
                        
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom02">مقدار</label>
-                            {{ form.amount }}
-                            <div class="valid-feedback">
-
-                            </div>
+                       <div class="col-md-4 mb-3">
+                        <label for="validationCustom02">کتاب</label>
+                        <div class="p-2 border rounded" style="max-height: 200px; overflow-y: auto;">
+                            {% for book in total_book %}
+                                <div class="form-check" style="display: flex; align-items: center;">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        name="books" 
+                                        value="{{ book.id }}" 
+                                        id="book{{ book.id }}"
+                                        hx-post="{% url 'students:buy_book' student.id %}" 
+                                        hx-trigger="change" 
+                                        hx-target="#books-price" 
+                                        hx-include="[name='books']"
+                                    >
+                                    <label class="form-check-label ms-1" for="book{{ book.id }}" style="margin-right: 21px;">
+                                        {{ book.name }}
+                                    </label>
+                                </div>
+                            {% endfor %}
                         </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="validationCustom03">مقدار پول</label>
+                        {{ buy_book_form.paid_amount }}
+                        <div class="invalid-feedback">
+
+                        </div>
+                    </div>
+                    
+                    <!-- Total price output -->
+                    <div id="books-price" class="mt-2" style="max-width: 250px;"></div>                    
+                    
                     </div>
                 
                     <div class="form-row">
         
                         <div class="col-md-12 mb-3">
                             <label for="validationCustom03">تفصیل</label>
-                            {{ form.description }}
+                            {{ buy_book_form.description }}
                             <div class="invalid-feedback">
 
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="form_type" value="income">
+                    <input type="hidden" name="form_type" value="buy-book">
                     <button class="btn btn-primary" type="submit">ذخیره کردن</button>
                 </form>
             </div>

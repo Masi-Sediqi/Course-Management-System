@@ -2,8 +2,11 @@ from django.shortcuts import render, redirect , get_object_or_404
 from decimal import Decimal
 from management.models import TotalIncome
 from .forms import *
+from django.db import transaction
 from .models import *
 from django.http import HttpResponse
+from django.db.models import Sum
+
 from django.contrib import messages
 # Create your views here.
 
@@ -12,7 +15,7 @@ def students_registration(request):
     students = None
 
     if request.method == "POST":
-        form = StudentForm(request.POST)
+        form = StudentForm(request.POST, request.FILES)
         if form.is_valid():
             student = form.save(commit=False)  # don't commit yet
             student.save()                     # save main instance
@@ -70,9 +73,11 @@ def student_bill(request, student_id, fees_id):
 
 def student_detail(request, student_id):
     student = get_object_or_404(Student, id=student_id)
+    remain_amount = StudentRemailMoney.objects.filter(student=student).last()
 
     context = {
         'student': student,
+        'remain_amount': remain_amount,
     }
     return render(request, 'students/student-detail.html', context)
 
@@ -208,3 +213,60 @@ def student_improvment(request, id):
         'form':form,
     }
     return render(request, 'students/student-improve.html', context)
+
+
+def buy_book(request, id):
+    total_book = Books.objects.all()
+    student = Student.objects.get(id=id)
+
+    # HTMX request to update total price
+    if request.headers.get("HX-Request"):  
+        book_ids = request.POST.getlist("books")
+        total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("price"))["total"] or 0
+        return HttpResponse(f"<div class='alert alert-card alert-info'>مجموع قیمت: {total_price} AFN</div>")
+
+    if request.method == "POST":
+        boos = request.POST.getlist('books')
+        form_type = request.POST.get('form_type')
+        if form_type == "buy-book":
+            buy_book_form = BuyBookForm(request.POST)
+            if buy_book_form.is_valid():
+                get_paid_amount = float(request.POST.get('paid_amount'))
+                book_ids = list(map(int, request.POST.getlist('books')))
+                total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("price"))["total"] or 0
+                subtraction = total_price - get_paid_amount
+
+                with transaction.atomic():
+                    # TotalIncome
+                    find_expenses_pk, created = TotalIncome.objects.get_or_create(student=student, defaults={'total_amount': 0})
+                    find_expenses_pk.total_amount += get_paid_amount
+                    find_expenses_pk.save()
+
+                    # Total_Stationery_Loan
+                    if subtraction > 0:
+                        collect_loans, created = StudentRemailMoney.objects.get_or_create(pk=1, defaults={'amount': 0})
+                        collect_loans.amount += subtraction
+                        collect_loans.save()
+                
+                
+                
+                instance = buy_book_form.save()
+                instance.student = student
+                instance.remain_amount = subtraction
+
+                instance.save()
+                instance.book.set(boos)
+                return redirect('students:buy_book', id=student.id)  # refresh after save
+        else:
+            pass
+
+    buy_book_form = BuyBookForm()
+    buy_book_records = BuyBook.objects.filter(student=id)
+
+    context = {
+        'student':student,
+        'buy_book_form':buy_book_form,
+        'buy_book_records':buy_book_records,
+        'total_book':total_book,
+    }
+    return render(request, 'students/student-buy-book.html', context)

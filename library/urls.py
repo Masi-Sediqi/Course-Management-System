@@ -13,4 +13,6 @@ urlpatterns = [
 
     path('library/view/delete/book/<int:id>', views.delete_book, name="delete_book"),
     path('library/view/edit/book/<int:id>', views.edit_book, name="edit_book"),
+
+    path('library/category/item/s/<int:id>', views.find_category_item, name="find_category_item"),
 ]

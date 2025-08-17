@@ -40,3 +40,35 @@ class TeacherForm(forms.ModelForm):
         self.fields["gender"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
+
+class TeacherPaidSalaryForm(forms.ModelForm):
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
+
+    class Meta:
+        model = TeacherPaidSalary
+        fields = ["amount","date","description"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["amount"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+
+class TeacherLoanForm(forms.ModelForm):
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker12",'class': 'form-control' }))
+
+    class Meta:
+        model = TeacherLoan
+        fields = ["amount","date","description"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["amount"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )

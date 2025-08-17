@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / </span> معلومات کامل استاد
+    </h4>
+    
+
+    <div class="card shadow-sm border rounded-3">
+        <div class="card-body text-center">
+
+            <div class="row">
+                <!-- ICON BG-->
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                        <div class="card-body text-center"><i class="i-Add-User"></i>
+                            <div class="content">
+                                <p class="text-muted mt-2 mb-0"> شاگردان </p>
+                                <p class="text-primary text-24 line-height-1 mb-2" data-toggle="modal"
+                                data-target="#exampleModal">{{total_students_count}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                        <div class="card-body text-center"><i class="i-Financial"></i>
+                            <div class="content">
+                                <p class="text-muted mt-2 mb-0">فیس</p>
+                                <p class="text-primary text-24 line-height-1 mb-2">$4021</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                        <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
+                            <div class="content">
+                                <p class="text-muted mt-2 mb-0">قرض</p>
+                                <p class="text-primary text-24 line-height-1 mb-2">{{total_loan_amount.total_loan_amount}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                        <div class="card-body text-center"><i class="i-Money-2"></i>
+                            <div class="content">
+                                <p class="text-muted mt-2 mb-0">Expense</p>
+                                <p class="text-primary text-24 line-height-1 mb-2">$1200</p>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+            <!-- ✅ Student Image -->
+            <img 
+                src="{% static 'images/student/people-face-avatar-icon-cartoon-character-png.png' %}" 
+                alt="عکس استاد" 
+                class="rounded-circle mb-3" 
+                width="120" 
+                height="120"
+                style="object-fit: cover; border: 3px solid #ccc;"
+            >
+
+            <h5 class="card-title mb-4 text-primary border-bottom pb-2">مشخصات استاد</h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <th>نام مکمل</th>
+                            <td>{{ teacher.name }} {{ teacher.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>تاریخ تولد</th>
+                            <td>{{ teacher.birth_date|default:"ندارد" }}</td>
+                        </tr>
+                        <tr>
+                            <th>شماره تماس</th>
+                            <td>{{ teacher.phone|default:"ندارد" }}</td>
+                        </tr>
+                        <tr>
+                            <th>جنسیت</th>
+                            <td>
+                                {% if teacher.gender == 'M' %}
+                                    <span class="badge bg-warning text-dark" style="font-size: 1rem;">مرد</span>
+                                {% elif teacher.gender == 'F' %}
+                                    <span class="badge bg-primary" style="font-size: 1rem;">زن</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">نامشخص</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>مضمون</th>
+                            <td>{{ teacher.subject }}</td>
+                        </tr>
+                        <tr>
+                            <th>فیصدی</th>
+                            <td>{{ teacher.percentage }}%</td>
+                        </tr>
+                        <tr>
+                            <th>فایل</th>
+                            <td>
+                                {% if teacher.file %}
+                                    <a href="{{ teacher.file.url }}" target="_blank" class="btn btn-sm btn-info">دانلود فایل</a>
+                                {% else %}
+                                    ندارد
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>وضعیت</th>
+                            <td>
+                                {% if teacher.is_active %}
+                                    <span class="badge bg-success">فعال</span>
+                                {% else %}
+                                    <span class="badge bg-danger">غیر فعال</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="width: 150px;">توضیحات</th>
+                            <td style="white-space: pre-wrap;">{{ teacher.description|default:"ندارد" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>            
+
+            <div class="text-end mt-4">
+                <a href="" class="btn btn-secondary me-2">بازگشت</a>
+                <a href="" class="btn btn-warning me-2">تغیرات</a>
+                <a href="" class="btn btn-danger"
+                   onclick="return confirm('آیا مطمئن هستید که می‌خواهید این استاد را حذف کنید؟')">حذف</a>
+                <!-- Trigger Button -->
+                <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-primary shadow-sm">
+                    <i class="fas fa-money-bill-wave"></i> پرداخت ماش
+                </a>
+                <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn btn-info shadow-sm">
+                    <i class="fas fa-money-bill-wave"></i> گرفتن قرض
+                </a>
+                <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn shadow-sm" style="color: #fff; background-color: rgb(3, 38, 93);">
+                    <i class="fas fa-credit-card"></i> درخواست رخصتی
+                </a>
+                
+
+                <!-- Style -->
+                <style>
+                    .btn-promote {
+                    background-color: #bc12f0;
+                    color: white;
+                    font-size: 1rem;
+                    border: none;
+                    border-radius: 8px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s ease-in-out;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                    }
+                
+                    .btn-promote:hover {
+                    background-color: #218838;
+                    transform: translateY(-4px);
+                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+                    }
+                
+                    .btn-promote .icon {
+                    opacity: 0;
+                    transform: translateY(5px);
+                    transition: all 0.3s ease-in-out;
+                    }
+                
+                    .btn-promote:hover .icon {
+                    opacity: 1;
+                    transform: translateY(0);
+                    }
+                </style>
+  
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">استادان ثبت شده</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                {% if total_students %}
+                <!-- Search box -->
+                <div class="mb-3">
+                    <input type="text" id="studentSearch" class="form-control" placeholder="جستجو در استادان...">
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>شماره</th>
+                                <th>نام</th>
+                                <th>تخلص</th>
+                                <th>نام پدر</th>
+                                <th>شماره تماس</th>
+                                <th>مضمون</th>
+                                <th>فیس</th>
+                                <th>تاریخ ثبت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in total_students %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ student.first_name }}</td>
+                                <td>{{ student.last_name }}</td>
+                                <td>{{ student.father_name }}</td>
+                                <td>{{ student.phone|default:"ندارد" }}</td>
+                                <td>{{ student.subject }}</td>
+                                <td>{{ student.orginal_fees }}</td>
+                                <td>{{ student.date_of_registration }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <p class="text-center text-muted">هیچ استادی ثبت نشده است.</p>
+                {% endif %}
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search filter script -->
+<script>
+    document.getElementById("studentSearch").addEventListener("keyup", function () {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#studentsTable tbody tr");
+
+        rows.forEach(function (row) {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? "" : "none";
+        });
+    });
+</script>
+
+
+</div>
+
+
+
+{% endblock %}

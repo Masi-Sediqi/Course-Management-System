@@ -37,7 +37,10 @@ class BooksForm(forms.ModelForm):
 
     class Meta:
         model = Books
-        fields = ["name","price","description"]
+        fields = ["name","price","description","number_of_book","paid_price"]
+
+        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update(
@@ -47,5 +50,11 @@ class BooksForm(forms.ModelForm):
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["number_of_book"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["paid_price"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )

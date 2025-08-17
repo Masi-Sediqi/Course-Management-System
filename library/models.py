@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class StationeryCategory(models.Model):
     name = models.CharField(max_length=50, blank=False)
 
@@ -20,7 +18,13 @@ class StationeryItem(models.Model):
 
 class Books(models.Model):
     name = models.CharField(max_length=115, blank=False)
+    number_of_book = models.IntegerField(blank=False)
     price = models.IntegerField(blank=False)
+    paid_price = models.IntegerField()
     description = models.TextField(blank=True)
     def __str__(self):
         return self.name
+
+class Total_Stationery_Loan(models.Model):
+    total_amount = models.FloatField()
+    created = models.DateField(auto_now_add=True)

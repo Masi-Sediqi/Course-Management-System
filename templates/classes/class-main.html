@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="breadcrumb">
+        <h1>دوره صنوف جدید</h1>
+        <ul>
+            <li><a href="/">داشبورد</a></li>
+            <li>صنوف</li>
+        </ul>
+    </div>
+    <div class="separator-breadcrumb border-top"></div>
+    <!-- content goes here-->
+    <section class="ul-todo-list-content">
+        <div class="ul-todo-sidebar">
+            <div class="card">
+                <div class="card-body">
+                    <div class="pr-3 pb-3">
+                        <i class="todo-sidebar-close i-Close pb-3 text-right" data-sidebar-toggle="main"></i>
+
+                        <!-- Buttons side by side -->
+                        <div class="d-flex mb-4">
+                            <button class="btn btn-primary btn-sm mr-2" type="button" data-toggle="modal"
+                                data-target=".bd-example-modal-lg">
+                                صنف جدید
+                            </button>
+                            <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal"
+                                data-target="#exampleModalgood">
+                                دوره جدید
+                            </button>
+                        </div>
+
+                        <div>
+                            <p class="text-muted mb-2">Filters</p>
+                            <ul class="list-group">
+                                {% for i in main_records %}
+                                <li class="list-group-item border-0">
+                                    <a href=""><i class="icon-regular i-Find-User mr-2"></i> {{i.name}}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+            aria-hidden="true">
+            <form class="needs-validation" novalidate="novalidate" action="{% url 'classes:main_classes' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content p-3">                       
+                            <div class="row">
+                                <div class="col-12">
+                                   
+                                    <h5>معلومات دوره جدید</h5>
+                                </div>
+                                <!-- Personal Info -->
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="firstName1"> دوره<span style="color: red;">*</span></label>
+                                    {{ sub_form.main_class }}
+                                </div>
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="lastName1">نام صنف<span style="color: red;">*</span></label>
+                                    {{ sub_form.name }}
+                                </div>
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="email">تاریخ آغاز </label>
+                                    {{ sub_form.start_date }}
+                                </div>
+                        
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="email">تایم </label>
+                                    {{ sub_form.time }}
+                                </div>
+                        
+                         
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="orginal_fees">اساتید<span style="color: red;">*</span></label>
+                                    {{ sub_form.teacher }}
+                                </div>
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="orginal_fees">ضرفیت صنف<span style="color: red;">*</span></label>
+                                    {{ sub_form.capacity }}
+                                </div>
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="orginal_fees">صنف<span style="color: red;">*</span></label>
+                                    {{ sub_form.room }}
+                                </div>
+                                <div class="col-md-12 form-group mb-3">
+                                    <label for="orginal_fees">تقسیم اوقات<span style="color: red;">*</span></label>
+                                    {{ sub_form.schedule }}
+                                </div>
+                             
+                        
+                                <!-- Submit Buttons -->
+                                <div class="col-12 modal-footer">
+                                    <input type="hidden" name="form_type" value="class">
+                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
+                                    <button class="btn btn-primary " type="submit">ذخیره کردن</button>
+                                </div>
+                            </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    $('#datepicker3').datepicker({
+                                
+                                    });
+                                });
+                            </script>
+                  
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal fade bd-example-modal-lg" id="exampleModalgood" tabindex="-1" role="dialog"
+            aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <form class="needs-validation" novalidate="novalidate" action="{% url 'classes:main_classes' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content p-3">                       
+                            <div class="row">
+                                <div class="col-12">
+                                   
+                                    <h5>معلومات دوره جدید</h5>
+                                </div>
+                                <!-- Personal Info -->
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="firstName1">نام دوره<span style="color: red;">*</span></label>
+                                    {{ main_form.name }}
+                                </div>
+                        
+                                <!-- Fee Fields -->
+                                <div class="col-md-12 form-group mb-3">
+                                    <label for="orginal_fees">توضیحات<span style="color: red;">*</span></label>
+                                    {{ main_form.description }}
+                                </div>
+                             
+                        
+                                <!-- Submit Buttons -->
+                                <div class="col-12 modal-footer">
+                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
+                                    <button class="btn btn-primary " type="submit">ذخیره کردن</button>
+                                </div>
+                            </div>
+                   
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="ul-todo-content-right">
+            <div class="row">
+                <div class="col-md-12">
+
+
+                    <div class="card mt-2 mb-4">
+                        <div class="card-body">
+                            <nav>
+                                <div class="nav nav-tabs" id="nav-tab" role="tablist"><a class="nav-item nav-link active show"
+                                        id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
+                                        aria-controls="nav-home" aria-selected="true">صنوف</a>
+                                        <a
+                                        class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab"
+                                        href="#nav-profile" role="tab" aria-controls="nav-profile"
+                                        aria-selected="false">دوره ها</a></div>
+                            </nav>
+                            <div class="tab-content ul-tab__content" id="nav-tabContent">
+                                <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                    <div class="col-md-12 mb-3">
+                                       
+                                            <div class="card-body">
+                                                <h4 class="card-title mb-3"> بخش صنوف</h4>
+                                                <!-- <p>Similar to tables and dark tables, use the modifier classes <code>.thead-dark</code> to make <code>thead</code> appear Dark</p> -->
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead class="thead-dark">
+                                                            <tr>
+                                                                <th scope="col">#</th>
+                                                                <th scope="col">نام صنف</th>
+                                                                <th scope="col">تاریخ آغاز</th>
+                                                                <th scope="col">تاریخ ختم</th>
+                                                                <th scope="col">استاد</th>
+                                                                <th scope="col">ضرفیت صنف</th>
+                                                                <th scope="col">صنف</th>
+                                                                <th scope="col">تقسیم اوقات</th>
+                                                                <th scope="col">وضعیت</th>
+                                                                <th scope="col">عملیات</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for i in sub_records %}
+                                                            <tr>
+                                                                <th scope="row">{{ forloop.counter }}</th>
+                                                                <td>{{i.name}}</td>
+                                                                <td>{{i.start_date}}</td>
+                                                                <td> {{i.end_date}} </td>
+                                                                <td>
+                                                                    {% for t in i.teacher.all %}
+                                                                    <span class="badge bg-primary">{{ t.name }}</span>{% if not forloop.last %} + {% endif %}
+                                                                    {% empty %}
+                                                                      -
+                                                                    {% endfor %}
+                                                                  </td>                                                                  
+                                                                <td> {{i.capacity}} </td>
+                                                                <td> {{i.room}} </td>
+                                                                <td> {{i.schedule}} </td>
+                                                                <td><span class="badge badge-success">
+                                                                    {% if i.active == True %}فعال
+                                                                {% else %}غیر فعال
+                                                                {% endif %}
+                                                                </span></td>                                                                <td><a class="text-success mr-2" href="#"><i class="nav-icon i-Pen-2 font-weight-bold"></i></a><a class="text-danger mr-2" href="#"><i class="nav-icon i-Close-Window font-weight-bold"></i></a></td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                    </div>
+
+                                </div>
+                                <div class="tab-pane fade" id="nav-profile" role="tabpanel"
+                                    aria-labelledby="nav-profile-tab">
+                                    <div class="col-md-12 mb-3">
+                                      
+                                            <div class="card-body">
+                                                <h4 class="card-title mb-3"> یخش دوره ها</h4>
+                                                <!-- <p>invert the colors—with light text on dark backgrounds—with <code>.table-dark</code>.</p> -->
+                                                <div class="table-responsive">
+                                                    <table class="table table-dark">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">#</th>
+                                                                <th scope="col">نام دوره</th>
+                                                                <th scope="col">مدت</th>
+                                                                <th scope="col">قیمت</th>
+                                                                <th scope="col">وضعیت</th>
+                                                                <th scope="col">توضیحات</th>
+                                                                <th scope="col">عملیات</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for i in main_records %}
+                                                            <tr>
+                                                                <th scope="row">{{forloop.counter}}</th>
+                                                                <td>{{i.name}}</td>
+                                                                <td> هفته {{i.duration_weeks}}</td>
+                                                                <td>{{i.price}}</td>
+                                                                <td><span class="badge badge-success">
+                                                                    {% if i.active == True %}فعال
+                                                                {% else %}غیر فعال
+                                                                {% endif %}
+                                                                </span></td>
+                                                                <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
+                                                                <td>
+                                                                    <button class="btn btn-success" type="button"><i class="nav-icon i-Pen-2"></i></button>
+                                                                    <button class="btn btn-danger" type="button"><i class="nav-icon i-Close-Window"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        
+                                    </div>
+                                </div>
+                               
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section><!-- end of main-content -->
+</div>
+
+{% endblock %}
