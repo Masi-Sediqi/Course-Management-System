@@ -22,14 +22,16 @@ class MainClassForm(forms.ModelForm):
 
 class SubClassForm(forms.ModelForm):
     start_date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
+    end_date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker4",'class': 'form-control' }))
 
     class Meta:
         model = SubClass
-        fields = ["main_class","name","start_date","teacher","capacity","room","schedule","time","books","fees"]
+        fields = ["main_class","name","start_date","teacher","capacity","room","schedule","time","books","fees","subjects","end_date"]
 
         widgets = {
             'teacher': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
             'books': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
+            'subjects': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
         }
 
     def __init__(self, *args, **kwargs):

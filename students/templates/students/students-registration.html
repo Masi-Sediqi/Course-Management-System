@@ -58,12 +58,10 @@
                             <tr>
                               <th scope="col">#</th>
                               <th scope="col">نام کامل</th>
-                              <th scope="col">تایم</th>
-                              <th scope="col">مضمون</th>
+
                               <th scope="col">شماره تماس</th>
                               <th scope="col">تاریخ ثبت</th>
                               <th scope="col">جنسیت</th>
-                              <th scope="col">فیس</th>
                               <th scope="col" style="min-width: 140px;">عملیات</th>
                             </tr>
                           </thead>
@@ -72,8 +70,7 @@
                             <tr>
                               <th scope="row">{{ i.id }}</th>
                               <td> <a href="{% url 'students:student_detail' i.id %}">{{ i.first_name }} {{ i.last_name }}</a></td>
-                              <td>{{ i.time }}</td>
-                              <td>{{ i.subject }}</td>
+           
                               <td>{{ i.phone|default:"ندارد" }}</td>
                               <td>{{ i.date_of_registration }}</td>
                               <td>
@@ -83,7 +80,6 @@
                                 <span class="badge bg-primary text-white py-2 px-3 fs-6">زن</span>
                               {% endif %}                              
                               </td>
-                              <td>{{ i.orginal_fees }}</td>
                               <td>
                                 <div class="dropdown">
                                   <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
@@ -200,31 +196,15 @@
                             {{ form.date_of_registration }}
                         </div>
                         <div class="col-md-4 form-group mb-3">
-                            <label for="date_of_registration">مضمون<span style="color: red;">*</span></label>
-                            {{ form.subject }}
+                            <label for="date_of_registration">صنف<span style="color: red;">*</span></label>
+                            {{ form.classs }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
-                          <label for="books">کتاب‌ها<span style="color: red;">*</span></label>
-                          {{ form.books }}
-                      </div>
+                    
                         <div class="col-md-4 form-group mb-3">
                             <label for="gender">جنسیت<span style="color: red;">*</span></label>
                             {{ form.gender }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
-                            <label for="gender">تایم<span style="color: red;">*</span></label>
-                            {{ form.time }}
-                        </div>
-                        <div class="col-md-4 form-group mb-3">
-                            <label for="gender">استاد<span style="color: red;">*</span></label>
-                            {{ form.teacher }}
-                        </div>
-                
-                        <!-- Fee Fields -->
-                        <div class="col-md-4 form-group mb-3">
-                            <label for="orginal_fees">مقدار فیس<span style="color: red;">*</span></label>
-                            {{ form.orginal_fees }}
-                        </div>
+            
                         <div class="col-md-4 form-group mb-3">
                             <label for="orginal_fees">عکس<span style="color: red;">*</span></label>
                             {{ form.image }}

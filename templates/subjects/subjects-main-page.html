@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} text-center h3"  style="font-family: XW_Zar_Bd_0;" role="alert">
+                        {{ message }}
+                    </div>
+                    <script>
+                        setTimeout(function () {
+                            $('.alert').fadeOut('slow');
+                        }, 3000); // 3 seconds
+                    </script>
+                    {% endfor %}
+                    {% endif %}
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> بخش مضامین
+    </h4>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="col-lg-12 text-right">
+                        
+                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
+                    data-target="#exampleModal">
+                    مضمون جدید
+                </button>
+
+            </div>
+       
+    
+            <!-- Tabs Content -->
+            <div class="tab-content mt-4" id="incomeTabsContent">
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>اسم مضمون</th>
+                           
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {% for i in datas %}
+                                <tr>
+                                    <td>{{ i.id }}</td>
+                                    <td>{{ i.name }}</td>
+                                    
+                                    <td>
+                                        <!-- Actions like edit/delete buttons go here -->
+                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
+                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+ 
+    
+</div>
+
+<!--  Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مضامین</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true"></span></button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'subjects:subjects' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                            <label for="validationCustom01">مضمون</label>
+                            {{ form.name }}
+                            <div class="valid-feedback">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

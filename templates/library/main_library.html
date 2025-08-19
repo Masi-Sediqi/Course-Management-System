@@ -294,6 +294,7 @@
                               <th>تام کتاب</th>
                               <th>تعداد</th>
                               <th>قیمت</th>
+                              <th>مقدار پرداخت شده</th>
                               <th>توضیحات</th>
                               <th>عملیات</th>
                           </tr>
@@ -303,8 +304,9 @@
                           <tr>
                               <td>{{ i.id }}</td>
                               <td>{{ i.name }}</td>
-                              <td>{{ i.number }}</td>
+                              <td>{{ i.number_of_book }}</td>
                               <td>{{ i.price }}</td>
+                              <td>{{ i.paid_price }}</td>
                               <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                             
                               <td>
