@@ -8,6 +8,7 @@ from django.http import HttpResponse
 # Create your views here.
 
 def library_view(request):
+    referer = request.META.get('HTTP_REFERER', '/')
     category_form = StationeryCategoryForm()
     form = StationeryItemForm()
     book_form=None
@@ -28,7 +29,10 @@ def library_view(request):
                 get_paid_price_field = float(request.POST.get('paid_price') or 0)
 
                 multiplication = get_number_of_book_field * get_price_field
-                subtraction_paid_price_collection = multiplication - get_paid_price_field
+                if get_paid_price_field < multiplication:
+                    messages.warning(request, 'مقدار پرداخت شده کمتر از مقدار است که باید پرداخت شود')
+                    return redirect(referer)
+                # subtraction_paid_price_collection = multiplication - get_paid_price_field
 
                 with transaction.atomic():
                     # TotalExpenses
@@ -37,10 +41,10 @@ def library_view(request):
                     find_expenses_pk.save()
 
                     # Total_Stationery_Loan
-                    if subtraction_paid_price_collection > 0:
-                        collect_loans, created = Total_Stationery_Loan.objects.get_or_create(pk=1, defaults={'total_amount': 0})
-                        collect_loans.total_amount += subtraction_paid_price_collection
-                        collect_loans.save()
+                    # if subtraction_paid_price_collection > 0:
+                    #     collect_loans, created = Total_Stationery_Loan.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+                    #     collect_loans.total_amount += subtraction_paid_price_collection
+                    #     collect_loans.save()
 
                     # Save book
                     book_form.save()

@@ -21,7 +21,7 @@ class SubClass(models.Model):
     end_date = models.CharField(max_length=15)
     teacher = models.ManyToManyField(Teacher)  # مدرس
     books = models.ManyToManyField(Books)
-    subjects = models.ManyToManyField(Subjects)
+    # subjects = models.ManyToManyField(Subjects)
     fees = models.IntegerField(blank=False)
     capacity = models.PositiveIntegerField(default=30)  # ظرفیت کلاس
     room = models.CharField(max_length=50, blank=True)  # شماره یا نام اتاق

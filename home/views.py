@@ -9,3 +9,6 @@ def dashboard(request):
 
 def colculator(request):
     return render(request, 'colculator.html')
+
+def notification(request):
+    return render(request, 'noti/notifications.html')

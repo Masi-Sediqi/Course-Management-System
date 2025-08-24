@@ -15,21 +15,41 @@ def students_registration(request):
     students = None
 
     if request.method == "POST":
-        form = StudentForm(request.POST, request.FILES)
-        if form.is_valid():
-            student = form.save(commit=False)  # don't commit yet
-            student.save()                     # save main instance
-            form.save_m2m()         
-            return redirect('students:students_registration')
+        form_type = request.POST.get('form_type')
+        if form_type == "student":
+            form = StudentForm(request.POST, request.FILES)
+            if form.is_valid():
+                get_class_ids = request.POST.getlist('classs')
+                # Add the student to classes and decrease capacity
+                with transaction.atomic():  # ensures rollback if anything fails
+                    for class_id in get_class_ids:
+                        subclass = SubClass.objects.select_for_update().get(id=class_id)
+                        
+                        if subclass.capacity > 0:
+                            subclass.capacity -= 1
+                            subclass.save()
+                        else:
+                            return HttpResponse(f"صنف {subclass.name} گنجایش ندارد", status=400)
+                student = form.save(commit=False)  # don't commit yet
+                student.save()                     # save main instance
+                form.save_m2m()         
+                return redirect('students:students_registration')
+        else:
+            student_without_classForm = StudentWithoutClassForm(request.POST)
+            if student_without_classForm.is_valid():
+                student_without_classForm.save()
+                return redirect('students:students_registration')
     else:
         form = StudentForm()
-    
+        student_without_classForm = StudentWithoutClassForm()
+
     form = StudentForm()
     students = Student.objects.filter(is_active=True)
 
     context = {
         'students':students,
         'form':form,
+        'student_without_classForm':student_without_classForm,
     }
 
     return render(request, 'students/students-registration.html', context)
@@ -115,7 +135,7 @@ def student_fees_detail(request, student_id):
             form = Student_fess_infoForm(request.POST)
             if form.is_valid():
                 get_date = form.cleaned_data.get('date')
-                get_orginal_fess = form.cleaned_data.get('orginal_fees')
+                get_orginal_fess = 12
                 get_give_money = form.cleaned_data.get('give_fees')
                 # Extract month part
                 try:
@@ -151,19 +171,19 @@ def student_fees_detail(request, student_id):
                 fees_info.save()
                 return redirect(referer)
         else:
-            g_form = StudentGiveRemainMoneyForm(request.POST)
-            if g_form.is_valid():
-                get_Amount = g_form.cleaned_data.get('amount')
-                get_remain_money.amount -= get_Amount
-                instance = g_form.save(commit=False)
-                get_remain_money.save()
-                instance.studnet = student
-                instance.save()
-                return redirect(referer)
+            # g_form = StudentGiveRemainMoneyForm(request.POST)
+            # if g_form.is_valid():
+            #     get_Amount = g_form.cleaned_data.get('amount')
+            #     get_remain_money.amount -= get_Amount
+            #     instance = g_form.save(commit=False)
+            #     get_remain_money.save()
+            #     instance.studnet = student
+            #     instance.save()
+            #     return redirect(referer)
             return redirect('students:student_fees_detail', student_id=student.id)
     else:
         form = Student_fess_infoForm(initial={
-            'orginal_fees': student.orginal_fees
+            'orginal_fees':12
         })
         g_form = StudentGiveRemainMoneyForm()
 
@@ -182,6 +202,10 @@ def student_activate(request, student_id):
     student.save()
     return redirect(request.META.get('HTTP_REFERER'))
 
+def students_without_class(request):
+    get_students = StudentWithoutClass.objects.all()
+    return render(request, 'students/students-without-class.html', {'get_students':get_students})
+    
 def off_students(request):
     get_students = Student.objects.filter(is_active=False)
     return render(request, 'students/do-not-active-students.html', {'get_students':get_students})
@@ -238,13 +262,13 @@ def buy_book(request, id):
 
                 with transaction.atomic():
                     # TotalIncome
-                    find_expenses_pk, created = TotalIncome.objects.get_or_create(student=student, defaults={'total_amount': 0})
+                    find_expenses_pk, created = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
                     find_expenses_pk.total_amount += get_paid_amount
                     find_expenses_pk.save()
 
                     # Total_Stationery_Loan
                     if subtraction > 0:
-                        collect_loans, created = StudentRemailMoney.objects.get_or_create(pk=1, defaults={'amount': 0})
+                        collect_loans, created = StudentRemailMoney.objects.get_or_create(student=student, defaults={'amount': 0})
                         collect_loans.amount += subtraction
                         collect_loans.save()
                 

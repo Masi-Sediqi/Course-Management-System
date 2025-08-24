@@ -73,15 +73,11 @@
                                     <label for="email">تاریخ ختم </label>
                                     {{ sub_form.end_date }}
                                 </div>
-                                <div class="col-md-4 form-group mb-3">
+                                <div class="col-md-6 form-group mb-3">
                                     <label for="orginal_fees">اساتید<span style="color: red;">*</span></label>
                                     {{ sub_form.teacher }}
                                 </div>
-                                <div class="col-md-4 form-group mb-3">
-                                    <label for="orginal_fees">مضامین<span style="color: red;">*</span></label>
-                                    {{ sub_form.subjects }}
-                                </div>
-                                <div class="col-md-4 form-group mb-3">
+                                <div class="col-md-6 form-group mb-3">
                                     <label for="orginal_fees">کتابها<span style="color: red;">*</span></label>
                                     {{ sub_form.books }}
                                 </div>
@@ -219,7 +215,7 @@
                                                                     {% endfor %}
                                                                   </td> 
                                                                   <td>
-                                                                    {% for t in i.subjects.all %}
+                                                                    {% for t in i.books.all %}
                                                                     <span class="badge bg-primary">{{ t.name }}</span>{% if not forloop.last %} + {% endif %}
                                                                     {% empty %}
                                                                       -

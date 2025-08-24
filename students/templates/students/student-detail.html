@@ -97,12 +97,44 @@
                         </tr>
                         <tr>
                             <th>مضمون</th>
-                            <td>{{ student.subject }}</td>
+                            <td>
+                                {% for n in student.classs.all %}
+                                    {% for subj in n.subjects.all %}
+                                        <span class="badge bg-primary">{{ subj.name }}</span>{% if not forloop.last %} , {% endif %}
+                                    {% empty %}
+                                        <span>-</span>
+                                    {% endfor %}
+                                    {% if not forloop.last %} + {% endif %}
+                                {% empty %}
+                                    -
+                                {% endfor %}
+                            </td>
                         </tr>
                         <tr>
-                            <th>وقت درسی</th>
-                            <td>{{ student.time }}</td>
+                            <th>صنوف</th>
+                            <td>
+                                {% for t in student.classs.all %}
+                                    <a href="" class="badge bg-info class-badge">
+                                        {{ t.name }}
+                                    </a>{% if not forloop.last %} + {% endif %}
+                                {% empty %}
+                                    -
+                                {% endfor %}
+                            </td>
                         </tr>
+                                            
+                        
+                        <tr>
+                            <th>وقت درسی</th>
+                            <td>
+                                {% for t in student.classs.all %}
+                                    <span class="badge bg-primary">{{ t.time }}</span>{% if not forloop.last %} + {% endif %}
+                                {% empty %}
+                                    -
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        
                         <tr>
                             <th>تاریخ ثبت</th>
                             <td>{{ student.date_of_registration }}</td>

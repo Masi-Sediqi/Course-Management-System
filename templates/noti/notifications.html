@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row" style="font-family: XW_Zar_Bd_0;">
+    <div class="col-md-12 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">🔔 Notifications</h5>
+            </div>
+            <div class="card-body p-0">
+                <!-- Notification List -->
+                <ul class="list-group list-group-flush">
+                    <!-- Example Notification Item -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>New Message:</strong> You received a message from Admin.
+                            <br>
+                            <small class="text-muted">2 minutes ago</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">New</span>
+                    </li>
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>System Update:</strong> The server will restart tonight at 11 PM.
+                            <br>
+                            <small class="text-muted">1 hour ago</small>
+                        </div>
+                        <span class="badge bg-secondary rounded-pill">Info</span>
+                    </li>
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Reminder:</strong> Don’t forget to submit your report.
+                            <br>
+                            <small class="text-muted">Yesterday</small>
+                        </div>
+                        <span class="badge bg-warning rounded-pill">Pending</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

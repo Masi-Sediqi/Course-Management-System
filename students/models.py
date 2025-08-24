@@ -5,7 +5,7 @@ from classes.models import *
 # Create your models here.
 
 class Student(models.Model):
-    first_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, blank=False)
     last_name = models.CharField(max_length=100)
     father_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -23,6 +23,19 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+class StudentWithoutClass(models.Model):
+    first_name = models.CharField(max_length=100 , blank=False)
+    last_name = models.CharField(max_length=100 , blank=True)
+    father_name = models.CharField(max_length=100 , blank=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    date = models.CharField(max_length=20, blank=False)
+    gender = models.CharField(max_length=10, choices=[('Male', 'مرد'), ('Female', 'زن')])
+    date_for_notification = models.CharField(max_length=14, blank=False)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+        
 
 class Student_fess_info(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)

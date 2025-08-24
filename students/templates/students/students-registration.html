@@ -37,6 +37,16 @@
                 <div class="card-body">
                     <div class="col-lg-12 text-right">
                         
+                   
+                        <div class="btn-group dropleft">
+                            <button class="btn btn-info btn-lg m-1" data-toggle="modal"
+                            data-target="#exampleModal1" type="button">
+                                شاگردان بدون صنف
+                            </button>
+                            <a href="{% url 'students:students_without_class' %}" class="btn btn-info btn-lg m-1 dropdown-toggle dropdown-toggle-split _r_drop_left"><span class="sr-only"></span></a>
+                        </div>
+                  
+
                         <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
                             data-target="#exampleModal">
                             شاگرد جدید
@@ -157,7 +167,7 @@
     </div>
 
     <!--  Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -175,41 +185,36 @@
                             <h5>معلومات شاگرد</h5>
                         </div>
                         <!-- Personal Info -->
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="firstName1">نام مکمل<span style="color: red;">*</span></label>
-                            {{ form.first_name }}
+                            {{ student_without_classForm.first_name }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="lastName1">تخلص<span style="color: red;">*</span></label>
-                            {{ form.last_name }}
+                            {{ student_without_classForm.last_name }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="email">نام پدر</label>
-                            {{ form.father_name }}
+                            {{ student_without_classForm.father_name }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="phone">شماره تماس</label>
-                            {{ form.phone }}
+                            {{ student_without_classForm.phone }}
                         </div>
                         <div class="col-md-4 form-group mb-3">
-                            <label for="date_of_registration">تاریخ ثبت نام<span style="color: red;">*</span></label>
-                            {{ form.date_of_registration }}
+                            <label for="phone">جنسیت</label>
+                            {{ student_without_classForm.gender }}
                         </div>
                         <div class="col-md-4 form-group mb-3">
-                            <label for="date_of_registration">صنف<span style="color: red;">*</span></label>
-                            {{ form.classs }}
+                            <label for="date_of_registration">تاریخ <span style="color: red;">*</span></label>
+                            {{ student_without_classForm.date }}
                         </div>
-                    
+
                         <div class="col-md-4 form-group mb-3">
-                            <label for="gender">جنسیت<span style="color: red;">*</span></label>
-                            {{ form.gender }}
+                            <label for="gender">تاریخ برای هشدار<span style="color: red;">*</span></label>
+                            {{ student_without_classForm.date_for_notification }}
                         </div>
-            
-                        <div class="col-md-4 form-group mb-3">
-                            <label for="orginal_fees">عکس<span style="color: red;">*</span></label>
-                            {{ form.image }}
-                        </div>
-                     
+
                 
                         <!-- Submit Buttons -->
                         <div class="col-12 modal-footer">
@@ -222,7 +227,7 @@
             </div>
         </div>
     </div>
-</div>
+    </div>
 
 <!-- Initialize datepicker (if needed) -->
 <script>
@@ -230,8 +235,84 @@
         $('#datepicker3').datepicker({});
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker4').datepicker({});
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker5').datepicker({});
+    });
+</script>
 
-    <!--  Modal -->
 
-
+        <!--  Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">ثبت نام شاگردان</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <form class="needs-validation" novalidate="novalidate" action="{% url 'students:students_registration' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                               
+                                <h5>معلومات شاگرد</h5>
+                            </div>
+                            <!-- Personal Info -->
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="firstName1">نام مکمل<span style="color: red;">*</span></label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="lastName1">تخلص<span style="color: red;">*</span></label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="email">نام پدر</label>
+                                {{ form.father_name }}
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="phone">شماره تماس</label>
+                                {{ form.phone }}
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="date_of_registration">تاریخ ثبت نام<span style="color: red;">*</span></label>
+                                {{ form.date_of_registration }}
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="date_of_registration">صنف<span style="color: red;">*</span></label>
+                                {{ form.classs }}
+                            </div>
+                        
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="gender">جنسیت<span style="color: red;">*</span></label>
+                                {{ form.gender }}
+                            </div>
+                
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="orginal_fees">عکس<span style="color: red;">*</span></label>
+                                {{ form.image }}
+                            </div>
+                         
+                    
+                            <!-- Submit Buttons -->
+                            <div class="col-12 modal-footer">
+                              <input type="hidden" name="form_type" value="student">
+                                <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
+                                <button class="btn btn-primary " type="submit">ذخیره کردن</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+        </div>
     {% endblock %}

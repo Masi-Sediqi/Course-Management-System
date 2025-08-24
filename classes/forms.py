@@ -26,12 +26,11 @@ class SubClassForm(forms.ModelForm):
 
     class Meta:
         model = SubClass
-        fields = ["main_class","name","start_date","teacher","capacity","room","schedule","time","books","fees","subjects","end_date"]
+        fields = ["main_class","name","start_date","teacher","capacity","room","schedule","time","books","fees","end_date"]
 
         widgets = {
             'teacher': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
             'books': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
-            'subjects': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
         }
 
     def __init__(self, *args, **kwargs):
