@@ -2,6 +2,7 @@ from django.db import models
 from library.models import *
 from teachers.models import *
 from classes.models import *
+import jdatetime
 # Create your models here.
 
 class Student(models.Model):
@@ -32,9 +33,16 @@ class StudentWithoutClass(models.Model):
     date = models.CharField(max_length=20, blank=False)
     gender = models.CharField(max_length=10, choices=[('Male', 'مرد'), ('Female', 'زن')])
     date_for_notification = models.CharField(max_length=14, blank=False)
+    jalali_to_gregorian = models.DateField()
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def is_notification_today(self):
+        """Check if today is notification day."""
+        today = jdatetime.date.today().togregorian()
+        return self.jalali_to_gregorian == today
         
 
 class Student_fess_info(models.Model):

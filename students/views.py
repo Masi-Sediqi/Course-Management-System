@@ -6,7 +6,6 @@ from django.db import transaction
 from .models import *
 from django.http import HttpResponse
 from django.db.models import Sum
-
 from django.contrib import messages
 # Create your views here.
 
@@ -37,7 +36,16 @@ def students_registration(request):
         else:
             student_without_classForm = StudentWithoutClassForm(request.POST)
             if student_without_classForm.is_valid():
-                student_without_classForm.save()
+                jalali_str = student_without_classForm.cleaned_data.get('date_for_notification')  # "30/06/1404"
+
+                # Parse the string (format: day/month/year)
+                jalali_date = jdatetime.datetime.strptime(jalali_str, "%d/%m/%Y").date()
+
+                # Convert Jalali to Gregorian
+                gregorian_date = jalali_date.togregorian()
+                instance = student_without_classForm.save(commit=False)
+                instance.jalali_to_gregorian = gregorian_date
+                instance.save()
                 return redirect('students:students_registration')
     else:
         form = StudentForm()
