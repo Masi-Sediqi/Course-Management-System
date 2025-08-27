@@ -3,6 +3,12 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from.forms import *
 
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+
+
 from django.contrib import messages
 from .models import MainClass, SubClass
 from .forms import MainClassForm, SubClassForm
@@ -66,3 +72,40 @@ def main_classes(request):
         'notifications': notifications,
     }
     return render(request, 'classes/class-main.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+def edit_sub_class(request, pk):
+    instance = get_object_or_404(SubClass, pk=pk)
+    if request.method == "POST":
+        form = SubClassForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "صنف موفقانه ویرایش شد")
+            return redirect('classes:main_classes')
+    else:
+        form = SubClassForm(instance=instance)
+    return render(request, 'classes/edit_sub_class.html', {'form': form, 'instance': instance})
+
+
+
+
+def delete_sub_class(request, pk):
+    instance = get_object_or_404(SubClass, pk=pk)
+    instance.delete()
+    messages.success(request, "صنف موفقانه حذف شد")
+    return redirect('classes:main_classes')
+
+
+
+
+
