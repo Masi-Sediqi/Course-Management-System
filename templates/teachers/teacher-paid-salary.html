@@ -5,6 +5,28 @@
     <div class="main-content pt-4">
         <div class="row">
             <div class="col-md-12">
+                <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+            
+                    <script>
+                        {% if messages %}
+                            {% for message in messages %}
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                                    title: "{{ message|escapejs }}",
+                                    showConfirmButton: false,
+                                    timer: 4000,
+                                    timerProgressBar: true,
+                                    didOpen: (toast) => {
+                                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                    }
+                                });
+                            {% endfor %}
+                        {% endif %}
+                    </script>
                 <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
                     <li class="nav-item"><a class="nav-link active" id="invoice-tab" data-toggle="tab" href="#invoice" role="tab" aria-controls="invoice" aria-selected="true">
                         <button class="btn btn-dark ripple m-1" type="button"  data-toggle="modal"
@@ -16,74 +38,47 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
                             <div class="d-sm-flex mb-5" data-view="print"><span class="m-auto"></span>
-                                <button class="btn btn-primary mb-sm-0 mb-3 print-invoice">Print Invoice</button>
                             </div>
                             <!-- -===== Print Area =======-->
-                            <div id="print-area">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h4 class="font-weight-bold">Order Info</h4>
-                                        <p>#106</p>
-                                    </div>
-                                    <div class="col-md-6 text-sm-right">
-                                        <p><strong>Order status: </strong>Delivered</p>
-                                        <p><strong>Order date: </strong>10 Dec, 2018</p>
-                                    </div>
-                                </div>
-                                <div class="mt-3 mb-4 border-top"></div>
-                                <div class="row mb-5">
-                                    <div class="col-md-6 mb-3 mb-sm-0">
-                                        <h5 class="font-weight-bold">Bill From</h5>
-                                        <p>New Age Inc.</p><span style="white-space: pre-line">
-                                            rodriguez.trent@senger.com 61 Johnson St. Shirley, NY 11967. +202-555-0170
-                                        </span>
-                                    </div>
-                                    <div class="col-md-6 text-sm-right">
-                                        <h5 class="font-weight-bold">Bill To</h5>
-                                        <p>UI Lib</p><span style="white-space: pre-line">
-                                            sales@ui-lib.com 8254 S. Garfield Street. Villa Rica, GA 30180. +1-202-555-0170
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 table-responsive">
-                                        <table class="table table-hover mb-4">
-                                            <thead class="bg-gray-300">
-                                                <tr>
-                                                    <th scope="col">#</th>
-                                                    <th scope="col">Item Name</th>
-                                                    <th scope="col">Unit Price</th>
-                                                    <th scope="col">Unit</th>
-                                                    <th scope="col">Cost</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row">1</th>
-                                                    <td>Product 1</td>
-                                                    <td>300</td>
-                                                    <td>2</td>
-                                                    <td>600</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">1</th>
-                                                    <td>Product 2</td>
-                                                    <td>200</td>
-                                                    <td>3</td>
-                                                    <td>600</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="invoice-summary">
-                                            <p>Sub total: <span>$1200</span></p>
-                                            <p>Vat: <span>$120</span></p>
-                                            <h5 class="font-weight-bold">Grand Total: <span>$1320</span></h5>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">تاریخ</th>
+                                            <th scope="col">مقدار بل</th>
+                                            <th scope="col">مقدار</th>
+                                            <th scope="col">مقدار پرداخت شده</th>
+                                            <th scope="col">مقدار باقی مانده</th>
+                                            <th scope="col">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for i in paid_records %}
+                                        <tr>
+                                            <th scope="row">{{ forloop.counter }}</th>
+                                            <td>{{ i.date }}</td>
+                                            <td>{{ i.amount_of_fees_bell }}</td>
+                                            <td><span class="badge badge-info">{{ i.amount }}</span></td>
+                                            <td><span class="badge badge-success">{{ i.paid_salary }}</span></td>
+                                            <td><span class="badge badge-warning">{{ i.remain_salary }}</span></td>
+                                            <td>
+                                                <a class="text-success mr-2" href="#"><i class="nav-icon i-Pen-2 font-weight-bold"></i></a>
+                                                <a class="text-danger mr-2" href="#"><i class="nav-icon i-Close-Window font-weight-bold"></i></a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5" class="text-right font-weight-bold">مجموع مقدار باقی مانده:</td>
+                                            <td><span class="badge badge-danger">{{ total_remain_salary }}</span></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                             </div>
+                            
                             <!-- ==== / Print Area =====-->
                         </div>
                     </div>
@@ -102,42 +97,51 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form method="post" novalidate>
+                <form class="needs-validation" novalidate action="{% url 'teachers:teacher_paid_salary' id=teacher.id %}" method="post">
                     {% csrf_token %}
-                    
-                    <div class="form-group mb-3">
-                        {{ form.amount.label_tag }}
-                        {{ form.amount }}
-                        {% if form.amount.errors %}
-                            <div class="text-danger">{{ form.amount.errors }}</div>
-                        {% endif %}
-                    </div>
+                    <div class="row p-3">
 
-                    <div class="form-group mb-3">
-                        {{ form.date.label_tag }}
-                        {{ form.date }}
-                        {% if form.date.errors %}
-                            <div class="text-danger">{{ form.date.errors }}</div>
-                        {% endif %}
-                    </div>
+                        <!-- Personal Info -->
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="lastName1">تاریخ<span style="color: red;">*</span></label>
+                            {{ form.date }}
+                        </div>
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="firstName1"> تعداد فیس بل<span style="color: red;">*</span></label>
+                            {{ form.amount_of_fees_bell }}
+                        </div>
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="firstName1"> مقدار<span style="color: red;">*</span></label>
+                            {{ form.amount }}
+                        </div>
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="firstName1"> مقدار برای پرداخت<span style="color: red;">*</span></label>
+                            {{ form.paid_salary }}
+                        </div>
+                        <div class="col-md-12 form-group mb-3">
+                            <label for="email">توضیحات </label>
+                            {{ form.description }}
+                        </div>
 
-                    <div class="form-group mb-3">
-                        {{ form.description.label_tag }}
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                            <div class="text-danger">{{ form.description.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
-                        <button type="submit" class="btn btn-primary">ذخیره کردن</button>
+                        <!-- Submit Buttons -->
+                        <div class="col-12 modal-footer">
+                            <input type="hidden" name="form_type" value="class">
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
+                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker3').datepicker({});
+    });
+</script>
+
 
 </div>
 {% endblock %}

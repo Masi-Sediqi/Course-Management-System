@@ -22,8 +22,16 @@ class Teacher(models.Model):
 class TeacherPaidSalary(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True)
     date = models.CharField(max_length=14, blank=False)
+    amount_of_fees_bell = models.IntegerField()
     amount = models.FloatField()
-    description = models.TextField()
+    paid_salary = models.FloatField()
+    remain_salary = models.FloatField(default=0)
+    description = models.TextField(blank=True)
+
+class TeacherRemainMoney(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    total_amount = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class TeacherLoan(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)

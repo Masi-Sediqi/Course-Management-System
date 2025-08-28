@@ -42,11 +42,17 @@ class TeacherPaidSalaryForm(forms.ModelForm):
 
     class Meta:
         model = TeacherPaidSalary
-        fields = ["amount","date","description"]
+        fields = ["amount","date","description","amount_of_fees_bell","paid_salary"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["amount"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["amount_of_fees_bell"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["paid_salary"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["description"].widget.attrs.update(

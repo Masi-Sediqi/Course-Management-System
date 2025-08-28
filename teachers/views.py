@@ -4,6 +4,7 @@ from .models import *
 from students.models import *
 from django.contrib import messages
 from django.http import HttpResponse
+from django.db.models import Sum
 # Create your views here.
 
 
@@ -67,8 +68,16 @@ def edit_teacher(request, id):
 
 def teacher_detail(request, id):
     teacher = Teacher.objects.get(id=id)
-    total_students = Student.objects.filter(teacher=teacher)
-    total_students_count = Student.objects.filter(teacher=teacher).count()
+    total_students = 0
+    try:
+        total_students = Student.objects.filter(teacher=teacher)
+    except Exception:
+        total_students = 0
+    try:
+        total_students_count = Student.objects.filter(teacher=teacher).count()
+    except Exception:
+        total_students_count = 0
+
     total_loan_amount = TeacherTotalLoan.objects.filter(teacher=teacher).last()
     return render(request, 'teachers/teacher-detail.html', 
     {'teacher':teacher,'total_students':total_students,'total_students_count':total_students_count,'total_loan_amount':total_loan_amount})
@@ -79,19 +88,47 @@ def teacher_paid_salary(request,id):
     if request.method == "POST":
         form = TeacherPaidSalaryForm(request.POST)
         if form.is_valid():
+            get_amount = form.cleaned_data.get('amount')
+            get_paid_amount = form.cleaned_data.get('paid_salary')
+
+            if get_paid_amount > get_amount:
+                messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود.')
+                return redirect(referer)
+            # Calculate remain if any
+            substracktion = 0
+            if get_paid_amount < get_amount:
+                substracktion = get_amount - get_paid_amount
+
             instance = form.save()
+            instance.remain_salary = substracktion
             instance.teacher = teacher
             instance.save()
+
+            # Handle TeacherRemainMoney (one record per teacher)
+            if substracktion > 0:
+                remain_obj, created = TeacherRemainMoney.objects.get_or_create(
+                    teacher=teacher,
+                    defaults={'total_amount': substracktion}
+                )
+                if not created:  
+                    # If already exists, add to it
+                    remain_obj.total_amount += substracktion
+                    remain_obj.save()
             return redirect(referer)
     else:
         form = TeacherPaidSalaryForm()
     
     paid_records = TeacherPaidSalary.objects.filter(teacher=teacher)
+        # Collect total remain salary
+    total_remain_salary = TeacherPaidSalary.objects.aggregate(
+        total=Sum('remain_salary')
+    )['total'] or 0
 
     context = {
         'teacher':teacher,
         'paid_records':paid_records,
         'form':form,
+        'total_remain_salary':total_remain_salary,
     }
     return render(request, 'teachers/teacher-paid-salary.html', context)
 

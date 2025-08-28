@@ -19,12 +19,9 @@
                 <div class="card-body">
                     {% for note in notifications %}
                     <div class="alert mb-3 
-                        {% if note.type == 'danger' %} 
-                            alert-danger
-                        {% elif note.type == 'warning' %} 
-                            alert-warning
-                        {% else %} 
-                            alert-success
+                        {% if note.type == 'danger' %}alert-danger
+                        {% elif note.type == 'warning' %}alert-warning
+                        {% else %}alert-success
                         {% endif %}">
                         
                         <div class="d-flex">
@@ -38,30 +35,42 @@
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <p class="mb-1">
-                                    <span class="fw-medium">صنف:</span> 
-                                    <span class="fw-bold">{{ note.name }}</span>
-                                </p>
-                                <p class="mb-2">
-                                    <span class="fw-medium">تاریخ آغاز:</span> 
-                                    <span class="text-primary">{{ note.start_date }}</span>
-                                </p>
                                 
-                                {% if note.type == "danger" %}
-                                    <p class="mb-0 fw-bold">❌ صنف امروز ختم شد!</p>
-                                {% elif note.type == "warning" %}
-                                    <p class="mb-0 fw-bold">
-                                        ⚠️ فقط <span class="fw-bold">{{ note.remaining }}</span> روز مطابق تاریخ ختم باقی مانده است!
+                                {% if note.source == "student" %}
+                                    <p class="mb-1">
+                                        <span class="fw-medium">شاگرد:</span>
+                                        <span class="fw-bold"><a href="">
+                                            {{ note.name }}
+                                        </a></span>
                                     </p>
-                                {% elif note.type == "info" %}
-                                    <p class="mb-0">
-                                        ✅ <span class="fw-bold">{{ note.remaining }}</span> روز مطابق تاریخ ختم باقی مانده است.
+                                    <p class="mb-1">
+                                        <span class="fw-medium">📞 شماره تماس:</span>
+                                        <span class="text-dark">{{ note.phone|default:"-" }}</span>
                                     </p>
+                                    <p class="mb-0 fw-bold text-danger">📢 امروز باید برای ایجاد صنف حاضر شود!</p>
+                                
+                                {% elif note.source == "class" %}
+                                    <p class="mb-1">
+                                        <span class="fw-medium">صنف:</span> 
+                                        <span class="fw-bold">{{ note.name }}</span>
+                                    </p>
+                                    <p class="mb-2">
+                                        <span class="fw-medium">تاریخ آغاز:</span> 
+                                        <span class="text-primary">{{ note.start_date }}</span>
+                                    </p>
+                                    {% if note.type == "danger" %}
+                                        <p class="mb-0 fw-bold">❌ صنف امروز ختم شد!</p>
+                                    {% elif note.type == "warning" %}
+                                        <p class="mb-0 fw-bold">
+                                            ⚠️ فقط <span class="fw-bold">{{ note.remaining }}</span> روز مطابق تاریخ ختم باقی مانده است!
+                                        </p>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                     {% endfor %}
+                    
                 </div>
             </div>
             {% else %}
@@ -73,7 +82,6 @@
         </div>
     </div>
 </div>
-
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
