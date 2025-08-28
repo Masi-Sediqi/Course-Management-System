@@ -42,3 +42,41 @@ class TeacherLoan(models.Model):
 class TeacherTotalLoan(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     total_loan_amount = models.FloatField()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Attendance_and_Leaves(models.Model):
+
+    leve_mont_choces = [
+        ('حمل', 'حمل'),
+        ('ثور', 'ثور'),
+        ('جوزا', 'جوزا'),
+        ('سرطان', 'سرطان'),
+        ('اسد', 'اسد'),
+        ('سنبله', 'سنبله'),
+        ('میزان', 'میزان'),
+        ('عقرب', 'عقرب'),
+        ('قوس', 'قوس'),
+        ('جدی', 'جدی'),
+        ('دلو', 'دلو'),
+        ('حوت', 'حوت'),   
+    ]
+    Teacher_id = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    start_date = models.CharField(max_length=10, blank=False)  # Store the Jalali start date (e.g., "28/02/1404")
+    end_date = models.CharField(max_length=10)
+    leave_days = models.IntegerField(blank=False)
+    description = models.TextField(blank=True)
+   
+    def __str__(self):
+        return f"{self.Teacher_id.name} - {self.start_date} - {self.leave_days} days"

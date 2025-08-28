@@ -169,3 +169,44 @@ def teacher_loan(request, id):
 
 def teacher_leave_day(request,id):
     return render()
+
+
+
+
+
+
+
+
+
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Attendance_and_Leaves, Teacher
+from .forms import Attendance_and_LeavesForm
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Attendance_and_Leaves, Teacher
+from .forms import Attendance_and_LeavesForm
+
+def add_attendance(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+
+    if request.method == "POST":
+        form = Attendance_and_LeavesForm(request.POST)
+        if form.is_valid():
+            attendance = form.save(commit=False)
+            attendance.Teacher_id = teacher  # set teacher manually
+            attendance.save()
+            return redirect("teachers:add_attendance", teacher_id=teacher.id)
+    else:
+        form = Attendance_and_LeavesForm()
+
+    # Query all attendance records for this teacher
+    records = Attendance_and_Leaves.objects.filter(Teacher_id=teacher).order_by('-start_date')
+
+    return render(
+        request,
+        "teachers/add_attendance.html",
+        {"form": form, "teacher": teacher, "records": records}  # pass records to template
+    )

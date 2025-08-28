@@ -12,4 +12,5 @@ urlpatterns = [
     path('teacher/detail/<int:id>/', views.teacher_detail, name="teacher_detail"),
     path('teacher/paid/salary/<int:id>/', views.teacher_paid_salary, name="teacher_paid_salary"),
     path('teacher/loan/request/<int:id>/', views.teacher_loan, name="teacher_loan"),
+    path("teachers/<int:teacher_id>/attendance/add/", views.add_attendance, name="add_attendance"),
 ]

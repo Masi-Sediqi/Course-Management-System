@@ -105,7 +105,3 @@ def delete_sub_class(request, pk):
     messages.success(request, "صنف موفقانه حذف شد")
     return redirect('classes:main_classes')
 
-
-
-
-

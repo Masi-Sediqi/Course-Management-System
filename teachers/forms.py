@@ -74,3 +74,68 @@ class TeacherLoanForm(forms.ModelForm):
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
+
+
+
+
+
+
+
+from django import forms
+from .models import Attendance_and_Leaves
+from django import forms
+
+from jalali_date.widgets import AdminJalaliDateWidget  # make sure you have django-jalali installed
+
+class Attendance_and_LeavesForm(forms.ModelForm):
+    # Custom Jalali date widget for start_date
+    start_date = forms.CharField(
+        label='تاریخ شروع',
+        widget=AdminJalaliDateWidget(
+            attrs={
+                "placeholder": "0/0/0000",
+                "id": "datepicker9",
+                "class": "form-control"
+            }
+        )
+    )
+
+    end_date = forms.CharField(
+        label='تاریخ پایان',
+        widget=AdminJalaliDateWidget(
+            attrs={
+                "placeholder": "0/0/0000",
+                "id": "datepicker10",
+                "class": "form-control"
+            }
+        )
+    )
+
+    class Meta:
+        model = Attendance_and_Leaves
+        fields = [
+            "start_date",
+            "end_date",
+            "leave_days",
+            "description",
+
+
+
+
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add Bootstrap classes and placeholders to fields
+        self.fields['leave_days'].widget.attrs.update(
+            {'class': 'form-control', 'placeholder': 'تعداد روزهای رخصتی'}
+        )
+        self.fields['description'].widget.attrs.update(
+            {'class': 'form-control', 'placeholder': 'توضیحات'}
+        )
+
+        
+
+
+
