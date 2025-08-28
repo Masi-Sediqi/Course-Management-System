@@ -124,6 +124,7 @@
                                 <th>روزهای رخصتی</th>
                                 <th>توضیحات</th>
                                 <th>عملیات</th>
+                               
                             </tr>
                         </thead>
                         <tbody id="table-body">
@@ -132,8 +133,9 @@
                                 <td>{{ record.id }}</td>
                                 <td>{{ record.start_date }}</td>
                                 <td>{{ record.end_date }}</td>
-                                <td>{{ record.leave_days }}</td>
+                                <td>{{ record.days }}</td>
                                 <td>{{ record.description|slice:":30" }}{% if record.description|length > 30 %}...{% endif %}</td>
+                               
                                 <td>
                                     <!-- Actions like edit/delete buttons go here -->
                                     <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
@@ -185,20 +187,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="id_leave_days">تعداد روزهای رخصتی</label>
-                            {{ form.leave_days }}
-                            {% if form.leave_days.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ form.leave_days.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                  
-                    </div>
+
                     <div class="form-row">
                         <div class="col-md-12 mb-3">
                             <label for="id_description">توضیحات</label>

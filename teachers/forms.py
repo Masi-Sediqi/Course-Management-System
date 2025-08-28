@@ -116,7 +116,7 @@ class Attendance_and_LeavesForm(forms.ModelForm):
         fields = [
             "start_date",
             "end_date",
-            "leave_days",
+            
             "description",
 
 
@@ -127,10 +127,7 @@ class Attendance_and_LeavesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Add Bootstrap classes and placeholders to fields
-        self.fields['leave_days'].widget.attrs.update(
-            {'class': 'form-control', 'placeholder': 'تعداد روزهای رخصتی'}
-        )
+
         self.fields['description'].widget.attrs.update(
             {'class': 'form-control', 'placeholder': 'توضیحات'}
         )
