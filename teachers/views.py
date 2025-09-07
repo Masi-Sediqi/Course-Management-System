@@ -251,3 +251,57 @@ def teacher_paid_remain_money(request, id):
         'remain_money':remain_money,
     }
     return render(request, 'teachers/teahcer-paid-remain-money.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+import jdatetime
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Teacher, Attendance_and_Leaves
+from .forms import Attendance_and_LeavesForm
+
+def add_attendance(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+
+    if request.method == "POST":
+        form = Attendance_and_LeavesForm(request.POST)
+        if form.is_valid():
+            attendance = form.save(commit=False)
+            attendance.Teacher_id = teacher  # set teacher manually
+            attendance.save()
+            return redirect("teachers:add_attendance", teacher_id=teacher.id)
+    else:
+        form = Attendance_and_LeavesForm()
+
+    # Query all attendance records for this teacher
+    records = Attendance_and_Leaves.objects.filter(Teacher_id=teacher).order_by('-start_date')
+
+    # Add a 'days' attribute to each record
+    for r in records:
+        try:
+            # Parse DD/MM/YYYY format
+            start_parts = [int(x) for x in r.start_date.split('/')]
+            end_parts = [int(x) for x in r.end_date.split('/')]
+            start_jdate = jdatetime.date(start_parts[2], start_parts[1], start_parts[0])
+            end_jdate = jdatetime.date(end_parts[2], end_parts[1], end_parts[0])
+            r.days = (end_jdate.togregorian() - start_jdate.togregorian()).days
+        except Exception:
+            r.days = 0
+
+    return render(
+        request,
+        "teachers/add_attendance.html",
+        {
+            "form": form,
+            "teacher": teacher,
+            "records": records  # each record now has a 'days' attribute
+        }
+    )
