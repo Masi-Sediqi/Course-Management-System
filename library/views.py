@@ -54,6 +54,22 @@ def library_view(request):
         else:
             form = StationeryItemForm(request.POST)
             if form.is_valid():
+
+                get_number_of_book_field = float(request.POST.get('number_of_stationery') or 0)
+                get_price_field = float(request.POST.get('price') or 0)
+                get_paid_price_field = float(request.POST.get('paid_price') or 0)
+
+                multiplication = get_number_of_book_field * get_price_field
+                if get_paid_price_field < multiplication:
+                    messages.warning(request, 'مقدار پرداخت شده کمتر از مقدار است که باید پرداخت شود')
+                    return redirect(referer)
+                # subtraction_paid_price_collection = multiplication - get_paid_price_field
+
+                with transaction.atomic():
+                    # TotalExpenses
+                    find_expenses_pk, created = TotalExpenses.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+                    find_expenses_pk.total_amount += get_paid_price_field
+                    find_expenses_pk.save()
                 form.save()
                 messages.success(request, "قرطاسیه جدید ذخیره شد ")
                 form = StationeryItemForm()  # Reset after saving

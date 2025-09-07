@@ -31,7 +31,7 @@
                 </button>
                 <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
                     data-target="#exampleModal1">
-                    مصرف جدید
+                    خرید قرطاسیه
                 </button>
         
             </div>
@@ -230,44 +230,12 @@
                         aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'management:Total_income' %}" method="POST">
+                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:buy_book' student.id %}" method="POST">
                     {% csrf_token %}
                     <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom01">تاریخ</label>
-                            {{ x_form.date }}
-                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
-                            <div class="valid-feedback">
-
-                            </div>
-                        </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker12').datepicker({
-                            
-                                });
-                            });
-                        </script>
-                       
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom02">مقدار</label>
-                            {{ x_form.amount }}
-                            <div class="valid-feedback">
-
-                            </div>
-                        </div>
+                      
                     </div>
                 
-                    <div class="form-row">
-        
-                        <div class="col-md-12 mb-3">
-                            <label for="validationCustom03">تفصیل</label>
-                            {{ x_form.description }}
-                            <div class="invalid-feedback">
-
-                            </div>
-                        </div>
-                    </div>
                     <input type="hidden" name="form_type" value="expense">
                     <button class="btn btn-primary" type="submit">ذخیره کردن</button>
                 </form>

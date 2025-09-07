@@ -5,8 +5,6 @@
     <div class="main-content pt-4">
         <div class="row">
             <div class="col-md-12">
-                <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
             
                     <script>
                         {% if messages %}
@@ -30,7 +28,10 @@
                 <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
                     <li class="nav-item"><a class="nav-link active" id="invoice-tab" data-toggle="tab" href="#invoice" role="tab" aria-controls="invoice" aria-selected="true">
                         <button class="btn btn-dark ripple m-1" type="button"  data-toggle="modal"
-                        data-target="#exampleModal">پرداخت جدید</button>
+                        data-target="#exampleModal">ماش جدید</button>
+                    </a></li>
+                    <li class="nav-item"><a href="{% url 'teachers:teacher_paid_remain_money' teacher.id %}" class="nav-link">
+                        <button class="btn btn-dark ripple m-1">پرداخت ها</button>
                     </a></li>
             
                 </ul>
@@ -72,7 +73,7 @@
                                     <tfoot>
                                         <tr>
                                             <td colspan="5" class="text-right font-weight-bold">مجموع مقدار باقی مانده:</td>
-                                            <td><span class="badge badge-danger">{{ total_remain_salary }}</span></td>
+                                            <td><span class="badge badge-danger">{{ total_remain_salary.total_amount }}</span></td>
                                             <td></td>
                                         </tr>
                                     </tfoot>
@@ -110,14 +111,44 @@
                             <label for="firstName1"> تعداد فیس بل<span style="color: red;">*</span></label>
                             {{ form.amount_of_fees_bell }}
                         </div>
+                  
                         <div class="col-md-3 form-group mb-3">
-                            <label for="firstName1"> مقدار<span style="color: red;">*</span></label>
+                            <label for="id_amount"> مقدار<span style="color: red;">*</span></label>
                             {{ form.amount }}
                         </div>
+                        
+                        {% if total_teacher_loan.total_loan_amount > 0 %}
                         <div class="col-md-3 form-group mb-3">
-                            <label for="firstName1"> مقدار برای پرداخت<span style="color: red;">*</span></label>
+                            <label for="loan_amount"> مقدار قرض<span style="color: red;">*</span></label>
+                            <input type="number" id="loan_amount" name="loan_amount"
+                                   value="{{ total_teacher_loan.total_loan_amount }}" class="form-control">
+                        </div>
+                        {% endif %}
+                        
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="id_paid_salary"> مقدار برای پرداخت<span style="color: red;">*</span></label>
                             {{ form.paid_salary }}
                         </div>
+                        
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                const amountInput = document.getElementById("id_amount");
+                                const loanInput = document.getElementById("loan_amount");
+                                const paidSalaryInput = document.getElementById("id_paid_salary");
+                        
+                                function calculatePaidSalary() {
+                                    let amount = parseFloat(amountInput.value) || 0;
+                                    let loan = parseFloat(loanInput?.value) || 0;
+                                    let result = amount - loan;
+                        
+                                    paidSalaryInput.value = result >= 0 ? result : 0; // don’t allow negative
+                                }
+                        
+                                amountInput.addEventListener("input", calculatePaidSalary);
+                                if (loanInput) loanInput.addEventListener("input", calculatePaidSalary);
+                            });
+                        </script>
+                        
                         <div class="col-md-12 form-group mb-3">
                             <label for="email">توضیحات </label>
                             {{ form.description }}

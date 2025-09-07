@@ -56,8 +56,7 @@
                             <tr>
                               <th scope="col">#</th>
                               <th scope="col">نام کامل</th>
-                              <th scope="col">سال تولد</th>
-                              <th scope="col">مضمون</th>
+                      
                               <th scope="col">جنسیت</th>
                               <th scope="col">شماره تماس</th>
                         
@@ -71,9 +70,8 @@
                             {% for i in teachers %}
                               <tr>
                                 <th scope="row">{{ i.id }}</th>
-                                <td>{{ i.name }} {{ i.last_name }}</td>
-                                <td>{{ i.birth_date }}</td>
-                                <td>{{ i.subject }}</td>
+                             <td>   <a href="{% url 'teachers:teacher_detail' i.id %}">{{ i.name }} {{ i.last_name }}</a></td>
+                        
                                 <td>{{ i.gender }}</td>
                                 <td>{{ i.phone|default:"ندارد" }}</td>
                                 <td>{{ i.percentage }}</td>

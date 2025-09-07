@@ -80,3 +80,12 @@ class BuyBook(models.Model):
     paid_amount = models.FloatField(blank=False)
     remain_amount = models.FloatField(default=0)
     description = models.TextField(blank=True)
+
+class BuyStationery(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True) 
+    date = models.CharField(max_length=14, blank=False)
+    stationery = models.ForeignKey(StationeryItem, on_delete=models.CASCADE)
+    number_of_stationery = models.IntegerField(default=1)
+    paid_amount = models.FloatField(blank=False)
+    remain_amount = models.FloatField(default=0)
+    description = models.TextField(blank=True)

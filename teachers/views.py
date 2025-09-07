@@ -68,6 +68,14 @@ def edit_teacher(request, id):
 
 def teacher_detail(request, id):
     teacher = Teacher.objects.get(id=id)
+    try:
+        get_total_remain_money = TeacherRemainMoney.objects.get(teacher=teacher)
+    except TeacherRemainMoney.DoesNotExist:
+        get_total_remain_money = None   # or 0 if you want numeric
+    try:
+        total_paid_amount_for_teacher = TotalPaidMoneyForTeacher.objects.get(teacher=teacher)
+    except TotalPaidMoneyForTeacher.DoesNotExist:
+        total_paid_amount_for_teacher = None   # or 0 if you want numeric
     total_students = 0
     try:
         total_students = Student.objects.filter(teacher=teacher)
@@ -80,20 +88,51 @@ def teacher_detail(request, id):
 
     total_loan_amount = TeacherTotalLoan.objects.filter(teacher=teacher).last()
     return render(request, 'teachers/teacher-detail.html', 
-    {'teacher':teacher,'total_students':total_students,'total_students_count':total_students_count,'total_loan_amount':total_loan_amount})
+    {'teacher':teacher,'total_students':total_students,'total_students_count':total_students_count,'total_loan_amount':total_loan_amount,
+            'get_total_remain_money':get_total_remain_money,'total_paid_amount_for_teacher':total_paid_amount_for_teacher})
 
 def teacher_paid_salary(request,id):
     referer = request.META.get('HTTP_REFERER', '/')
     teacher = Teacher.objects.get(id=id)
+    try:
+        total_paid_amount_for_teacher = TeacherRemainMoney.objects.get(teacher=teacher)
+    except TeacherRemainMoney.DoesNotExist:
+        total_paid_amount_for_teacher = None   # or 0 if you want numeric
+
+    try:
+        total_teacher_loan = TeacherTotalLoan.objects.get(teacher=teacher)
+    except TeacherTotalLoan.DoesNotExist:
+        total_teacher_loan = None   # or 0 if you want numeric
+
     if request.method == "POST":
         form = TeacherPaidSalaryForm(request.POST)
         if form.is_valid():
             get_amount = form.cleaned_data.get('amount')
+            get_loan_amount = float(request.POST.get('loan_amount'))
             get_paid_amount = form.cleaned_data.get('paid_salary')
 
-            if get_paid_amount > get_amount:
-                messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود.')
+            if get_loan_amount > total_teacher_loan.total_loan_amount:
+                messages.warning(request, 'مقدار قرض بیشتر از مقدار قرض است')
                 return redirect(referer)
+
+            if total_teacher_loan.total_loan_amount > 0:
+                total_teacher_loan.total_loan_amount -= get_loan_amount
+                total_teacher_loan.save()
+
+            if get_paid_amount > get_amount:
+                substracktion =  get_paid_amount - get_amount
+                checking_if_any_remain_amount_for_teacher = total_paid_amount_for_teacher.total_amount
+                if checking_if_any_remain_amount_for_teacher <= 0:
+                    messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود.')
+                    return redirect(referer)
+                else:
+                    total_paid_amount_for_teacher.total_amount -= substracktion
+                    if 0 > total_paid_amount_for_teacher.total_amount:
+                        messages.warning(request, 'مقدار باقی مانده کمتر از صفر میشود.')
+                        return redirect(referer)
+                    else:
+                        total_paid_amount_for_teacher.save()
+
             # Calculate remain if any
             substracktion = 0
             if get_paid_amount < get_amount:
@@ -114,21 +153,30 @@ def teacher_paid_salary(request,id):
                     # If already exists, add to it
                     remain_obj.total_amount += substracktion
                     remain_obj.save()
+
+                remain_obj, created = TotalPaidMoneyForTeacher.objects.get_or_create(
+                    teacher=teacher,
+                    defaults={'total_amount': get_paid_amount}
+                )
+                if not created:  
+                    # If already exists, add to it
+                    remain_obj.total_amount += get_paid_amount
+                    remain_obj.save()
             return redirect(referer)
     else:
         form = TeacherPaidSalaryForm()
     
     paid_records = TeacherPaidSalary.objects.filter(teacher=teacher)
-        # Collect total remain salary
-    total_remain_salary = TeacherPaidSalary.objects.aggregate(
-        total=Sum('remain_salary')
-    )['total'] or 0
+    # Collect total remain salary
+    total_remain_salary = TeacherRemainMoney.objects.get(teacher=teacher)
 
     context = {
         'teacher':teacher,
         'paid_records':paid_records,
         'form':form,
         'total_remain_salary':total_remain_salary,
+        'total_paid_amount_for_teacher':total_paid_amount_for_teacher,
+        'total_teacher_loan':total_teacher_loan,
     }
     return render(request, 'teachers/teacher-paid-salary.html', context)
 
@@ -169,3 +217,37 @@ def teacher_loan(request, id):
 
 def teacher_leave_day(request,id):
     return render()
+
+def teacher_paid_remain_money(request, id):
+    teacher = Teacher.objects.get(id=id)
+    try:
+        remain_money = TeacherRemainMoney.objects.get(teacher=teacher)
+    except TeacherRemainMoney.DoesNotExist:
+        pass
+
+    if request.method == "POST":
+        form = TeacherPaidRemainMoneyForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            get_amount = form.cleaned_data.get('amount')
+            get_remain_amount = remain_money.total_amount
+
+            if get_amount > get_remain_amount:
+                messages.warning(request, 'مقدار برای پرداخت بیشتر از مقدار باقی مانده است')
+                return redirect('teachers:teacher_paid_remain_money', id=teacher.id)
+            elif get_amount <= get_remain_amount:
+                remain_money.total_amount -= get_amount
+                remain_money.save()
+            instance.teacher = teacher
+            instance.save()   
+    else:
+        form = TeacherPaidRemainMoneyForm()
+    records = TeacherPaidRemainMoney.objects.filter(teacher=teacher)
+
+    context = {
+        'teacher':teacher,
+        'form':form,
+        'records':records,
+        'remain_money':remain_money,
+    }
+    return render(request, 'teachers/teahcer-paid-remain-money.html', context)

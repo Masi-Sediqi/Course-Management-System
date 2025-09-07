@@ -142,3 +142,21 @@ class BuyBookForm(forms.ModelForm):
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
+
+class BuyStationeryForm(forms.ModelForm):
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker21",'class': 'form-control' }))
+
+    class Meta:
+        model = BuyStationery
+        fields = ["date","description","paid_amount"]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["paid_amount"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["description"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )

@@ -28,7 +28,7 @@
                         <div class="card-body text-center"><i class="i-Financial"></i>
                             <div class="content">
                                 <p class="text-muted mt-2 mb-0">فیس</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">$4021</p>
+                                <p class="text-primary text-24 line-height-1 mb-2"> {{ total_paid_amount_for_teacher.total_amount }} </p>
                             </div>
                         </div>
                     </div>
@@ -43,16 +43,16 @@
                         </div>
                     </div>
                 </div>
-                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                         <div class="card-body text-center"><i class="i-Money-2"></i>
                             <div class="content">
-                                <p class="text-muted mt-2 mb-0">Expense</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">$1200</p>
+                                <p class="text-muted mt-2 mb-0"> باقی مانده</p>
+                                <p class="text-primary text-24 line-height-1 mb-2">{{get_total_remain_money.total_amount}}</p>
                             </div>
                         </div>
                     </div>
-                </div> -->
+                </div>
             </div>
             <!-- ✅ Student Image -->
             <img 
@@ -94,10 +94,6 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>مضمون</th>
-                            <td>{{ teacher.subject }}</td>
-                        </tr>
-                        <tr>
                             <th>فیصدی</th>
                             <td>{{ teacher.percentage }}%</td>
                         </tr>
@@ -129,58 +125,30 @@
                 </table>
             </div>            
 
-            <div class="text-end mt-4">
-                <a href="" class="btn btn-secondary me-2">بازگشت</a>
-                <a href="" class="btn btn-warning me-2">تغیرات</a>
-                <a href="" class="btn btn-danger"
-                   onclick="return confirm('آیا مطمئن هستید که می‌خواهید این استاد را حذف کنید؟')">حذف</a>
-                <!-- Trigger Button -->
-                <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-primary shadow-sm">
-                    <i class="fas fa-money-bill-wave"></i> پرداخت ماش
-                </a>
-                <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn btn-info shadow-sm">
-                    <i class="fas fa-money-bill-wave"></i> گرفتن قرض
-                </a>
-                <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn shadow-sm" style="color: #fff; background-color: rgb(3, 38, 93);">
-                    <i class="fas fa-credit-card"></i> درخواست رخصتی
-                </a>
-                
-
-                <!-- Style -->
-                <style>
-                    .btn-promote {
-                    background-color: #bc12f0;
-                    color: white;
-                    font-size: 1rem;
-                    border: none;
-                    border-radius: 8px;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.3s ease-in-out;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    overflow: hidden;
-                    }
-                
-                    .btn-promote:hover {
-                    background-color: #218838;
-                    transform: translateY(-4px);
-                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-                    }
-                
-                    .btn-promote .icon {
-                    opacity: 0;
-                    transform: translateY(5px);
-                    transition: all 0.3s ease-in-out;
-                    }
-                
-                    .btn-promote:hover .icon {
-                    opacity: 1;
-                    transform: translateY(0);
-                    }
-                </style>
-  
+            <div class="text-center mt-4">
+                <div class="btn-group flex-wrap" role="group">
+                    <a href="" class="btn btn-outline-secondary me-2">بازگشت</a>
+                    <a href="" class="btn btn-outline-warning me-2">تغیرات</a>
+                    <a href="" class="btn btn-outline-danger me-2"
+                       onclick="return confirm('آیا مطمئن هستید که می‌خواهید این استاد را حذف کنید؟')">
+                       حذف
+                    </a>
+                    <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-money-bill-wave"></i> پرداخت ماش
+                    </a>
+                    <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn btn-outline-info me-2">
+                        <i class="fas fa-money-bill-wave"></i> گرفتن قرض
+                    </a>
+                    <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn btn-outline-dark me-2">
+                        <i class="fas fa-credit-card"></i> درخواست رخصتی
+                    </a>
+                    
+                    <a href="{% url 'teachers:teacher_paid_remain_money' teacher.id %}" class="btn btn-outline-success me-2">
+                        <i class="fas fa-credit-card"></i> پرداخت پول باقی مانده
+                    </a>
+                </div>
             </div>
+            
         </div>
     </div>
 

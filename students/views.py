@@ -71,6 +71,16 @@ def delete_students(request, id):
     else:
         return HttpResponse('User Is Not in Detabase')
 
+def delete_students_withoutclass(request, id):
+    get_student_id = StudentWithoutClass.objects.get(id=id)
+    if get_student_id:
+        get_student_id.delete()
+        messages.success(request, 'شاگرد موفقانه ذخیره شد')
+        return redirect('students:students_registration')
+    else:
+        return HttpResponse('User Is Not in Detabase')
+
+    
 def edit_students(request, id):
     get_student_id = Student.objects.get(id=id)
     if request.method == "POST":
@@ -88,7 +98,29 @@ def edit_students(request, id):
         'get_student_id':get_student_id,
         'form':form,
     }
-    return render(request, 'students/student-edit.html', context)
+    return render(request, 'students/students-without-class.html', context)
+
+def students_edit_withoutclass(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
+    student = get_object_or_404(StudentWithoutClass, id=id)
+    if request.method == "POST":
+        form = StudentWithoutClassForm(request.POST, instance=student)
+        if form.is_valid():
+            jalali_str = form.cleaned_data.get('date_for_notification')
+            if jalali_str:
+                jalali_date = jdatetime.datetime.strptime(jalali_str, "%d/%m/%Y").date()
+                gregorian_date = jalali_date.togregorian()
+                instance = form.save(commit=False)
+                instance.jalali_to_gregorian = gregorian_date
+                instance.save()
+            else:
+                form.save()
+            messages.success(request, "معلومات شاگرد موفقانه ویرایش شد ✅")
+            return redirect(referer)
+    else:
+        form = StudentWithoutClassForm(instance=student)
+
+    return render(request, "students/student_edit_modal.html", {"form": form, "student": student})
 
 def student_bill(request, student_id, fees_id):
     get_student_fees = Student_fess_info.objects.get(id=fees_id)
@@ -212,7 +244,8 @@ def student_activate(request, student_id):
 
 def students_without_class(request):
     get_students = StudentWithoutClass.objects.all()
-    return render(request, 'students/students-without-class.html', {'get_students':get_students})
+    form = StudentWithoutClassForm()
+    return render(request, 'students/students-without-class.html', {'get_students':get_students,'form':form,})
     
 def off_students(request):
     get_students = Student.objects.filter(is_active=False)
@@ -250,7 +283,7 @@ def student_improvment(request, id):
 def buy_book(request, id):
     total_book = Books.objects.all()
     student = Student.objects.get(id=id)
-
+    allStationeryItem = StationeryItem.objects.all()
     # HTMX request to update total price
     if request.headers.get("HX-Request"):  
         book_ids = request.POST.getlist("books")
@@ -290,9 +323,34 @@ def buy_book(request, id):
                 instance.book.set(boos)
                 return redirect('students:buy_book', id=student.id)  # refresh after save
         else:
-            pass
+            buy_stationery_form = BuyStationeryForm(request.POST)
+            if buy_stationery_form.is_valid():
+                get_paid_amount = float(request.POST.get('paid_amount'))
+                book_ids = list(map(int, request.POST.getlist('stationery')))
+                total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("price"))["total"] or 0
+                subtraction = total_price - get_paid_amount
+
+                with transaction.atomic():
+                    # TotalIncome
+                    find_expenses_pk, created = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+                    find_expenses_pk.total_amount += get_paid_amount
+                    find_expenses_pk.save()
+
+                    # Total_Stationery_Loan
+                    if subtraction > 0:
+                        collect_loans, created = StudentRemailMoney.objects.get_or_create(student=student, defaults={'amount': 0})
+                        collect_loans.amount += subtraction
+                        collect_loans.save()
+            
+                instance = buy_stationery_form.save(commit=False)
+                instance.student = student
+                instance.remain_amount = subtraction
+                instance.save()
+                instance.book.set(boos)
+                return redirect('students:buy_book', id=student.id)  # refresh after save
 
     buy_book_form = BuyBookForm()
+    buy_stationery_form = BuyStationeryForm()
     buy_book_records = BuyBook.objects.filter(student=id)
 
     context = {
@@ -300,5 +358,7 @@ def buy_book(request, id):
         'buy_book_form':buy_book_form,
         'buy_book_records':buy_book_records,
         'total_book':total_book,
+        'buy_stationery_form':buy_stationery_form,
+        'allStationeryItem':allStationeryItem,
     }
     return render(request, 'students/student-buy-book.html', context)

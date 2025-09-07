@@ -9,7 +9,9 @@ class StationeryCategory(models.Model):
 class StationeryItem(models.Model):
     name = models.CharField(max_length=100, blank=False)
     category = models.ForeignKey(StationeryCategory, on_delete=models.SET_NULL, null=True)
+    number_of_stationery = models.IntegerField(blank=False)
     price = models.IntegerField(blank=False)
+    paid_price = models.FloatField()
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
