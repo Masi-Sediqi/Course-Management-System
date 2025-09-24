@@ -30,10 +30,7 @@
                                   <button class="btn btn-outline-success mr-2" type="button" data-toggle="modal" data-target=".bd-example-modal-lg">
                                       فیس جدید
                                   </button>
-                              
-                                  <button class="btn btn-outline-success" type="button" data-toggle="modal" data-target="#giveFeesModal">
-                                      جبران قرض داری
-                                  </button>
+
                               </div>                              
                             </div>
                         </div>
@@ -191,69 +188,7 @@
         });
       </script>
       
-      <div class="modal fade" id="giveFeesModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <form method="POST" action="{% url 'students:student_fees_detail' student_id=student.id %}">
-          {% csrf_token %}
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content p-3">
-              <div class="card-title h5 mb-3">بخش جبران قرض داری های شاگرد {{ student.first_name }}</div>
-              <div>
-                <div class="row">
-                  <div class="col-md-4 form-group mb-3">
-                    <label for="">تاریخ</label>
-                    {{ g_form.date }}
-                  </div>
-                  <div class="col-md-4 form-group mb-3">
-                    <label for="">مقدار باقی مانده</label>
-                    <input id="remainAmount" class="form-control" type="number" value="{{ get_remain_money.amount }}" readonly>
-                  </div>
-                  <div class="col-md-4 form-group mb-3">
-                    <label for="{{ g_form.amount.id_for_label }}">مقدار</label>
-                    {{ g_form.amount }}
-                    <div id="amount-error" class="text-danger mt-1" style="display:none;">شما نمی‌توانید مقداری بزرگ‌تر از مقدار باقی‌مانده وارد کنید!</div>
-                  </div>
-                </div>
-                
-                <script>
-                  // Get elements
-                  const remainInput = document.getElementById('remainAmount');
-                  const amountInput = document.getElementById('{{ g_form.amount.id_for_label }}');
-                  const errorDiv = document.getElementById('amount-error');
-                
-                  // Validate on input change
-                  amountInput.addEventListener('input', () => {
-                    const remainValue = parseFloat(remainInput.value) || 0;
-                    const amountValue = parseFloat(amountInput.value) || 0;
-                
-                    if (amountValue > remainValue) {
-                      errorDiv.style.display = 'block';
-                      amountInput.setCustomValidity("Invalid field.");
-                    } else {
-                      errorDiv.style.display = 'none';
-                      amountInput.setCustomValidity("");
-                    }
-                  });
-                </script>                
-      
-                <div class="col-md-12 form-group mb-3">
-                  <label for="{{ form.description.id_for_label }}">توضیحات</label>
-                  {{ g_form.description }}
-                </div>
 
-                <script>
-                  document.addEventListener('DOMContentLoaded', function () {
-                      $('#datepicker21').datepicker({});
-                  });
-              </script>
-      
-                <div class="text-end">
-                  <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
 </div>
   
 

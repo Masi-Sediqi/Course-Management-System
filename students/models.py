@@ -14,12 +14,12 @@ class Student(models.Model):
     gender = models.CharField(max_length=10, choices=[('Male', 'مرد'), ('Female', 'زن')])
     classs = models.ManyToManyField(SubClass)
     # time = models.CharField(max_length=30)
-    # teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
+    # teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=True, null=True)
     # subject = models.CharField(max_length=50)
     # books = models.ManyToManyField(Books)
     # orginal_fees = models.FloatField()  # <--- This is your فیس
     registered_at = models.DateTimeField(auto_now_add=True)
-    image = models.ImageField(upload_to="student/")
+    image = models.ImageField(upload_to="student/", blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -54,38 +54,61 @@ class Student_fess_info(models.Model):
     description = models.TextField(blank=True, null=True)
     month = models.CharField(max_length=120)
     remaining = models.FloatField(default=0)
-
-class StudentRemailMoney(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.SET_NULL, related_name="student_remains", blank=True, null=True)
-    amount = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class StudentGiveRemainMoney(models.Model):
-    studnet = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)
+    studnet = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True)
     date = models.CharField(max_length=15, blank=False)
     amount = models.FloatField(blank=False)
     description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class StudentRemailMoney(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="student_remains", blank=True, null=True)
+    amount = models.FloatField()
 
 class StudentImporvment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     date = models.CharField(max_length=14, blank=False)
-    past_book = models.ForeignKey(Books, on_delete=models.SET_NULL, null=True, related_name="books")
-    change_book = models.ForeignKey(Books, on_delete=models.SET_NULL, null=True)
+    past_book = models.ForeignKey(Books, on_delete=models.CASCADE, null=True, related_name="books")
+    change_book = models.ForeignKey(Books, on_delete=models.CASCADE, null=True)
     file = models.FileField(upload_to=f"student/", blank=True)
     description = models.TextField(blank=True)
 
 class BuyBook(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     date = models.CharField(max_length=14, blank=False)
     book = models.ManyToManyField(Books, blank=False)
+    number_of_book = models.IntegerField(default=1)
+    total_amount = models.FloatField()
     paid_amount = models.FloatField(blank=False)
     remain_amount = models.FloatField(default=0)
     description = models.TextField(blank=True)
 
-class BuyStationery(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True) 
+class BookRecord(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
+    book = models.ForeignKey(Books, on_delete=models.CASCADE)
+    buy_book = models.ForeignKey(BuyBook, on_delete=models.CASCADE)
     date = models.CharField(max_length=14, blank=False)
-    stationery = models.ForeignKey(StationeryItem, on_delete=models.CASCADE)
+    number_of_book = models.IntegerField(default=1)
+    total_amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class BuyStationery(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) 
+    date = models.CharField(max_length=14, blank=False)
+    stationery = models.ManyToManyField(StationeryItem)
     number_of_stationery = models.IntegerField(default=1)
-    paid_amount = models.FloatField(blank=False)
+    total_stationery_amount = models.FloatField()
+    paid_stationery_amount = models.FloatField(blank=False)
     remain_amount = models.FloatField(default=0)
     description = models.TextField(blank=True)
+
+class StationeryRecord(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
+    stationery = models.ForeignKey(StationeryItem, on_delete=models.CASCADE)
+    buy_stationery = models.ForeignKey(BuyStationery, on_delete=models.CASCADE)
+    date = models.CharField(max_length=14, blank=False)
+    number_of_stationery = models.IntegerField(default=1)
+    total_amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} text-center h3" style="font-family: XW_Zar_Bd_0;" role="alert">
+    {{ message }}
+</div>
+<script>
+    setTimeout(function () { $('.alert').fadeOut('slow'); }, 3000);
+</script>
+{% endfor %}
+{% endif %}
+
+<div id="layout-wrapper py-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="main-content">
+        <div class="page-content wrapper">
+            <div class="container-fluid">
+
+                <!-- Page title -->
+                <div class="row py-4">
+                    <div class="col-12">
+                        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                            <h4 class="mb-0"></h4>
+                            <div class="page-title-right">
+                           
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <div class="row justify-content-center">
+                    <div class="col-xxl-10">
+                        <div class="card">
+                            <div class="row g-0 product-list">
+
+                                <!-- Left side: Book Details -->
+                                <div class="col-xxl-9">
+                                    <div class="card-header d-flex align-items-center gap-2">
+                                        <h5 class="card-title flex-grow-1 mb-0">کتاب خریداری‌شده</h5>
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-info"> {{ student.first_name }} </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table align-middle table-nowrap table-borderless mb-0">
+                                                <thead class="table-active">
+                                                    <tr>
+                                                        <th>نام قرطاسیه</th>
+                                                        <th>قیمت</th>
+                                                        <th>تعداد</th>
+                                                        <th class="text-end">مجموع</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for stationey in buyed_stationeyies %}
+                                                    <tr class="product">
+                                                        <td>{{ stationey.stationery.name }}</td>
+                                                        <td>{{ stationey.stationery.per_price_for_buy }}</td>
+                                                        <td>{{ stationey.number_of_stationery }}</td>
+                                                        <td class="fw-medium text-end">{{ stationey.total_amount }} افغانی</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right side: Summary -->
+                                <div class="col-xxl-3">
+                                    <div class="border-start-xxl border-top-xxl-0 border-top h-100">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">خلاصه خرید</h5>
+                                        </div>
+                                        <div class="card-body mt-2">
+                                            <div class="table-responsive table-card">
+                                                <table class="table table-borderless">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="fw-semibold">مجموع کل :</td>
+                                                            <td class="text-end">{{ stationery_id.total_stationery_amount }} افغانی</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>مبلغ پرداخت‌شده :</td>
+                                                            <td class="text-end">{{ stationery_id.paid_stationery_amount }} افغانی</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>مبلغ باقی‌مانده :</td>
+                                                            <td class="text-end text-danger">{{ stationery_id.remain_amount }} افغانی</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>تاریخ خرید :</td>
+                                                            <td class="text-end">{{ stationery_id.date }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div class="text-end mt-4 d-flex flex-wrap gap-1 justify-content-end">
+                                                <a href="" class="btn btn-secondary">برگشت</a>
+                                                <a href="#" class="btn btn-primary">ویرایش</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div><!-- end row -->
+                        </div><!-- end card -->
+                    </div>
+                </div>
+
+            </div><!-- container-fluid -->
+        </div><!-- End Page-content -->
+    </div>
+</div>
+
+{% endblock %}

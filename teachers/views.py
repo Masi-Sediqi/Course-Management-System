@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from .models import *
 from students.models import *
@@ -91,104 +91,236 @@ def teacher_detail(request, id):
     {'teacher':teacher,'total_students':total_students,'total_students_count':total_students_count,'total_loan_amount':total_loan_amount,
             'get_total_remain_money':get_total_remain_money,'total_paid_amount_for_teacher':total_paid_amount_for_teacher})
 
+# def teacher_paid_salary(request,id):
+#     referer = request.META.get('HTTP_REFERER', '/')
+#     teacher = Teacher.objects.get(id=id)
+#     try:
+#         total_paid_amount_for_teacher = TeacherRemainMoney.objects.get(teacher=teacher)
+#     except TeacherRemainMoney.DoesNotExist:
+#         total_paid_amount_for_teacher = None   # or 0 if you want numeric
+
+#     try:
+#         total_teacher_loan = TeacherTotalLoan.objects.get(teacher=teacher)
+#     except TeacherTotalLoan.DoesNotExist:
+#         total_teacher_loan = None   # or 0 if you want numeric
+
+#     if request.method == "POST":
+#         form = TeacherPaidSalaryForm(request.POST)
+#         if form.is_valid():
+#             get_amount = form.cleaned_data.get('amount')
+#             get_paid_amount = form.cleaned_data.get('paid_salary')
+#             try:
+#                 get_loan_amount = float(request.POST.get('loan_amount'))
+#                 if get_loan_amount > total_teacher_loan.total_loan_amount:
+#                     messages.warning(request, 'مقدار قرض بیشتر از مقدار قرض است')
+#                     return redirect(referer)
+
+#                 if total_teacher_loan.total_loan_amount > 0:
+#                     total_teacher_loan.total_loan_amount -= get_loan_amount
+#                     total_teacher_loan.save()
+#             except:
+#                 pass
+
+#             if get_paid_amount > get_amount:
+#                 substracktion =  get_paid_amount - get_amount
+#                 checking_if_any_remain_amount_for_teacher = total_paid_amount_for_teacher.total_amount
+#                 if checking_if_any_remain_amount_for_teacher <= 0:
+#                     messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود.')
+#                     return redirect(referer)
+#                 else:
+#                     total_paid_amount_for_teacher.total_amount -= substracktion
+#                     if 0 > total_paid_amount_for_teacher.total_amount:
+#                         messages.warning(request, 'مقدار باقی مانده کمتر از صفر میشود.')
+#                         return redirect(referer)
+#                     else:
+#                         total_paid_amount_for_teacher.save()
+
+#             # Calculate remain if any
+#             substracktion = 0
+#             if get_paid_amount < get_amount:
+#                 try:
+#                     collections = get_loan_amount + get_paid_amount
+#                 except:
+#                     pass
+#                 substracktion = get_amount - get_paid_amount
+
+#             instance = form.save()
+#             instance.remain_salary = substracktion
+#             instance.teacher = teacher
+#             instance.save()
+
+#             # Handle TeacherRemainMoney (one record per teacher)
+#             if substracktion > 0:
+#                 remain_obj, created = TeacherRemainMoney.objects.get_or_create(
+#                     teacher=teacher,
+#                     defaults={'total_amount': substracktion}
+#                 )
+#                 if not created:  
+#                     # If already exists, add to it
+#                     remain_obj.total_amount += substracktion
+#                     remain_obj.save()
+
+#                 remain_obj, created = TotalPaidMoneyForTeacher.objects.get_or_create(
+#                     teacher=teacher,
+#                     defaults={'total_amount': get_paid_amount}
+#                 )
+#                 if not created:  
+#                     # If already exists, add to it
+#                     remain_obj.total_amount += get_paid_amount
+#                     remain_obj.save()
+#             return redirect(referer)
+#     else:
+#         form = TeacherPaidSalaryForm()
+    
+#     paid_records = TeacherPaidSalary.objects.filter(teacher=teacher)
+#     # Collect total remain salary
+#     try:
+#         total_remain_salary = TeacherRemainMoney.objects.get(teacher=teacher)
+#     except TeacherRemainMoney.DoesNotExist:
+#         total_remain_salary = None  # or set a fake object/value
+
+
+#     context = {
+#         'teacher':teacher,
+#         'paid_records':paid_records,
+#         'form':form,
+#         'total_remain_salary':total_remain_salary,
+#         'total_paid_amount_for_teacher':total_paid_amount_for_teacher,
+#         'total_teacher_loan':total_teacher_loan,
+#     }
+#     return render(request, 'teachers/teacher-paid-salary.html', context)
+
+
 def teacher_paid_salary(request,id):
     referer = request.META.get('HTTP_REFERER', '/')
     teacher = Teacher.objects.get(id=id)
     try:
         total_paid_amount_for_teacher = TeacherRemainMoney.objects.get(teacher=teacher)
+        total_paid_amount_for_teacher_amount = total_paid_amount_for_teacher.total_amount
     except TeacherRemainMoney.DoesNotExist:
-        total_paid_amount_for_teacher = None   # or 0 if you want numeric
+        total_paid_amount_for_teacher = None
+        total_paid_amount_for_teacher_amount = 0
 
     try:
         total_teacher_loan = TeacherTotalLoan.objects.get(teacher=teacher)
+        total_teacher_loan_amount = total_teacher_loan.total_loan_amount
     except TeacherTotalLoan.DoesNotExist:
         total_teacher_loan = None   # or 0 if you want numeric
+        total_teacher_loan_amount = 0
 
     if request.method == "POST":
         form = TeacherPaidSalaryForm(request.POST)
         if form.is_valid():
             get_amount = form.cleaned_data.get('amount')
-            get_loan_amount = float(request.POST.get('loan_amount'))
             get_paid_amount = form.cleaned_data.get('paid_salary')
+            get_loan_amount = float(request.POST.get('loan_amount', 0))  # Loan repayment part
+            get_remain_amount = float(request.POST.get('remain_amount', 0))
 
-            if get_loan_amount > total_teacher_loan.total_loan_amount:
-                messages.warning(request, 'مقدار قرض بیشتر از مقدار قرض است')
+            # Collect Remain Amounts 
+
+            sub_paid_with_amount = get_amount - get_paid_amount
+
+            # if remain amount was big than total remain money 
+
+            if get_remain_amount > total_paid_amount_for_teacher_amount:
+                messages.warning(request, 'مقدار پرداخت برای مقدار باقی مانده بیشتر از مقدار باقی مانده است')
                 return redirect(referer)
 
-            if total_teacher_loan.total_loan_amount > 0:
-                total_teacher_loan.total_loan_amount -= get_loan_amount
+            # when course was قرضدار from teacher
+
+            if total_paid_amount_for_teacher_amount > 0:
+                total_paid_amount_for_teacher.total_amount -= get_remain_amount
+                if total_paid_amount_for_teacher.total_amount < 0:
+                    total_paid_amount_for_teacher.total_amount = 0
+                total_paid_amount_for_teacher.save()
+ 
+            # when loan amount was big than total loan amount 
+
+            if get_loan_amount > total_teacher_loan_amount:
+                messages.warning(request, 'مقدار پرداخت قرضی بیشتر از مقدار قرض است')
+                return redirect(referer)
+
+            # paid salary with loan amount
+
+            if total_teacher_loan_amount > 0:
+                total_teacher_loan_amount -= get_loan_amount
+                collect_paid_amount_with_loan_amount = get_paid_amount + get_loan_amount
+                sub_salary_with_coll = get_amount - collect_paid_amount_with_loan_amount
+                total_teacher_loan.total_loan_amount = total_teacher_loan_amount
                 total_teacher_loan.save()
 
-            if get_paid_amount > get_amount:
-                substracktion =  get_paid_amount - get_amount
-                checking_if_any_remain_amount_for_teacher = total_paid_amount_for_teacher.total_amount
-                if checking_if_any_remain_amount_for_teacher <= 0:
-                    messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود.')
-                    return redirect(referer)
-                else:
-                    total_paid_amount_for_teacher.total_amount -= substracktion
-                    if 0 > total_paid_amount_for_teacher.total_amount:
-                        messages.warning(request, 'مقدار باقی مانده کمتر از صفر میشود.')
-                        return redirect(referer)
-                    else:
-                        total_paid_amount_for_teacher.save()
-
-            # Calculate remain if any
-            substracktion = 0
-            if get_paid_amount < get_amount:
-                substracktion = get_amount - get_paid_amount
-
-            instance = form.save()
-            instance.remain_salary = substracktion
+            instance = form.save(commit=False)
+            instance.remain_salary = sub_paid_with_amount
             instance.teacher = teacher
             instance.save()
+            if get_loan_amount:
+                sub_paid_with_amount = sub_salary_with_coll 
 
-            # Handle TeacherRemainMoney (one record per teacher)
-            if substracktion > 0:
-                remain_obj, created = TeacherRemainMoney.objects.get_or_create(
-                    teacher=teacher,
-                    defaults={'total_amount': substracktion}
-                )
-                if not created:  
-                    # If already exists, add to it
-                    remain_obj.total_amount += substracktion
-                    remain_obj.save()
+            remain_obj, created = TeacherRemainMoney.objects.get_or_create(
+                teacher=teacher,
+                defaults={'total_amount': sub_paid_with_amount}
+            )
+            if not created:  
+                # If already exists, add to it
+                remain_obj.total_amount += sub_paid_with_amount
+                remain_obj.save()
 
-                remain_obj, created = TotalPaidMoneyForTeacher.objects.get_or_create(
-                    teacher=teacher,
-                    defaults={'total_amount': get_paid_amount}
-                )
-                if not created:  
-                    # If already exists, add to it
-                    remain_obj.total_amount += get_paid_amount
-                    remain_obj.save()
-            return redirect(referer)
+            total_paid, created = TotalPaidMoneyForTeacher.objects.get_or_create(
+                teacher=teacher,
+                defaults={'total_amount': get_paid_amount}
+            )
+            if not created:  
+                # If already exists, add to it
+                total_paid.total_amount += get_paid_amount
+                total_paid.save()
+
     else:
         form = TeacherPaidSalaryForm()
-    
     paid_records = TeacherPaidSalary.objects.filter(teacher=teacher)
-    # Collect total remain salary
-    total_remain_salary = TeacherRemainMoney.objects.get(teacher=teacher)
 
     context = {
-        'teacher':teacher,
-        'paid_records':paid_records,
-        'form':form,
-        'total_remain_salary':total_remain_salary,
-        'total_paid_amount_for_teacher':total_paid_amount_for_teacher,
         'total_teacher_loan':total_teacher_loan,
+        'total_paid_amount_for_teacher':total_paid_amount_for_teacher,
+        'teacher':teacher,
+        'form':form,
+        'paid_records':paid_records,
     }
     return render(request, 'teachers/teacher-paid-salary.html', context)
+
+
+
+
 
 
 def teacher_loan(request, id):
     referer = request.META.get('HTTP_REFERER', '/')
     teacher = Teacher.objects.get(id=id)
+    try:
+        total_remain_money = TeacherRemainMoney.objects.get(teacher=teacher)
+        total_remain_amount = total_remain_money.total_amount
+    except TeacherRemainMoney.DoesNotExist:
+        total_remain_money = None
+        total_remain_amount = 0
+
     if request.method == "POST":
         form = TeacherLoanForm(request.POST)
         if form.is_valid():
-            get_amount_str = request.POST.get('amount')
-            get_amount = int(get_amount_str)
+            get_amount_str = request.POST.get('amount' ,0)
+            get_amount_float = float(get_amount_str or 0)
+
+            subtrack = get_amount_float  # default: full loan amount
+
+            if total_remain_amount > 0:
+                subtrack = float(get_amount_str) - total_remain_money.total_amount or 0
+                col_remaun_money = total_remain_money.total_amount - float(get_amount_str)
+                
+                total_remain_money.total_amount = col_remaun_money
+                if col_remaun_money < 0:
+                    total_remain_money.total_amount = 0
+                
+                total_remain_money.save()
+                    
+            get_amount = int(subtrack)
             instance = form.save(commit=False)
             instance.teacher = teacher
             instance.save()
@@ -212,6 +344,7 @@ def teacher_loan(request, id):
        'teacher':teacher, 
        'form':form, 
        'records':records, 
+       'total_remain_money':total_remain_money, 
     }
     return render(request, 'teachers/loan-page.html', context)
 
@@ -223,7 +356,7 @@ def teacher_paid_remain_money(request, id):
     try:
         remain_money = TeacherRemainMoney.objects.get(teacher=teacher)
     except TeacherRemainMoney.DoesNotExist:
-        pass
+        remain_money = None
 
     if request.method == "POST":
         form = TeacherPaidRemainMoneyForm(request.POST)
@@ -255,18 +388,6 @@ def teacher_paid_remain_money(request, id):
 
 
 
-
-
-
-
-
-
-
-
-import jdatetime
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Teacher, Attendance_and_Leaves
-from .forms import Attendance_and_LeavesForm
 
 def add_attendance(request, teacher_id):
     teacher = get_object_or_404(Teacher, id=teacher_id)

@@ -40,10 +40,7 @@
                 <li class="nav-item">
                     <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">کتابها</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">قرطاسیه</a>
-                </li>
-               
+
             </ul>
     
             <!-- Tabs Content -->
@@ -59,7 +56,9 @@
                                 <tr>
                                     <th>#</th>
                                     <th>تاریخ</th>
-                                    <th>کتاب</th>
+                                    <th>خرید</th>
+                                    <th>تعداد</th>
+                                    <th>مقدار مجموعی</th>
                                     <th>مقدار پرداخت شده</th>
                                     <th>مقدار باقی مانده</th>
                                     <th>توضیحات</th>
@@ -67,59 +66,37 @@
                                 </tr>
                             </thead>
                             <tbody id="table-body">
-                                {% for i in buy_book_records %}
+                                {% for i in all_records %}
                                 <tr>
                                     <td>{{ i.id }}</td>
                                     <td>{{ i.date }}</td>
+                                    <td>{{ i.type }}</td>
                                     <td>
-                                        {% for b in i.book.all %}
-                                            <span class="badge bg-primary">{{ b.name }}</span>{% if not forloop.last %} + {% endif %}
+                                        {% for name in i.names %}
+                                            <span class="badge bg-primary">{{ name }}</span>{% if not forloop.last %} + {% endif %}
                                         {% endfor %}
-                                    </td>                                    
-                                    <td>{{ i.paid_amount }}</td>
-                                    <td>{{ i.remain_amount }}</td>
+                                    </td>
+                                    <td>{{ i.total }}</td>
+                                    <td>{{ i.paid }}</td>
+                                    <td>{{ i.remain }}</td>
                                     <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                                     <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
-                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
-                    </div>
-                </div>
-    
-                <!-- Tab 2: Extra Content -->
-                <div class="tab-pane fade" id="extra" role="tabpanel">
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>تاریخ</th>
-                                    <th>مقدار</th>
-                                    <th>توضیحات</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                {% for i in get_total_expens %}
-                                <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>{{ i.date }}</td>
-                                    <td>{{ i.amount }}</td>
-                                    <td>{{ i.description }}</td>
-                                    <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
-                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
-                                    </td>
+                                        <div class="dropdown">
+                                          <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                          </button>
+                                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
+                                            {% if i.type == "کتاب" %}
+                                            <a class="dropdown-item text-info" href="{{ i.more_info }}">معلومات کامل</a>
+                                            {% else %}
+                                            <a class="dropdown-item text-info" href="{{ i.more_info_stationery }}">معلومات کامل</a>
+                                            {% endif %}
+                                            <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">تغیرات</a>
+                                            <a class="dropdown-item text-info" href="{% url 'students:edit_students' i.id %}">حذف</a>
+                                        </div>
+                                        </div>
+                                      </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -146,74 +123,126 @@
                         aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:buy_book' student.id %}" method="POST">
+                <form class="needs-validation" novalidate action="{% url 'students:buy_book' student.id %}" method="POST">
                     {% csrf_token %}
-                    <div class="form-row">
-                        <div class="col-md-4 mb-3">
-                            <label for="validationCustom01">تاریخ</label>
-                            {{ buy_book_form.date }}
-                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
-                            <div class="valid-feedback">
-
+                
+                    <!-- Main fields (date, money, description) -->
+                    <div class="card shadow-sm rounded-3 mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">جزئیات خرید</h5>
+                
+                            <div class="row g-3">
+                                <!-- تاریخ -->
+                                <div class="col-md-6">
+                                    <label for="datepicker21" class="form-label">تاریخ</label>
+                                    {{ buy_book_form.date }}
+                                </div><script> document.addEventListener('DOMContentLoaded', function () { $('#datepicker21').datepicker({ }); }); </script>
+                
+                                <div class="col-md-6">
+                                    <label for="paid_amount" class="form-label">مقدار پول</label>
+                                    {{ buy_book_form.paid_amount }}
+                                </div>
+                                
+                                <div class="p-2 border rounded" style="max-height: 220px; overflow-y: auto;">
+                                    {% for tb in total_book %}
+                                        <div class="form-check d-flex align-items-center mb-2">
+                                            <input 
+                                                class="form-check-input book-checkbox" 
+                                                type="checkbox" 
+                                                name="books" 
+                                                value="{{ tb.id }}" 
+                                                data-price="{{ tb.book.per_book_price_for_buy }}"
+                                                id="book{{ tb.id }}">
+                                            
+                                            <label class="form-check-label ms-2 flex-grow-1" for="book{{ tb.id }}" style="padding-right: 20px;">
+                                                {{ tb.book.name }}
+                                                <span class="badge bg-secondary">موجودی: {{ tb.total_amount }}</span>
+                                                <span class="badge bg-info">قیمت: {{ tb.book.per_book_price_for_buy }}</span>
+                                            </label>
+                                
+                                            <input 
+                                                type="number" 
+                                                name="quantity_{{ tb.id }}" 
+                                                class="form-control form-control-sm d-none book-qty" 
+                                                min="1" 
+                                                max="{{ tb.total_amount }}" 
+                                                value="1" 
+                                                style="width: 90px;">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <strong>مجموع قیمت: <span id="totalPrice">0</span> افغانی</strong><br>
+                                    <strong>مبلغ باقی مانده: <span id="remainAmount">0</span> افغانی</strong>
+                                </div>
+                                <!-- توضیحات -->
+                                <div class="col-md-12">
+                                    <label for="description" class="form-label">تفصیل</label>
+                                    {{ buy_book_form.description }}
+                                </div>
                             </div>
                         </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker21').datepicker({
-                            
-                                });
-                            });
-                        </script>
-                       
-                       <div class="col-md-4 mb-3">
-                        <label for="validationCustom02">کتاب</label>
-                        <div class="p-2 border rounded" style="max-height: 200px; overflow-y: auto;">
-                            {% for book in total_book %}
-                                <div class="form-check" style="display: flex; align-items: center;">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="checkbox" 
-                                        name="books" 
-                                        value="{{ book.id }}" 
-                                        id="book{{ book.id }}"
-                                        hx-post="{% url 'students:buy_book' student.id %}" 
-                                        hx-trigger="change" 
-                                        hx-target="#books-price" 
-                                        hx-include="[name='books']"
-                                    >
-                                    <label class="form-check-label ms-1" for="book{{ book.id }}" style="margin-right: 21px;">
-                                        {{ book.name }}
-                                    </label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="validationCustom03">مقدار پول</label>
-                        {{ buy_book_form.paid_amount }}
-                        <div class="invalid-feedback">
-
-                        </div>
-                    </div>
-                    
-                    <!-- Total price output -->
-                    <div id="books-price" class="mt-2" style="max-width: 250px;"></div>                    
-                    
                     </div>
                 
-                    <div class="form-row">
-        
-                        <div class="col-md-12 mb-3">
-                            <label for="validationCustom03">تفصیل</label>
-                            {{ buy_book_form.description }}
-                            <div class="invalid-feedback">
-
-                            </div>
-                        </div>
-                    </div>
+                   
                     <input type="hidden" name="form_type" value="buy-book">
-                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                
+                    <div class="text-end">
+                        <button class="btn btn-primary px-4" type="submit">
+                            ذخیره کردن
+                        </button>
+                    </div>
                 </form>
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+                    
+                        const totalPriceElem = document.getElementById("totalPrice");
+                        const remainElem = document.getElementById("remainAmount");
+                        const paidInput = document.querySelector('input[name="paid_amount"]');
+                    
+                        function updateTotalPrice() {
+                            let total = 0;
+                            document.querySelectorAll(".book-checkbox:checked").forEach(cb => {
+                                const qtyInput = cb.closest(".form-check").querySelector(".book-qty");
+                                const qty = parseInt(qtyInput.value) || 1;
+                                const price = parseFloat(cb.dataset.price) || 0;
+                                total += qty * price;
+                            });
+                            totalPriceElem.textContent = total;
+                            updateRemain();
+                        }
+                    
+                        function updateRemain() {
+                            const total = parseFloat(totalPriceElem.textContent) || 0;
+                            const paid = parseFloat(paidInput.value) || 0;
+                            const remain = total - paid;
+                            remainElem.textContent = remain >= 0 ? remain : 0;
+                        }
+                    
+                        // Toggle quantity input when checkbox is checked
+                        document.querySelectorAll(".book-checkbox").forEach(cb => {
+                            cb.addEventListener("change", function() {
+                                const qtyInput = this.closest(".form-check").querySelector(".book-qty");
+                                if (this.checked) {
+                                    qtyInput.classList.remove("d-none");
+                                } else {
+                                    qtyInput.classList.add("d-none");
+                                    qtyInput.value = 1;
+                                }
+                                updateTotalPrice();
+                            });
+                        });
+                    
+                        // Update total when quantity changes
+                        document.querySelectorAll(".book-qty").forEach(qtyInput => {
+                            qtyInput.addEventListener("input", updateTotalPrice);
+                        });
+                    
+                        // Update remaining when paid amount changes
+                        paidInput.addEventListener("input", updateRemain);
+                    });
+                    </script>
             </div>
         </div>
     </div>
@@ -225,20 +254,122 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مصارف</h5>
+                <h5 class="modal-title" id="exampleModalLabel">بخش خرید قرطاسیه</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'students:buy_book' student.id %}" method="POST">
+                <form class="needs-validation" novalidate action="{% url 'students:buy_book' student.id %}" method="POST">
                     {% csrf_token %}
-                    <div class="form-row">
-                      
+                
+                    <!-- Main fields (date, money, description) -->
+                    <div class="card shadow-sm rounded-3 mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">جزئیات خرید</h5>
+                
+                            <div class="row g-3">
+                                <!-- تاریخ -->
+                                <div class="col-md-6">
+                                    <label for="datepicker22" class="form-label">تاریخ</label>
+                                    {{ buy_stationery_form.date }}
+                                </div><script> document.addEventListener('DOMContentLoaded', function () { $('#datepicker22').datepicker({ }); }); </script>
+                
+                                <div class="col-md-6">
+                                    <label for="paid_stationery_amount" class="form-label">مقدار پول</label>
+                                    {{ buy_stationery_form.paid_stationery_amount }}
+                                </div>
+                                
+                                <div class="p-2 border rounded" style="max-height: 220px; overflow-y: auto;">
+                                    {% for s in allStationeryItem %}
+                                        <div class="form-check d-flex align-items-center mb-2">
+                                            <input 
+                                                class="form-check-input stationery-checkbox" 
+                                                type="checkbox" 
+                                                name="stationery" 
+                                                value="{{ s.id }}" 
+                                                data-price="{{ s.per_price  }}"
+                                                id="stationery{{ s.id }}">
+                                            
+                                            <label class="form-check-label ms-2 flex-grow-1" for="stationery{{ s.id }}" style="padding-right: 20px;">
+                                                {{ s.stationery.name }}
+                                                <span class="badge bg-secondary">موجودی: {{ s.total_stationery }}</span>
+                                                <span class="badge bg-info">قیمت: {{ s.stationery.per_price_for_buy }}</span>
+                                            </label>
+                                
+                                            <input 
+                                                type="number" 
+                                                name="quantity_{{ s.id }}" 
+                                                class="form-control form-control-sm d-none stationery-qty" 
+                                                min="1" 
+                                                max="{{ s.total_stationery }}" 
+                                                value="1" 
+                                                style="width: 90px;">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <strong>مجموع قیمت: <span id="stationeryTotalPrice">0</span> افغانی</strong><br>
+                                    <strong>مبلغ باقی مانده: <span id="stationeryRemainAmount">0</span> افغانی</strong>
+                                </div>
+                                
+                                <!-- توضیحات -->
+                                <div class="col-md-12">
+                                    <label for="description" class="form-label">تفصیل</label>
+                                    {{ buy_stationery_form.description }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 
-                    <input type="hidden" name="form_type" value="expense">
-                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                   
+                    <div class="text-end">
+                        <button class="btn btn-primary px-4" type="submit">
+                            ذخیره کردن
+                        </button>
+                    </div>
                 </form>
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const totalPriceElem = document.getElementById("stationeryTotalPrice");
+                        const remainElem = document.getElementById("stationeryRemainAmount");
+                        const paidInput = document.querySelector('input[name="paid_stationery_amount"]');
+                    
+                        function updateTotalPrice() {
+                            let total = 0;
+                            document.querySelectorAll(".stationery-checkbox:checked").forEach(cb => {
+                                const qtyInput = cb.closest(".form-check").querySelector(".stationery-qty");
+                                const qty = parseInt(qtyInput.value) || 1;
+                                const price = parseFloat(cb.dataset.price) || 0;
+                                total += qty * price;
+                            });
+                            totalPriceElem.textContent = total;
+                            updateRemain();
+                        }
+                    
+                        function updateRemain() {
+                            const total = parseFloat(totalPriceElem.textContent) || 0;
+                            const paid = parseFloat(paidInput.value) || 0;
+                            const remain = total - paid;
+                            remainElem.textContent = remain >= 0 ? remain : 0;
+                        }
+                    
+                        document.querySelectorAll(".stationery-checkbox").forEach(cb => {
+                            cb.addEventListener("change", function() {
+                                const qtyInput = this.closest(".form-check").querySelector(".stationery-qty");
+                                qtyInput.classList.toggle("d-none", !this.checked);
+                                if (!this.checked) qtyInput.value = 1;
+                                updateTotalPrice();
+                            });
+                        });
+                    
+                        document.querySelectorAll(".stationery-qty").forEach(qtyInput => {
+                            qtyInput.addEventListener("input", updateTotalPrice);
+                        });
+                    
+                        paidInput.addEventListener("input", updateRemain);
+                    });
+                    </script>
             </div>
         </div>
     </div>

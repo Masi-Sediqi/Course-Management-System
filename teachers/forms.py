@@ -92,17 +92,6 @@ class TeacherLoanForm(forms.ModelForm):
         )
 
 
-
-
-
-
-
-from django import forms
-from .models import Attendance_and_Leaves
-from django import forms
-
-from jalali_date.widgets import AdminJalaliDateWidget  # make sure you have django-jalali installed
-
 class Attendance_and_LeavesForm(forms.ModelForm):
     # Custom Jalali date widget for start_date
     start_date = forms.CharField(
@@ -134,15 +123,10 @@ class Attendance_and_LeavesForm(forms.ModelForm):
             "end_date",
             
             "description",
-
-
-
-
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
         self.fields['description'].widget.attrs.update(
             {'class': 'form-control', 'placeholder': 'توضیحات'}

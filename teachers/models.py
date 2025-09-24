@@ -54,17 +54,6 @@ class TotalPaidMoneyForTeacher(models.Model):
     total_amount = models.FloatField()
 
 
-
-
-
-
-
-
-
-
-
-
-
 class Attendance_and_Leaves(models.Model):
 
     leve_mont_choces = [

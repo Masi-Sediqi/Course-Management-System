@@ -40,25 +40,65 @@
           <div class="main-menu">
               <ul class="metismenu" id="menu">
                 
-                <li class="Ul_li--hover"><a href="/"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">داشبورد</span></a></li>
+                <li class="Ul_li--hover">
+                    <a href="/" class="d-flex align-items-center">
+                        <img src="{% static 'icon/line-md--home-twotone.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">داشبورد</span>
+                    </a>
+                </li>
 
-                <li class="Ul_li--hover"><a class="has-arrow" href="#"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">شاگردان و استادان</span></a>
+                <li class="Ul_li--hover">
+                    <a href="#" class="has-arrow">
+                        <img src="{% static 'icon/hugeicons--teacher.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">شاگردان و استادان</span>
+                    </a>
                     <ul class="mm-collapse">
-                        <li class="item-name"><a href="{% url 'students:students_registration' %}"><i class="nav-icon"></i><span class="item-name">ثبت نام شاگردان</span></a></li>
-                        <li class="item-name"><a href="{% url 'teachers:teacher_registration' %}"><i class="nav-icon"></i><span class="item-name">ثبت نام استادان</span></a></li>
+                        <li class="item-name">
+                            <a href="{% url 'students:students_registration' %}" class="d-flex align-items-center">
+                                <img src="{% static 'icon/hugeicons--student.svg' %}" alt="" style="margin-left: 8px;">
+                                <span class="item-name text-15 text-muted">ثبت نام شاگردان</span>
+                            </a>
+                        </li>
+                        <li class="item-name">
+                            <a href="{% url 'teachers:teacher_registration' %}" class="d-flex align-items-center">
+                                <img src="{% static 'icon/la--chalkboard-teacher.svg' %}" alt="" style="margin-left: 8px;">
+                                <span class="item-name text-15 text-muted">ثبت نام استادان</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
-                <li class="Ul_li--hover"><a class="" href="{% url 'library:library_view' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> قرطاسیه و کتابها</span></a>
+                <li class="Ul_li--hover">
+                    <a href="{% url 'library:library_view' %}" class="d-flex align-items-center">
+                        <img src="{% static 'icon/icon-park-twotone--notebook-and-pen.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">قرطاسیه و کتابها</span>
+                    </a>
                 </li>
-                <li class="Ul_li--hover"><a class="" href="{% url 'classes:main_classes' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> صنوف</span></a>
+                <li class="Ul_li--hover">
+                    <a href="{% url 'classes:main_classes' %}" class="d-flex align-items-center">
+                        <img src="{% static 'icon/streamline-plump--class-lesson-solid.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">صنوف</span>
+                    </a>
                 </li>
-                <li class="Ul_li--hover"><a class="" href="{% url 'subjects:subjects' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> مضامین</span></a>
+                <li class="Ul_li--hover">
+                    <a class="" href="{% url 'subjects:subjects' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted"> مضامین</span></a>
                 </li>
-                <li class="Ul_li--hover"><a class="" href="{% url 'management:Total_income' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">عواید و مصارف</span></a>
+                <li class="Ul_li--hover">
+                    <a href="{% url 'management:Total_income' %}" class="d-flex align-items-center">
+                        <img src="{% static 'icon/healthicons--low-income-level.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">عواید و مصارف</span>
+                    </a>
                 </li>
-                <li class="Ul_li--hover"><a class="" href="{% url 'management:Total_income' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">راپورها</span></a>
+                <li class="Ul_li--hover">
+                    <a href="{% url 'management:Total_income' %}" class="d-flex align-items-center">
+                        <img src="{% static 'icon/streamline-plump--file-report.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">راپورها</span>
+                    </a>
                 </li>
-                <li class="Ul_li--hover"><a class="" href="{% url 'home:colculator' %}"><i class="i-Library text-20 mr-2 text-muted"></i><span class="item-name text-15 text-muted">ماشین حساب</span></a>
+                <li class="Ul_li--hover">
+                    <a href="{% url 'home:colculator' %}" class="d-flex align-items-center">
+                        <img src="{% static 'icon/mdi--calculator.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">ماشین حساب</span>
+                    </a>
                 </li>
                 
                             
@@ -68,13 +108,12 @@
                 <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                     <div class="card-body text-center">
                         <div class="content">
-                            <p class="text-muted mt-2 mb-0">فعال اکونټ:</p>
+                            <p class="text-muted mt-2 mb-0">فعال :</p>
                             <p class="text-primary text-18 line-height-1 mb-2">{{user.name}}</p>
                         </div>
                         <form method="post" action="{% url 'account:logout' %}">
                             {% csrf_token %}
-                            
-                            <button type="submit" class="btn btn-outline-danger btn-icon m-1">وتل</button>
+                            <button type="submit" class="btn btn-outline-danger btn-icon m-1">خارج شدن</button>
                         </form>
                     </div>
                 </div>

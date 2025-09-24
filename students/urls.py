@@ -18,4 +18,7 @@ urlpatterns = [
     path('student/with-out-class/nothing!/', views.students_without_class, name='students_without_class'),
     path('student/improvment/top/<int:id>/', views.student_improvment, name='student_improvment'),
     path('student/buy/book/<int:id>/', views.buy_book, name='buy_book'),
+    path('student/paid/remain/money/<int:id>/', views.student_paid_Remain_money, name='student_paid_Remain_money'),
+    path('student/buy/past/books/<int:stu_id>/<int:book_id>/', views.student_buyed_book, name='student_buyed_book'),
+    path('student/buy/past/stationery/<int:stu_id>/<int:stationery_id>/', views.student_buyed_stationery, name='student_buyed_stationery'),
 ]

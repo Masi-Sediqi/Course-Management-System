@@ -3,4 +3,4 @@ from django.contrib import admin
 from library.models import *
 
 
-admin.site.register(Total_Stationery_Loan)
+admin.site.register(TotalStationery)

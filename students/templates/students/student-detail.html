@@ -95,7 +95,7 @@
                             <th>ایمیل</th>
                             <td>{{ student.email|default:"ندارد" }}</td>
                         </tr>
-                        <tr>
+                        <!-- <tr>
                             <th>مضمون</th>
                             <td>
                                 {% for n in student.classs.all %}
@@ -109,7 +109,7 @@
                                     -
                                 {% endfor %}
                             </td>
-                        </tr>
+                        </tr> -->
                         <tr>
                             <th>صنوف</th>
                             <td>
@@ -134,6 +134,8 @@
                                 {% endfor %}
                             </td>
                         </tr>
+                        
+                       
                         
                         <tr>
                             <th>تاریخ ثبت</th>
@@ -166,8 +168,11 @@
                 <a href="{% url 'students:delete_students' student.id %}" class="btn btn-danger"
                    onclick="return confirm('آیا مطمئن هستید که می‌خواهید این شاگرد را حذف کنید؟')">حذف</a>
                    <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-warning btn-icon m-1" type="button"><span class="ul-btn__icon"><i class="fas fa-money-bill-wave"></i>
-                   </span><span class="ul-btn__text">معلومات فیس</span></a>
+                   </span><span class="ul-btn__text"> فیس </span></a>
 
+                   <a href="{% url 'students:student_paid_Remain_money' student.id %}" class="btn btn-dark btn-icon m-1" type="button"><span class="ul-btn__icon"><i class="fas fa-money-bill-wave"></i>
+                   </span><span class="ul-btn__text">  پول باقی مانده</span></a>
+                   
                    <a href="{% url 'students:buy_book' student.id %}" class="btn btn-light m-1">خرید قرطاسیه & کتاب</a>
                <!-- Button -->
                 <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote">

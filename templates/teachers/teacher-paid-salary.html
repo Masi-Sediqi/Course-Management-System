@@ -5,7 +5,8 @@
     <div class="main-content pt-4">
         <div class="row">
             <div class="col-md-12">
-            
+                <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
                     <script>
                         {% if messages %}
                             {% for message in messages %}
@@ -100,8 +101,8 @@
             <div class="modal-body">
                 <form class="needs-validation" novalidate action="{% url 'teachers:teacher_paid_salary' id=teacher.id %}" method="post">
                     {% csrf_token %}
-                    <div class="row p-3">
-
+                    
+                        <div class="row p-3">
                         <!-- Personal Info -->
                         <div class="col-md-3 form-group mb-3">
                             <label for="lastName1">تاریخ<span style="color: red;">*</span></label>
@@ -117,6 +118,13 @@
                             {{ form.amount }}
                         </div>
                         
+                        {% if total_paid_amount_for_teacher.total_amount > 0 %}
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="loan_amount"> مقدار پول باقی مانده<span style="color: red;">*</span></label>
+                            <input type="number" id="loan_amount" name="remain_amount"
+                                   value="{{ total_paid_amount_for_teacher.total_amount }}" class="form-control">
+                        </div>
+                        {% endif %}
                         {% if total_teacher_loan.total_loan_amount > 0 %}
                         <div class="col-md-3 form-group mb-3">
                             <label for="loan_amount"> مقدار قرض<span style="color: red;">*</span></label>

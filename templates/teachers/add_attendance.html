@@ -1,238 +1,147 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 {% load static %}
-{% block content%}
 
-<style>
-    body {
-      background-color: #f8f9fa;
-      overflow-x: hidden;
-    }
-    
-    .topbar-wrapper {
-      background: #fff;
-      padding: 0 1rem;
-      border-bottom: 1px solid #e9ecef;
-    }
-    
-    .menu-tabs .nav-link {
-      font-weight: 500;
-      color: #6c757d;
-      padding: 1rem;
-      border-bottom: 3px solid transparent;
-    }
-    
-    .menu-tabs .nav-link.active {
-      color: #0d6efd;
-      border-bottom-color: #0d6efd;
-    }
-    
-    .page-header {
-      padding: 1rem 0;
-      border-bottom: 1px solid #e9ecef;
-      margin-bottom: 1.5rem;
-    }
-    
-    .page-title {
-      font-weight: 600;
-      color: #343a40;
-      margin: 0;
-    }
-    
-    .card {
-      border: none;
-      border-radius: 0.5rem;
-      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    }
-    
-    .table {
-      margin-bottom: 0;
-    }
-    
-    .table th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-      color: #495057;
-      white-space: nowrap;
-    }
-    
-    .badge {
-      font-weight: 500;
-      padding: 0.35em 0.65em;
-    }
-    
-    .btn {
-      padding: 0.375rem 0.75rem;
-      font-size: 0.875rem;
-    }
-    
-    .form-label {
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #495057;
-    }
-</style>
+{% block content %}
 
-<div class="topbar-wrapper shadow">
-    {% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} text-center h3" role="alert">
-            {{ message }}
-        </div>
-        <script>
-            setTimeout(function() {
-                $('.alert').fadeOut('slow');
-            }, 3000);
-        </script>
-    {% endfor %}
-    {% endif %}
-</div>
-
-<div class="main-content">
-    <div class="page-content wrapper">
-        <div class="container-fluid">
-            
-            <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="page-title">ثبت رخصتی برای  معلم: {{ teacher.name }}</h4>
-                        <div class="page-title-right">
-                            <ol class="breadcrumb m-0">
-                              
-                                <li class="breadcrumb-item active">ثبت جدید</li>
-                            </ol>
-                        </div>
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} text-center h3"  style="font-family: XW_Zar_Bd_0;" role="alert">
+                        {{ message }}
                     </div>
-                </div>
+                    <script>
+                        setTimeout(function () {
+                            $('.alert').fadeOut('slow');
+                        }, 3000); // 3 seconds
+                    </script>
+                    {% endfor %}
+                    {% endif %}
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> بخش قرض 
+    </h4>
+
+
+    <div class="card">
+        <div class="card-body">
+            <div class="col-lg-12 text-right">
+                        
+                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
+                    data-target="#exampleModal">
+                    ثبت روزهای رخصتی   
+                </button>
+        
+        
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <div class="col-lg-12 text-right">
-                        <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal" data-target="#attendanceModal">
-                            ثبت روزهای رخصتی   
-                        </button>
-                    </div>
-
-                    <!-- Attendance Table -->
+    
+            <!-- Tabs Content -->
+            <div class="tab-content mt-4" id="incomeTabsContent">
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+    
+                    <!-- your full code... -->
                     <div class="table-responsive mt-4">
-                       <table class="display table table-striped table-bordered" id="attendance_table" style="width:100%">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>تاریخ شروع</th>
-                                <th>تاریخ پایان</th>
-                                <th>روزهای رخصتی</th>
-                                <th>توضیحات</th>
-                                <th>عملیات</th>
-                               
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            {% for record in records %}
-                            <tr>
-                                <td>{{ record.id }}</td>
-                                <td>{{ record.start_date }}</td>
-                                <td>{{ record.end_date }}</td>
-                                <td>{{ record.days }}</td>
-                                <td>{{ record.description|slice:":30" }}{% if record.description|length > 30 %}...{% endif %}</td>
-                               
-                                <td>
-                                    <!-- Actions like edit/delete buttons go here -->
-                                    <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
-                                    <a href="#" class="btn btn-sm btn-danger">حذف</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    </div>
+                        <table class="display table table-striped table-bordered" id="attendance_table" style="width:100%">
+                         <thead class="thead-dark">
+                             <tr>
+                                 <th>#</th>
+                                 <th>تاریخ شروع</th>
+                                 <th>تاریخ پایان</th>
+                                 <th>روزهای رخصتی</th>
+                                 <th>توضیحات</th>
+                                 <th>عملیات</th>
+                                
+                             </tr>
+                         </thead>
+                         <tbody id="table-body">
+                             {% for record in records %}
+                             <tr>
+                                 <td>{{ record.id }}</td>
+                                 <td>{{ record.start_date }}</td>
+                                 <td>{{ record.end_date }}</td>
+                                 <td>{{ record.days }}</td>
+                                 <td>{{ record.description|slice:":30" }}{% if record.description|length > 30 %}...{% endif %}</td>
+                                
+                                 <td>
+                                     <!-- Actions like edit/delete buttons go here -->
+                                     <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
+                                     <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                                 </td>
+                             </tr>
+                             {% endfor %}
+                         </tbody>
+                     </table>
+                     </div>
                 </div>
+    
+        
             </div>
         </div>
     </div>
+    
+ 
+    
 </div>
 
-<!-- Attendance Modal -->
-<div class="modal fade" id="attendanceModal" tabindex="-1" role="dialog" aria-labelledby="attendanceModalLabel" aria-hidden="true">
+<!--  Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="attendanceModalLabel">ثبت حضور و غیاب جدید</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مصارف</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
                 <form class="needs-validation" novalidate="novalidate" action="{% url 'teachers:add_attendance' teacher.id %}" method="POST">
                     {% csrf_token %}
-                    
                     <div class="form-row">
                         <div class="col-md-6 mb-3">
-                            <label for="datepicker9">تاریخ شروع</label>
+                            <label for="validationCustom01">تاریخ شروع</label>
                             {{ form.start_date }}
-                            {% if form.start_date.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ form.start_date.errors }}
-                                </div>
-                            {% endif %}
+                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
+                            
                         </div>
-                        
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                $('#datepicker9').datepicker({
+                            
+                                });
+                            });
+                        </script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                $('#datepicker10').datepicker({
+                            
+                                });
+                            });
+                        </script>
+                       
                         <div class="col-md-6 mb-3">
-                            <label for="datepicker10">تاریخ پایان</label>
+                            <label for="validationCustom02">تاریخ پایان</label>
                             {{ form.end_date }}
-                            {% if form.end_date.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ form.end_date.errors }}
-                                </div>
-                            {% endif %}
+                            
                         </div>
                     </div>
-
+                
                     <div class="form-row">
+        
                         <div class="col-md-12 mb-3">
-                            <label for="id_description">توضیحات</label>
+                            <label for="validationCustom03">تفصیل</label>
                             {{ form.description }}
-                            {% if form.description.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ form.description.errors }}
-                                </div>
-                            {% endif %}
+                            <div class="invalid-feedback">
+
+                            </div>
                         </div>
                     </div>
-                    
                     <button class="btn btn-primary" type="submit">ذخیره کردن</button>
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">انصراف</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // Initialize datepickers for Jalali dates
-    document.addEventListener('DOMContentLoaded', function () {
-        // Initialize datepicker for start_date
-        $('#datepicker9').datepicker({
-            // Your datepicker options here
-        });
-        
-        // Initialize datepicker for end_date
-        $('#datepicker10').datepicker({
-            // Your datepicker options here
-        });
-        
-        // Initialize DataTable
-        $('#attendance_table').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Persian.json"
-            }
-        });
-    });
-    
-    // Reload page when modal is closed to show updated data
-    $('#attendanceModal').on('hidden.bs.modal', function () {
-        location.reload();
-    });
-</script>
 
 {% endblock %}

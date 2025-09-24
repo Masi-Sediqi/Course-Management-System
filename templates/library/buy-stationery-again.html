@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} text-center h3"  style="font-family: XW_Zar_Bd_0;" role="alert">
+                        {{ message }}
+                    </div>
+                    <script>
+                        setTimeout(function () {
+                            $('.alert').fadeOut('slow');
+                        }, 3000); // 3 seconds
+                    </script>
+                    {% endfor %}
+                    {% endif %}
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> بخش خریداری جدید 
+    </h4>
+
+
+    <div class="row">
+        <!-- ICON BG-->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Add-User"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">مقدار کُل</p>
+                        <p class="lead text-success text-24 mb-2">{{total_book.total_stationery}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Financial"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">فروخته شده</p>
+                        <p class="lead text-danger text-24 mb-2">{{get_total_expenses.total_amount}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">باقی مانده</p>
+                        <p class="lead text-primary text-24 mb-2">{{total_book.total_amount}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!-- Card -->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4" 
+                style="cursor:pointer;" 
+                data-toggle="modal" 
+                data-target="#perPriceModal">
+                <div class="card-body text-center">
+                    <i class="i-Checkout-Basket"></i>
+                    <div class="content">
+                        <p class="text-muted mt-2 mb-0">مقدار فی</p>
+                        <p class="lead text-primary text-24 mb-2">{{ total_book.per_price }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="perPriceModal" tabindex="-1" role="dialog" aria-labelledby="perPriceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <form method="POST" action="{% url 'library:update_stationery_per_price' id=stationery.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                <h5 class="modal-title" id="perPriceModalLabel">تغییر مقدار فی</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+
+                <div class="modal-body">
+                <div class="form-group">
+                    <label>مقدار جدید</label>
+                    <input type="number" name="per_price_stationery" class="form-control" value="{{ total_book.per_price }}" required>
+                </div>
+                </div>
+
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">بستن</button>
+                <button type="submit" class="btn btn-primary">ذخیره</button>
+                </div>
+            </form>
+    </div>
+  </div>
+</div>
+
+    </div>
+
+
+    <div class="card">
+        <div class="card-body">
+            <div class="col-lg-12 text-right">
+                        
+                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
+                    data-target="#exampleModal">
+                   خریداری جدید "{{ stationery.name }}"
+                </button>
+              
+        
+            </div>
+            <!-- Tabs Header -->
+            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">خرید</a>
+                </li>
+            </ul>
+    
+            <!-- Tabs Content -->
+            <div class="tab-content mt-4" id="incomeTabsContent">
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+                    <p>در بخش پایین، معلومات تمام خریداری کتاب {{ book.name }} را مشاهده میکنید.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive shadow rounded">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">تاریخ</th>
+                                    <th scope="col">تعداد</th>
+                                    <th scope="col">مقدار فی</th>
+                                    <th scope="col">مقدار کُل</th>
+                                    <th scope="col">مقدار پرداخت شده</th>
+                                    <th scope="col">مقدار برای فروش</th>
+                                    <th scope="col">توضیحات</th>
+                                    <th scope="col">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in records %}
+                                <tr class="text-center">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ i.date }}</td>
+                                    <td>{{ i.number_of_stationery }}</td>
+                                    <td>{{ i.per_price_stationery }}</td>
+                                    <td>{{ i.stationery_price }}</td>
+                                    <td>{{ i.stationery_paid_price }}</td>
+                                    <td><span class="badge bg-success px-3 py-2">{{ i.per_price_for_buy }} </span></td>
+                                    <td class="text-muted">{{ i.description|default:"—" }}</td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <i class="bi bi-pencil"></i> ویرایش
+                                            </a>
+                                            <a href="{% url 'library:delete_buy_again' id=i.id %}" 
+                                            class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                            onclick="return confirm('آیا مطمئن هستید که می‌خواهید این رکورد را حذف کنید؟');">
+                                             <i class="bi bi-trash"></i> حذف
+                                         </a>
+                                         
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        هیچ داده‌ای موجود نیست
+                                    </td>
+                                </tr>
+
+                                
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+    
+            </div>
+        </div>
+    </div>
+    
+ 
+    
+</div>
+
+<!--  Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">بخش خریداری دوباره کتاب "{{ book.name }}"</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true"></span></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'library:buy_stationery_again' id=stationery.id %}" class="needs-validation" novalidate="novalidate">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                      <div class="container-fluid">
+                        <div class="row g-3">
+                          <div class="col-md-4">
+                            <label for="{{ form.date.id_for_label }}" class="form-label">
+                              تاریخ <span class="text-danger">*</span>
+                            </label>
+                            {{ form.date }}
+                          </div>
+
+                          <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                $('#datepicker7').datepicker({
+                            
+                                });
+                            });
+                        </script>
+                       
+
+                          <div class="col-md-4">
+                            <label for="{{ form.number_of_stationery.id_for_label }}" class="form-label">تعداد<span class="text-danger">*</span></label>
+                            {{ form.number_of_stationery }}
+                          </div>
+            
+                          <div class="col-md-4">
+                            <label for="{{ form.per_price_stationery.id_for_label }}" class="form-label">مقدار فی <span class="text-danger">*</span></label>
+                            {{ form.per_price_stationery }}
+                          </div>
+
+                          
+                          <div class="col-md-4">
+                            <label for="{{ form.stationery_price.id_for_label }}" class="form-label">قیمت<span class="text-danger">*</span></label>
+                            {{ form.stationery_price }}
+                          </div>
+            
+
+                          <div class="col-md-4">
+                            <label for="{{ form.stationery_paid_price.id_for_label }}" class="form-label">مقدار برای پرداخت<span class="text-danger">*</span></label>
+                            {{ form.stationery_paid_price }}
+                          </div>
+            
+
+                          <div class="col-md-4">
+                            <label for="{{ form.per_price_for_buy.id_for_label }}" class="form-label">مقدار فی برای فروش <span class="text-danger">*</span></label>
+                            {{ form.per_price_for_buy }}
+                          </div>
+            
+                         
+                          <div class="col-md-12">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
+                            {{ form.description }}
+                          </div>
+            
+                        </div>
+                      </div>
+                    </div>
+            
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                      <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
+                    </div>
+                    <script>
+                      document.addEventListener("DOMContentLoaded", function() {
+                          const numberField = document.getElementById("{{ form.number_of_stationery.id_for_label }}");
+                          const perPriceField = document.getElementById("{{ form.per_price_stationery.id_for_label }}");
+                          const totalField = document.getElementById("{{ form.stationery_price.id_for_label }}");
+                      
+                          function calculateTotal() {
+                              let number = parseFloat(numberField.value) || 0;
+                              let perPrice = parseFloat(perPriceField.value) || 0;
+                              let total = number * perPrice;
+                      
+                              totalField.value = total.toFixed(2);  // 2 decimal places
+                          }
+                      
+                          numberField.addEventListener("input", calculateTotal);
+                          perPriceField.addEventListener("input", calculateTotal);
+                      });
+                      </script>                            
+                  </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

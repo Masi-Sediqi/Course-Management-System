@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.shortcuts import render, redirect , get_object_or_404
 from decimal import Decimal
 from management.models import TotalIncome
@@ -7,6 +8,7 @@ from .models import *
 from django.http import HttpResponse
 from django.db.models import Sum
 from django.contrib import messages
+from itertools import chain
 # Create your views here.
 
 def students_registration(request):
@@ -167,7 +169,35 @@ def student_fees_detail(request, student_id):
     get_remain_money = StudentRemailMoney.objects.filter(student=student).first()
 
     fees_record_related_student = Student_fess_info.objects.filter(student=student)
-    remain_money_records = StudentGiveRemainMoney.objects.filter(studnet=student)
+    # remain_money_records = StudentGiveRemainMoney.objects.filter(studnet=student)
+
+    # Add a type field to each record (so we know قرض or پرداخت in template)
+    # for record in fees_record_related_student:
+    #     record.record_type = "قرض"
+    #     record.amount_paid = record.give_fees
+    #     record.remain = record.remain_fees
+    #     record.month_display = record.month
+    #     record.model_type = "fees"
+    #     record.student_obj = record.student  # unify field name
+    #     # 🔴 Flag for remain_fees
+    #     record.is_red = record.remain_fees and record.remain_fees > 0
+    #     record.is_green = False
+
+    # for record in remain_money_records:
+    #     record.record_type = "پرداخت"
+    #     record.orginal_fees = "-"
+    #     record.give_fees = record.amount
+    #     record.remain_fees = "-"
+    #     record.month_display = "-"
+    #     record.model_type = "remain"
+    #     record.student_obj = record.studnet  # unify field name
+    #     # 🟢 Always green
+    #     record.is_red = False
+    #     record.is_green = True
+
+    # Merge them into one list
+    # all_records = list(chain(fees_record_related_student, remain_money_records))
+    # all_records.sort(key=lambda r: r.created_at)
 
     if request.method == "POST":
         get_form_type = request.POST.get('form_type')
@@ -175,7 +205,7 @@ def student_fees_detail(request, student_id):
             form = Student_fess_infoForm(request.POST)
             if form.is_valid():
                 get_date = form.cleaned_data.get('date')
-                get_orginal_fess = 12
+                get_orginal_fess = form.cleaned_data.get('orginal_fees')
                 get_give_money = form.cleaned_data.get('give_fees')
                 # Extract month part
                 try:
@@ -210,21 +240,8 @@ def student_fees_detail(request, student_id):
                 total_income_obj.save()
                 fees_info.save()
                 return redirect(referer)
-        else:
-            # g_form = StudentGiveRemainMoneyForm(request.POST)
-            # if g_form.is_valid():
-            #     get_Amount = g_form.cleaned_data.get('amount')
-            #     get_remain_money.amount -= get_Amount
-            #     instance = g_form.save(commit=False)
-            #     get_remain_money.save()
-            #     instance.studnet = student
-            #     instance.save()
-            #     return redirect(referer)
-            return redirect('students:student_fees_detail', student_id=student.id)
     else:
-        form = Student_fess_infoForm(initial={
-            'orginal_fees':12
-        })
+        form = Student_fess_infoForm()
         g_form = StudentGiveRemainMoneyForm()
 
     context = {
@@ -281,15 +298,25 @@ def student_improvment(request, id):
 
 
 def buy_book(request, id):
-    total_book = Books.objects.all()
+    total_book = TotalBook.objects.all()
     student = Student.objects.get(id=id)
-    allStationeryItem = StationeryItem.objects.all()
+    allStationeryItem = TotalStationery.objects.all()
     # HTMX request to update total price
-    if request.headers.get("HX-Request"):  
-        book_ids = request.POST.getlist("books")
-        total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("price"))["total"] or 0
-        return HttpResponse(f"<div class='alert alert-card alert-info'>مجموع قیمت: {total_price} AFN</div>")
+    if request.headers.get("HX-Request"):
+        # Check which form was submitted
+        if "books" in request.POST:
+            book_ids = request.POST.getlist("books")
+            total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("per_book_price_for_buy"))["total"] or 0
+            return HttpResponse(f"<div class='alert alert-card alert-info'>مجموع قیمت: {total_price} AFN</div>")
+        
+        elif "stationeries" in request.POST:
+            stationery_ids = request.POST.getlist("stationeries")
+            total_price = StationeryItem.objects.filter(id__in=stationery_ids).aggregate(total=Sum("per_price_for_buy"))["total"] or 0
+            return HttpResponse(f"<div class='alert alert-card alert-info'>مجموع قیمت: {total_price} AFN</div>")
 
+        else:
+            return HttpResponse("<div class='alert alert-card alert-warning'>هیچ موردی انتخاب نشده است</div>")
+    
     if request.method == "POST":
         boos = request.POST.getlist('books')
         form_type = request.POST.get('form_type')
@@ -297,68 +324,247 @@ def buy_book(request, id):
             buy_book_form = BuyBookForm(request.POST)
             if buy_book_form.is_valid():
                 get_paid_amount = float(request.POST.get('paid_amount'))
-                book_ids = list(map(int, request.POST.getlist('books')))
-                total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("price"))["total"] or 0
-                subtraction = total_price - get_paid_amount
+                book_ids = request.POST.getlist('books')
+
+                total_price = 0
+                book_records = []
 
                 with transaction.atomic():
-                    # TotalIncome
-                    find_expenses_pk, created = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
-                    find_expenses_pk.total_amount += get_paid_amount
-                    find_expenses_pk.save()
+                    for tb_id in book_ids:
+                        qty = int(request.POST.get(f'quantity_{tb_id}', 0))
+                        print(f"qty {qty}")
+                        if qty <= 0:
+                            continue
 
-                    # Total_Stationery_Loan
-                    if subtraction > 0:
-                        collect_loans, created = StudentRemailMoney.objects.get_or_create(student=student, defaults={'amount': 0})
-                        collect_loans.amount += subtraction
-                        collect_loans.save()
-                
-                
-                
-                instance = buy_book_form.save()
+                        tb = TotalBook.objects.select_for_update().get(id=tb_id)
+
+                        # price calculation
+                        line_total = tb.per_price * qty
+                        print(f"line_total {line_total}")
+                        total_price += line_total
+                        print(f"total_price {total_price}")
+                        # update stock
+                        tb.total_amount -= qty
+                        tb.save()
+
+                        # prepare book record
+                        book_records.append({
+                            "book": tb,
+                            "qty": qty,
+                            "line_total": line_total
+                        })
+
+                    # Calculate remaining money
+                    remain_amount = total_price - get_paid_amount
+                    print(f"remain_amount {remain_amount}")
+                    # Update TotalIncome
+                    total_income, _ = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+                    total_income.total_amount += get_paid_amount
+                    total_income.save()
+
+                    # Save remaining money if student didn't pay full
+                    if remain_amount > 0:
+                        student_remain, _ = StudentRemailMoney.objects.get_or_create(
+                            student=student, defaults={'amount': 0}
+                        )
+                        student_remain.amount += remain_amount
+                        student_remain.save()
+
+                instance = buy_book_form.save(commit=False)
                 instance.student = student
-                instance.remain_amount = subtraction
-
+                instance.number_of_book = sum(b["qty"] for b in book_records)
+                instance.total_amount = total_price
+                instance.remain_amount = remain_amount
                 instance.save()
-                instance.book.set(boos)
-                return redirect('students:buy_book', id=student.id)  # refresh after save
+                instance.book.set([b["book"].id for b in book_records])
+
+                # Save BookRecords with correct total_amount
+                for b in book_records:
+                    # b["book"] is a TotalBook instance
+                    book_instance = b["book"].book  # get the actual Books instance
+
+                    per_price_for_buy = book_instance.per_book_price_for_buy
+                    qty = b["qty"]
+                    line_total = qty * per_price_for_buy  # calculate total amount correctly
+
+                    BookRecord.objects.create(
+                        student=student,
+                        book=book_instance,
+                        buy_book=instance,
+                        date=instance.date,
+                        number_of_book=qty,
+                        total_amount=line_total
+                    )
+
+                return redirect('students:buy_book', id=student.id)
         else:
+            # Stationery purchase
             buy_stationery_form = BuyStationeryForm(request.POST)
             if buy_stationery_form.is_valid():
-                get_paid_amount = float(request.POST.get('paid_amount'))
-                book_ids = list(map(int, request.POST.getlist('stationery')))
-                total_price = Books.objects.filter(id__in=book_ids).aggregate(total=Sum("price"))["total"] or 0
-                subtraction = total_price - get_paid_amount
+                get_paid_amount = float(request.POST.get('paid_stationery_amount', 0))
+                stationery_ids = request.POST.getlist('stationery')
+                total_price = 0
+                qty_dict = {}
+
+                # First, calculate total price
+                for ts_id in stationery_ids:
+                    qty = int(request.POST.get(f'quantity_{ts_id}', 0)) or 1
+                    ts = TotalStationery.objects.select_for_update().get(id=ts_id)
+                    line_total = ts.per_price * qty
+                    total_price += line_total
+                    qty_dict[ts_id] = qty
+
+                remain_amount = total_price - get_paid_amount
 
                 with transaction.atomic():
-                    # TotalIncome
-                    find_expenses_pk, created = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
-                    find_expenses_pk.total_amount += get_paid_amount
-                    find_expenses_pk.save()
+                    # Save BuyStationery instance first
+                    instance = buy_stationery_form.save(commit=False)
+                    instance.student = student
+                    instance.number_of_stationery = sum(qty_dict.values())
+                    instance.total_stationery_amount = total_price
+                    instance.remain_amount = remain_amount
+                    instance.paid_stationery_amount = get_paid_amount
+                    instance.save()
+                    instance.stationery.set(stationery_ids)
 
-                    # Total_Stationery_Loan
-                    if subtraction > 0:
-                        collect_loans, created = StudentRemailMoney.objects.get_or_create(student=student, defaults={'amount': 0})
-                        collect_loans.amount += subtraction
-                        collect_loans.save()
-            
-                instance = buy_stationery_form.save(commit=False)
-                instance.student = student
-                instance.remain_amount = subtraction
-                instance.save()
-                instance.book.set(boos)
-                return redirect('students:buy_book', id=student.id)  # refresh after save
+                    # Now create StationeryRecord
+                    for ts_id in stationery_ids:
+                        ts = TotalStationery.objects.select_for_update().get(id=ts_id)
+                        qty = qty_dict[ts_id]
+                        line_total = ts.per_price * qty
+
+                        # Update stock
+                        ts.total_stationery -= qty
+                        ts.save()
+
+                        StationeryRecord.objects.create(
+                            student=student,
+                            stationery=ts.stationery,  # must be StationeryItem instance
+                            buy_stationery=instance,
+                            date=instance.date,
+                            number_of_stationery=qty,
+                            total_amount=line_total
+                        )
+
+                    # Update TotalIncome
+                    total_income, _ = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+                    total_income.total_amount += get_paid_amount
+                    total_income.save()
+
+                    # Save remaining money
+                    if remain_amount > 0:
+                        student_remain, _ = StudentRemailMoney.objects.get_or_create(
+                            student=student, defaults={'amount': 0}
+                        )
+                        student_remain.amount += remain_amount
+                        student_remain.save()
+
+                return redirect('students:buy_book', id=student.id)
+
 
     buy_book_form = BuyBookForm()
     buy_stationery_form = BuyStationeryForm()
     buy_book_records = BuyBook.objects.filter(student=id)
+    buy_stationery_records = BuyStationery.objects.filter(student=id)
+
+    all_records = []
+
+    # append book records
+    for rec in buy_book_records:
+        all_records.append({
+            "id": rec.id,
+            "date": rec.date,
+            "type": "کتاب",
+            "names": [b.name for b in rec.book.all()],   # ✅ book names
+            "total": rec.total_amount,
+            "paid": rec.paid_amount,
+            "remain": rec.remain_amount,
+            "desc": rec.description,
+            "more_info": reverse('students:student_buyed_book', args=[rec.student.id, rec.id])
+        })
+
+    # append stationery records
+    for rec in buy_stationery_records:
+        all_records.append({
+            "id": rec.id,
+            "date": rec.date,
+            "type": "قرطاسیه",
+            "names": [s.name for s in rec.stationery.all()],  # ✅ stationery names
+            "total": rec.total_stationery_amount,
+            "paid": rec.paid_stationery_amount,
+            "remain": rec.remain_amount,
+            "desc": rec.description,
+            "more_info_stationery": reverse('students:student_buyed_stationery', args=[rec.student.id, rec.id])
+        })
+
+    # optional: sort all records (by id or date)
+    all_records = sorted(all_records, key=lambda x: x["id"], reverse=True)
 
     context = {
         'student':student,
         'buy_book_form':buy_book_form,
-        'buy_book_records':buy_book_records,
         'total_book':total_book,
         'buy_stationery_form':buy_stationery_form,
         'allStationeryItem':allStationeryItem,
+        'all_records':all_records,
     }
     return render(request, 'students/student-buy-book.html', context)
+
+
+def student_paid_Remain_money(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
+
+    student = Student.objects.get(id=id)
+    get_remain_money = StudentRemailMoney.objects.filter(student=student).first()
+
+    remain_money_records = StudentGiveRemainMoney.objects.filter(studnet=student)
+
+    if request.method == "POST":
+        g_form = StudentGiveRemainMoneyForm(request.POST)
+        if g_form.is_valid():
+            get_Amount = g_form.cleaned_data.get('amount')
+            if get_Amount > get_remain_money.amount:
+                messages.error(request, 'مقدار برای پرداخت قرض بیشتر از مقدار قرض است')
+                return redirect(referer)
+            get_remain_money.amount -= get_Amount
+            instance = g_form.save(commit=False)
+            get_remain_money.save()
+            instance.studnet = student
+            instance.save()
+            return redirect(referer)
+
+    else:
+        g_form = StudentGiveRemainMoneyForm()
+
+    context = {
+        'student':student,
+        'g_form':g_form,
+        'remain_money_records':remain_money_records,
+        'get_remain_money':get_remain_money,
+    }
+    return render(request, 'students/student-remain-money.html', context)
+
+def student_buyed_book(request, stu_id, book_id):
+    student = Student.objects.get(id=stu_id)
+    book_id = BuyBook.objects.get(id=book_id)
+    buyed_books = BookRecord.objects.filter(buy_book=book_id)
+
+    context = {
+        'student':student,
+        'book_id':book_id,
+        'buyed_books':buyed_books,
+    }
+    return render(request, 'students/student-buyed-books.html', context)
+
+def student_buyed_stationery(request, stu_id, stationery_id):
+    student = Student.objects.get(id=stu_id)
+    stationery_id = BuyStationery.objects.get(id=stationery_id)
+
+    buyed_stationeyies = StationeryRecord.objects.filter(buy_stationery=stationery_id)
+
+    context = {
+        'student':student,
+        'stationery_id':stationery_id,
+        'buyed_stationeyies':buyed_stationeyies,
+    }
+    return render(request, 'students/student-buyed-stationeries.html', context)

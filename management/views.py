@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from decimal import Decimal
-from library.models import Total_Stationery_Loan
 from management.forms import *
 from .models import *
 from django.http import HttpResponse
@@ -47,7 +46,6 @@ def Total_income(request):
     # Reload total income after saving
     get_total_income = TotalIncome.objects.last()
     get_total_expenses = TotalExpenses.objects.last()
-    get_total_stationery = Total_Stationery_Loan.objects.last()
     get_total_otherinceom = OtherIncome.objects.all()
     get_total_expens = Expenses.objects.all()
 
@@ -58,6 +56,5 @@ def Total_income(request):
         'x_form':x_form,
         'get_total_expenses':get_total_expenses,
         'get_total_expens':get_total_expens,
-        'get_total_stationery':get_total_stationery,
     }
     return render(request, 'management/total-income.html', context)

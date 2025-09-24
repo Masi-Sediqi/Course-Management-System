@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} text-center h3"  style="font-family: XW_Zar_Bd_0;" role="alert">
+                        {{ message }}
+                    </div>
+                    <script>
+                        setTimeout(function () {
+                            $('.alert').fadeOut('slow');
+                        }, 3000); // 3 seconds
+                    </script>
+                    {% endfor %}
+                    {% endif %}
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> بخش مضامین
+    </h4>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="col-lg-12 text-right">
+                        
+                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
+                    data-target="#exampleModal">
+                 پرداخت جدید
+                </button>
+
+            </div>
+       
+    
+            <!-- Tabs Content -->
+            <div class="tab-content mt-4" id="incomeTabsContent">
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+                    <p>در بخش پایین، معلومات کامل در مورد پرداخت قرض ها قابل مشاهده است.</p>
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>تاریخ </th>
+                                    <th>مقدار </th>
+                                    <th>توضیحات </th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {% for i in remain_money_records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ i.date }}</td>
+                                    <td>{{ i.amount }}</td>
+                                    <td>{{ i.description }}</td>
+                                    
+                                    <td>
+                                        <!-- Actions like edit/delete buttons go here -->
+                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
+                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+ 
+    
+</div>
+
+<!--  Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true"></span></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'students:student_paid_Remain_money' id=student.id %}">
+                    {% csrf_token %}
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content p-3">
+                        <div class="card-title h5 mb-3">بخش جبران قرض داری های شاگرد {{ student.first_name }}</div>
+                        <div>
+                          <div class="row">
+                            <div class="col-md-4 form-group mb-3">
+                              <label for="">تاریخ</label>
+                              {{ g_form.date }}
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                              <label for="">مقدار باقی مانده</label>
+                              <input id="remainAmount" class="form-control" type="number" value="{{ get_remain_money.amount }}" readonly>
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                              <label for="{{ g_form.amount.id_for_label }}">مقدار</label>
+                              {{ g_form.amount }}
+                              <div id="amount-error" class="text-danger mt-1" style="display:none;">شما نمی‌توانید مقداری بزرگ‌تر از مقدار باقی‌مانده وارد کنید!</div>
+                            </div>
+                          </div>
+                          
+                          <script>
+                            // Get elements
+                            const remainInput = document.getElementById('remainAmount');
+                            const amountInput = document.getElementById('{{ g_form.amount.id_for_label }}');
+                            const errorDiv = document.getElementById('amount-error');
+                          
+                            // Validate on input change
+                            amountInput.addEventListener('input', () => {
+                              const remainValue = parseFloat(remainInput.value) || 0;
+                              const amountValue = parseFloat(amountInput.value) || 0;
+                          
+                              if (amountValue > remainValue) {
+                                errorDiv.style.display = 'block';
+                                amountInput.setCustomValidity("Invalid field.");
+                              } else {
+                                errorDiv.style.display = 'none';
+                                amountInput.setCustomValidity("");
+                              }
+                            });
+                          </script>                
+                
+                          <div class="col-md-12 form-group mb-3">
+                            <label for="{{ form.description.id_for_label }}">توضیحات</label>
+                            {{ g_form.description }}
+                          </div>
+          
+                          <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                $('#datepicker21').datepicker({});
+                            });
+                        </script>
+                
+                          <div class="text-end">
+                            <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

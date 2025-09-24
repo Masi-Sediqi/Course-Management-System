@@ -88,14 +88,28 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مصارف</h5>
+                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت قرض</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true"></span></button>
             </div>
             <div class="modal-body">
                 <form class="needs-validation" novalidate="novalidate" action="{% url 'teachers:teacher_loan' teacher.id %}" method="POST">
                     {% csrf_token %}
-                    <div class="form-row">
+                    
+                    {% if total_remain_money.total_amount > 0 %}
+                    <div class="col-lg-12 col-md-6 col-sm-6">
+                        <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                            <div class="card-body text-center"><i class="i-Money-2"></i>
+                                <div class="content">
+                                    <p class="text-muted mt-2 mb-0">مقدار پول باقی مانده</p>
+                                    <p class="text-primary text-24 line-height-1 mb-2"> {{ total_remain_money.total_amount }} </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                        <div class="form-row">
                         <div class="col-md-6 mb-3">
                             <label for="validationCustom01">تاریخ</label>
                             {{ form.date }}

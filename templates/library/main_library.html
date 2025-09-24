@@ -140,9 +140,14 @@
                             <thead class="thead-dark">
                                 <tr>
                                     <th>#</th>
+                                    <th>تاریخ</th>
                                     <th>نام</th>
                                     <th>کتگوری</th>
-                                    <th>قیمت</th>
+                                    <th>تعداد</th>
+                                    <th>مقدار فی</th>
+                                    <th>مقدار کُل</th>
+                                    <th>مقدار پرداخت شده</th>
+                                    <th>مقدار برای فروش</th>
                                     <th>توضیحات</th>
                                     <th>عملیات</th>
                                 </tr>
@@ -150,11 +155,20 @@
                             <tbody id="table-body">
                                 {% for i in stationeries %}
                                 <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>{{ i.name }}</td>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ i.date }}</td>
+                                    <td>
+                                      <a href="{% url 'library:buy_stationery_again' i.id %}">
+                                        {{ i.name }}
+                                      </a>
+                                    </td>
                                     <td>{{ i.category }}</td>
-                                    <td>{{ i.price }}</td>
-                                    <td>{{ i.description }}</td>
+                                    <td>{{ i.number_of_stationery }}</td>
+                                    <td>{{ i.per_price_stationery }}</td>
+                                    <td>{{ i.stationery_paid_price }}</td>
+                                    <td>{{ i.stationery_price }}</td>
+                                    <td>{{ i.per_price_for_buy }}</td>
+                                    <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                                     <td>
                                         <!-- Actions like edit/delete buttons go here -->
                                         <a href="{% url 'library:edit_station' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
@@ -291,10 +305,13 @@
                       <thead class="thead-dark">
                           <tr>
                               <th>#</th>
+                              <th>تاریخ</th>
                               <th>تام کتاب</th>
                               <th>تعداد</th>
-                              <th>قیمت</th>
+                              <th>مقدار فی</th>
+                              <th>مقدار کُل</th>
                               <th>مقدار پرداخت شده</th>
+                              <th>مقدار برای فروش</th>
                               <th>توضیحات</th>
                               <th>عملیات</th>
                           </tr>
@@ -302,11 +319,15 @@
                       <tbody id="table-body">
                           {% for i in books %}
                           <tr>
-                              <td>{{ i.id }}</td>
-                              <td>{{ i.name }}</td>
+                              <td>{{ forloop.counter }}</td>
+                              <td>{{ i.date }}</td>
+                              <td><a href="{% url 'library:buy_book_again' i.id %}">
+                                {{ i.name }}</td>
                               <td>{{ i.number_of_book }}</td>
+                              <td>{{ i.per_price }}</td>
                               <td>{{ i.price }}</td>
                               <td>{{ i.paid_price }}</td>
+                              <td>{{ i.per_book_price_for_buy }}</td>
                               <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                             
                               <td>
@@ -323,45 +344,75 @@
 
 
                           
-<div class="modal fade" id="editBookModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editBookModalLabel{{ i.id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content text-center">
-      <form method="POST" action="{% url 'library:edit_book' i.id %}" class="needs-validation" novalidate>
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title w-100" id="editBookModalLabel{{ i.id }}">تغییرات کتاب</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      
-        <div class="modal-body py-2">
-          <div class="row">
-            <div class="col-md-6 form-group mb-2">
-              <label class="form-label">نام کتاب <span style="color: red;">*</span></label>
-              <input type="text" name="name" class="form-control" value="{{ i.name }}" required>
-            </div>
-            <div class="col-md-6 form-group mb-2">
-              <label class="form-label">قیمت</label>
-              <input type="text" name="price" class="form-control" value="{{ i.price }}">
-            </div>
-          </div>
-      
-          <div class="form-group mb-2">
-            <label class="form-label">توضیحات</label>
-            <textarea name="description" class="form-control" rows="3">{{ i.description }}</textarea>
-          </div>
-        </div>
-      
-        <div class="modal-footer py-2">
-          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">بستن</button>
-          <button type="submit" class="btn btn-sm btn-primary">ذخیره</button>
-        </div>
-      </form>
-      
-    </div>
-  </div>
-</div>
+                          <div class="modal fade" id="editBookModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editBookModalLabel{{ i.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                              <div class="modal-content">
+                                <form method="POST" action="{% url 'library:edit_book' i.id %}" class="needs-validation" novalidate>
+                                  {% csrf_token %}
+                          
+                                  <!-- Header -->
+                                  <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title w-100" id="editBookModalLabel{{ i.id }}">ویرایش کتاب</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                          
+                                  <!-- Body -->
+                                  <div class="modal-body">
+                                    <div class="row g-3">
+                                      
+                                      <div class="col-md-6">
+                                        <label class="form-label">تاریخ <span class="text-danger">*</span></label>
+                                        {{form.date}}
+                                      </div>
+                          
+                                      <div class="col-md-6">
+                                        <label class="form-label">نام کتاب <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" class="form-control" value="{{ i.name }}" required>
+                                      </div>
+                          
+                                      <div class="col-md-6">
+                                        <label class="form-label">تعداد کتاب <span class="text-danger">*</span></label>
+                                        <input type="number" name="number_of_book" class="form-control" value="{{ i.number_of_book }}" required>
+                                      </div>
+                          
+                                      <div class="col-md-6">
+                                        <label class="form-label">قیمت فی کتاب (خرید)</label>
+                                        <input type="number" name="per_price" class="form-control" value="{{ i.per_price }}">
+                                      </div>
+                          
+                                      <div class="col-md-6">
+                                        <label class="form-label">قیمت فی کتاب (فروش)</label>
+                                        <input type="number" name="per_book_price_for_buy" class="form-control" value="{{ i.per_book_price_for_buy }}">
+                                      </div>
+                          
+                                      <div class="col-md-6">
+                                        <label class="form-label">قیمت مجموعی</label>
+                                        <input type="number" name="price" class="form-control" value="{{ i.price }}">
+                                      </div>
+                          
+                                      <div class="col-md-6">
+                                        <label class="form-label">قیمت پرداخت شده</label>
+                                        <input type="number" name="paid_price" class="form-control" value="{{ i.paid_price }}">
+                                      </div>
+                          
+                                      <div class="col-12">
+                                        <label class="form-label">توضیحات</label>
+                                        <textarea name="description" class="form-control" rows="3">{{ i.description }}</textarea>
+                                      </div>
+                          
+                                    </div>
+                                  </div>
+                          
+                                  <!-- Footer -->
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">بستن</button>
+                                    <button type="submit" class="btn btn-sm btn-primary">ذخیره تغییرات</button>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                          
                           
                               <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
                                   <div class="modal-dialog modal-lg" role="document">
@@ -406,31 +457,58 @@
                           <div class="modal-body">
                             <div class="container-fluid">
                               <div class="row g-3">
-                  
-                                   <div class="col-md-4">
+                                <div class="col-md-3">
+                                  <label for="{{ form.date.id_for_label }}" class="form-label">
+                                    تاریخ <span class="text-danger">*</span>
+                                  </label>
+                                  {{ form.date }}
+                                </div>
+
+                                <script>
+                                  document.addEventListener('DOMContentLoaded', function () {
+                                      $('#datepicker7').datepicker({
+                                  
+                                      });
+                                  });
+                              </script>
+                                   <div class="col-md-3">
                                   <label for="{{ form.category.id_for_label }}" class="form-label">دسته‌بندی<span class="text-danger">*</span></label>
                                   {{ form.category }}
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                   <label for="{{ form.name.id_for_label }}" class="form-label">نام قرطاسیه<span class="text-danger">*</span></label>
                                   {{ form.name }}
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                   <label for="{{ form.number_of_stationery.id_for_label }}" class="form-label">تعداد<span class="text-danger">*</span></label>
                                   {{ form.number_of_stationery }}
                                 </div>
                   
-                                <div class="col-md-4">
-                                  <label for="{{ form.price.id_for_label }}" class="form-label">قیمت<span class="text-danger">*</span></label>
-                                  {{ form.price }}
+                                <div class="col-md-3">
+                                  <label for="{{ form.per_price_stationery.id_for_label }}" class="form-label">مقدار فی <span class="text-danger">*</span></label>
+                                  {{ form.per_price_stationery }}
+                                </div>
+
+                                
+                                <div class="col-md-3">
+                                  <label for="{{ form.stationery_price.id_for_label }}" class="form-label">قیمت<span class="text-danger">*</span></label>
+                                  {{ form.stationery_price }}
                                 </div>
                   
-                                <div class="col-md-4">
-                                  <label for="{{ form.paid_price.id_for_label }}" class="form-label">مقدار برای پرداخت<span class="text-danger">*</span></label>
-                                  {{ form.paid_price }}
+
+                                <div class="col-md-3">
+                                  <label for="{{ form.stationery_paid_price.id_for_label }}" class="form-label">مقدار برای پرداخت<span class="text-danger">*</span></label>
+                                  {{ form.stationery_paid_price }}
                                 </div>
                   
+
+                                <div class="col-md-3">
+                                  <label for="{{ form.per_price_for_buy.id_for_label }}" class="form-label">مقدار فی برای فروش <span class="text-danger">*</span></label>
+                                  {{ form.per_price_for_buy }}
+                                </div>
+                  
+                               
                                 <div class="col-md-12">
                                   <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
                                   {{ form.description }}
@@ -444,7 +522,26 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
                             <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
                           </div>
+                          <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const numberField = document.getElementById("{{ form.number_of_stationery.id_for_label }}");
+                                const perPriceField = document.getElementById("{{ form.per_price_stationery.id_for_label }}");
+                                const totalField = document.getElementById("{{ form.stationery_price.id_for_label }}");
+                            
+                                function calculateTotal() {
+                                    let number = parseFloat(numberField.value) || 0;
+                                    let perPrice = parseFloat(perPriceField.value) || 0;
+                                    let total = number * perPrice;
+                            
+                                    totalField.value = total.toFixed(2);  // 2 decimal places
+                                }
+                            
+                                numberField.addEventListener("input", calculateTotal);
+                                perPriceField.addEventListener("input", calculateTotal);
+                            });
+                            </script>                            
                         </form>
+
                   
                       </div>
                     </div>
@@ -496,59 +593,121 @@
                         <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate>
                           {% csrf_token %}
                           <input type="hidden" name="form_type" value="book">
-                        
+                  
                           <div class="modal-body">
                             <div class="container-fluid">
                               <div class="row g-3">
-                        
-                                <div class="col-md-3">
-                                  <label for="{{ book_form.name.id_for_label }}" class="form-label">نام کتاب <span class="text-danger">*</span></label>
+                  
+                                <div class="col-md-4">
+                                  <label for="{{ book_form.date.id_for_label }}" class="form-label">
+                                    تاریخ <span class="text-danger">*</span>
+                                  </label>
+                                  {{ book_form.date }}
+                                </div>
+
+                                <script>
+                                  document.addEventListener('DOMContentLoaded', function () {
+                                      $('#datepicker6').datepicker({
+                                  
+                                      });
+                                  });
+                              </script>
+
+                                <div class="col-md-4">
+                                  <label for="{{ book_form.name.id_for_label }}" class="form-label">
+                                    نام کتاب <span class="text-danger">*</span>
+                                  </label>
                                   {{ book_form.name }}
                                 </div>
-                        
-                                <div class="col-md-3">
-                                  <label for="id_number_of_book" class="form-label">تعداد <span class="text-danger">*</span></label>
+                  
+                                <div class="col-md-4">
+                                  <label for="{{ book_form.number_of_book.id_for_label }}" class="form-label">
+                                    تعداد <span class="text-danger">*</span>
+                                  </label>
                                   {{ book_form.number_of_book }}
                                 </div>
-                                
+                  
                                 <div class="col-md-3">
-                                  <label for="id_price" class="form-label">قیمت <span class="text-danger">*</span></label>
+                                  <label for="{{ book_form.per_price.id_for_label }}" class="form-label">
+                                    مقدار فی <span class="text-danger">*</span>
+                                  </label>
+                                  {{ book_form.per_price }}
+                                </div>
+                  
+                                <div class="col-md-3">
+                                  <label for="{{ book_form.price.id_for_label }}" class="form-label">
+                                    قیمت <span class="text-danger">*</span>
+                                  </label>
                                   {{ book_form.price }}
                                 </div>
-                                
                                 <div class="col-md-3">
-                                  <label for="id_price" class="form-label"> مقدار پرداخت شده <span class="text-danger">*</span></label>
+                                  <label for="{{ book_form.paid_price.id_for_label }}" class="form-label">
+                                    مقدار پرداخت شده <span class="text-danger">*</span>
+                                  </label>
                                   {{ book_form.paid_price }}
                                 </div>
-                                
-
-                        
+                  
+                                <div class="col-md-3">
+                                  <label for="{{ book_form.per_book_price_for_buy.id_for_label }}" class="form-label"  data-bs-toggle="tooltip" 
+                                  data-bs-placement="top" 
+                                  title="*">
+                                    مقدار فی برای فروش <span class="text-danger">*</span>
+                                  </label>
+                                  {{ book_form.per_book_price_for_buy }}
+                                </div>
+                  
+                                <script>
+                                  document.addEventListener("DOMContentLoaded", function() {
+                                      const numberBookField = document.getElementById("{{ book_form.number_of_book.id_for_label }}");
+                                      const perPriceBookField = document.getElementById("{{ book_form.per_price.id_for_label }}");
+                                      const totalBookField = document.getElementById("{{ book_form.price.id_for_label }}");
+                                  
+                                      function calculateBookTotal() {
+                                          let number = parseFloat(numberBookField.value) || 0;
+                                          let perPrice = parseFloat(perPriceBookField.value) || 0;
+                                          let total = number * perPrice;
+                                  
+                                          totalBookField.value = total.toFixed(2); // 2 decimals
+                                      }
+                                  
+                                      numberBookField.addEventListener("input", calculateBookTotal);
+                                      perPriceBookField.addEventListener("input", calculateBookTotal);
+                                  });
+                                  </script>
+                                  
+                               
+                  
                                 <div class="col-md-12">
-                                  <label for="{{ book_form.description.id_for_label }}" class="form-label">توضیحات</label>
+                                  <label for="{{ book_form.description.id_for_label }}" class="form-label">
+                                    توضیحات
+                                  </label>
                                   {{ book_form.description }}
                                 </div>
-                        
+                  
                               </div>
                             </div>
                           </div>
-                        
+                  
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
                             <button type="submit" class="btn btn-success">ذخیره کتاب</button>
                           </div>
-           
                         </form>
+                  
                         
                   
                       </div>
                     </div>
                   </div>
                   
+                  
 
             </div>
         </div>
     </div>
 </div>
+
+
 
 
 {% endblock %}
