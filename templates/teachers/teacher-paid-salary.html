@@ -65,10 +65,34 @@
                                             <td><span class="badge badge-success">{{ i.paid_salary }}</span></td>
                                             <td><span class="badge badge-warning">{{ i.remain_salary }}</span></td>
                                             <td>
-                                                <a class="text-success mr-2" href="#"><i class="nav-icon i-Pen-2 font-weight-bold"></i></a>
-                                                <a class="text-danger mr-2" href="#"><i class="nav-icon i-Close-Window font-weight-bold"></i></a>
+                                                <!-- Actions like edit/delete buttons go here -->
+                                                <a href="{% url 'teachers:edit_teacher_salary_record' i.id %}" class="btn btn-dark text-info">تغییرات</a>
+                                                <button class="btn btn-light text-danger"
+                                                data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
+                                                    حذف
+                                                </button> 
                                             </td>
                                         </tr>
+                                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                              <div class="modal-content text-center">
+                                                <div class="modal-header">
+                                                  <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                  </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                  <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                                  <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                                                  <div class="d-flex justify-content-center gap-2">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                                    <a href="{% url 'teachers:delete_teacher_salary_record' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                        </div>
                                         {% endfor %}
                                     </tbody>
                                     <tfoot>
@@ -117,21 +141,6 @@
                             <label for="id_amount"> مقدار<span style="color: red;">*</span></label>
                             {{ form.amount }}
                         </div>
-                        
-                        {% if total_paid_amount_for_teacher.total_amount > 0 %}
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="loan_amount"> مقدار پول باقی مانده<span style="color: red;">*</span></label>
-                            <input type="number" id="loan_amount" name="remain_amount"
-                                   value="{{ total_paid_amount_for_teacher.total_amount }}" class="form-control">
-                        </div>
-                        {% endif %}
-                        {% if total_teacher_loan.total_loan_amount > 0 %}
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="loan_amount"> مقدار قرض<span style="color: red;">*</span></label>
-                            <input type="number" id="loan_amount" name="loan_amount"
-                                   value="{{ total_teacher_loan.total_loan_amount }}" class="form-control">
-                        </div>
-                        {% endif %}
                         
                         <div class="col-md-3 form-group mb-3">
                             <label for="id_paid_salary"> مقدار برای پرداخت<span style="color: red;">*</span></label>

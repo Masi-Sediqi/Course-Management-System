@@ -90,7 +90,7 @@ def edit_students(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, f" دانش‌آموز{get_student_id.first_name} {get_student_id.last_name} موفقانه تغییرات آورده شد.")
-            return redirect('students:edit_students', id=get_student_id.id)  # or render response
+            return redirect('students:students_registration')  # or render response
         else:
             return HttpResponse('مشکل در تغییر شاگرد آمده ...')
 
@@ -160,44 +160,25 @@ shamsi_months = {
     "12": "حوت",
 }
 
-
 def student_fees_detail(request, student_id):
     g_form=None
     form=None
     referer = request.META.get('HTTP_REFERER', '/')
     student = get_object_or_404(Student, id=student_id)
-    get_remain_money = StudentRemailMoney.objects.filter(student=student).first()
+    student_classes = student.classs.all()
 
-    fees_record_related_student = Student_fess_info.objects.filter(student=student)
-    # remain_money_records = StudentGiveRemainMoney.objects.filter(studnet=student)
+    context = {
+        'student': student,
+        'g_form': g_form,
+        'form': form,
+        'student_classes': student_classes,
+    }
+    return render(request, 'students/student-fees-detail.html', context)
 
-    # Add a type field to each record (so we know قرض or پرداخت in template)
-    # for record in fees_record_related_student:
-    #     record.record_type = "قرض"
-    #     record.amount_paid = record.give_fees
-    #     record.remain = record.remain_fees
-    #     record.month_display = record.month
-    #     record.model_type = "fees"
-    #     record.student_obj = record.student  # unify field name
-    #     # 🔴 Flag for remain_fees
-    #     record.is_red = record.remain_fees and record.remain_fees > 0
-    #     record.is_green = False
-
-    # for record in remain_money_records:
-    #     record.record_type = "پرداخت"
-    #     record.orginal_fees = "-"
-    #     record.give_fees = record.amount
-    #     record.remain_fees = "-"
-    #     record.month_display = "-"
-    #     record.model_type = "remain"
-    #     record.student_obj = record.studnet  # unify field name
-    #     # 🟢 Always green
-    #     record.is_red = False
-    #     record.is_green = True
-
-    # Merge them into one list
-    # all_records = list(chain(fees_record_related_student, remain_money_records))
-    # all_records.sort(key=lambda r: r.created_at)
+def student_paid_fees(request, stu_id, cla_id):
+    referer = request.META.get('HTTP_REFERER', '/')
+    student = Student.objects.get(id=stu_id)
+    stu_class = SubClass.objects.get(id=cla_id)
 
     if request.method == "POST":
         get_form_type = request.POST.get('form_type')
@@ -215,7 +196,8 @@ def student_fees_detail(request, student_id):
                 except:
                     month_name = ""
                 fees_info = form.save(commit=False)
-                fees_info.student = student  # Link to the correct student
+                fees_info.student = student 
+                fees_info.st_class = stu_class 
                 fees_info.month = month_name  # Save the month name
                 # Handle total income safely
                 total_income_obj, created = TotalIncome.objects.get_or_create(pk=1)  # Ensure single row
@@ -239,19 +221,102 @@ def student_fees_detail(request, student_id):
 
                 total_income_obj.save()
                 fees_info.save()
+                messages.success(request, 'فیس ذیل موفقانه ذخیره شد')
                 return redirect(referer)
     else:
-        form = Student_fess_infoForm()
-        g_form = StudentGiveRemainMoneyForm()
+        form = Student_fess_infoForm(initial={"orginal_fees": stu_class.fees})
+        records = Student_fess_info.objects.filter(student=student, st_class=stu_class)
+
 
     context = {
-        'student': student,
-        'g_form': g_form,
-        'form': form,
-        'fees_record_related_student': fees_record_related_student,
-        'get_remain_money': get_remain_money,
+        'student':student,
+        'stu_class':stu_class,
+        'form':form,
+        'records':records,
     }
-    return render(request, 'students/student-fees-detail.html', context)
+    return render(request, 'students/student-paid-fees.html', context)
+
+def delete_paid_fess(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
+    fess_id = Student_fess_info.objects.get(id=id)
+    income = TotalIncome.objects.get(pk=1)
+    income.total_amount -= fess_id.give_fees
+    # Sub Track Amount From Remain Money
+    subtrack_remain_money = fess_id.orginal_fees - fess_id.give_fees
+    get_student_remain_money_model = StudentRemailMoney.objects.get(student=fess_id.student.id)
+    get_student_remain_money_model.amount -= subtrack_remain_money 
+    get_student_remain_money_model.save()
+    income.save()
+    messages.success(request, 'ریکارد پرداخت موفقانه حذف شد')
+    fess_id.delete()
+    return redirect(referer)
+
+def edit_paid_fees(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
+    fess_id = Student_fess_info.objects.get(id=id)
+    past_paid_amount = fess_id.give_fees
+    if request.method == "POST":
+        form = Student_fess_infoForm(request.POST, instance=fess_id)
+        if form.is_valid():
+            get_date = form.cleaned_data.get('date')
+            get_orginal_fess = form.cleaned_data.get('orginal_fees')
+            get_give_money = form.cleaned_data.get('give_fees')
+            try:
+                parts = get_date.split('/')
+                month_number = parts[1].zfill(2)  # Ensures "4" becomes "04"
+                month_name = shamsi_months.get(month_number, "")
+            except:
+                month_name = ""
+            fees_info = form.save(commit=False)
+            fees_info.student = fess_id.student 
+            fees_info.st_class = fess_id.st_class
+            fees_info.month = month_name  # Save the month name
+
+            total_income_obj, created = TotalIncome.objects.get_or_create(pk=1)  # Ensure single row
+
+            try:
+                record = StudentRemailMoney.objects.get(student=fess_id.student)
+            except StudentRemailMoney.DoesNotExist:
+                StudentRemailMoney.objects.create(
+                    student=fess_id.student,
+                    amount=0
+                )
+
+            if get_give_money >= past_paid_amount:
+                if get_give_money > get_orginal_fess:
+                    messages.warning(request, 'مقدار برای پرداخت بیشتر از مقدار است که باید پرداخت شود')
+                    return redirect("students:student_paid_fees", stu_id=fess_id.student.id, cla_id=fess_id.st_class.id)
+                else:
+                    record.amount -= fess_id.remain_fees
+                    new_remain = get_orginal_fess - get_give_money
+                    record.amount += new_remain
+                    total_income_obj.total_amount = Decimal(str(total_income_obj.total_amount)) + Decimal(new_remain)
+                    fees_info.remain_fees = new_remain
+                    record.save()
+
+            elif get_give_money < past_paid_amount:
+                record.amount -= fess_id.remain_fees
+                new_remain = get_orginal_fess - get_give_money
+                remain = past_paid_amount - get_give_money
+                fees_info.remain_fees = new_remain
+                record.amount += new_remain
+                total_income_obj.total_amount = Decimal(str(total_income_obj.total_amount)) - Decimal(remain)
+                record.save()
+
+            total_income_obj.save()
+            fees_info.save()
+            messages.SUCCESS(request, 'ریکارد ذیل موفقانه ایدیت شد')
+            return redirect("students:student_paid_fees", stu_id=fess_id.student.id, cla_id=fess_id.st_class.id)
+        else:
+            return HttpResponse('Form Is Not Valid')
+
+    else:
+        form = Student_fess_infoForm(instance=fess_id)
+    context = {
+        'fess_id':fess_id,
+        'form':form,
+    }
+    return render(request, 'students/edit-student-paid-fees.html', context)
 
 def student_activate(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -298,6 +363,7 @@ def student_improvment(request, id):
 
 
 def buy_book(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
     total_book = TotalBook.objects.all()
     student = Student.objects.get(id=id)
     allStationeryItem = TotalStationery.objects.all()
@@ -313,7 +379,6 @@ def buy_book(request, id):
             stationery_ids = request.POST.getlist("stationeries")
             total_price = StationeryItem.objects.filter(id__in=stationery_ids).aggregate(total=Sum("per_price_for_buy"))["total"] or 0
             return HttpResponse(f"<div class='alert alert-card alert-info'>مجموع قیمت: {total_price} AFN</div>")
-
         else:
             return HttpResponse("<div class='alert alert-card alert-warning'>هیچ موردی انتخاب نشده است</div>")
     
@@ -342,6 +407,9 @@ def buy_book(request, id):
                         line_total = tb.per_price * qty
                         print(f"line_total {line_total}")
                         total_price += line_total
+                        if get_paid_amount > total_price:
+                            messages.error(request, 'مقدار پرداخت بیشتر از مقدار مجموعی است')
+                            return redirect(referer)
                         print(f"total_price {total_price}")
                         # update stock
                         tb.total_amount -= qty
@@ -412,6 +480,9 @@ def buy_book(request, id):
                     ts = TotalStationery.objects.select_for_update().get(id=ts_id)
                     line_total = ts.per_price * qty
                     total_price += line_total
+                    if get_paid_amount > total_price:
+                        messages.error(request, 'مقدار پرداخت بیشتر از مقدار مجموعی است')
+                        return redirect(referer)
                     qty_dict[ts_id] = qty
 
                 remain_amount = total_price - get_paid_amount
@@ -480,7 +551,9 @@ def buy_book(request, id):
             "paid": rec.paid_amount,
             "remain": rec.remain_amount,
             "desc": rec.description,
-            "more_info": reverse('students:student_buyed_book', args=[rec.student.id, rec.id])
+            "more_info": reverse('students:student_buyed_book', args=[rec.student.id, rec.id]),
+            "delete_link": reverse('students:delete_student_buy_book', args=[rec.id]),
+            "edit_link": reverse('students:edit_student_buy_book', args=[rec.student.id, rec.id]),
         })
 
     # append stationery records
@@ -494,7 +567,9 @@ def buy_book(request, id):
             "paid": rec.paid_stationery_amount,
             "remain": rec.remain_amount,
             "desc": rec.description,
-            "more_info_stationery": reverse('students:student_buyed_stationery', args=[rec.student.id, rec.id])
+            "more_info_stationery": reverse('students:student_buyed_stationery', args=[rec.student.id, rec.id]),
+            "delete_link": reverse('students:delete_student_buy_book', args=[rec.id]),
+            "edit_link": reverse('students:edit_student_buy_book', args=[rec.student.id, rec.id]),
         })
 
     # optional: sort all records (by id or date)
@@ -510,13 +585,173 @@ def buy_book(request, id):
     }
     return render(request, 'students/student-buy-book.html', context)
 
+def delete_student_buy_book(request, id):
+    referer = request.META.get("HTTP_REFERER", "/")
+    buy_book = get_object_or_404(BuyBook, id=id)
+
+    try:
+        with transaction.atomic():
+            # 1. Subtract paid amount from TotalIncome
+            total_income, _ = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+            total_income.total_amount -= buy_book.paid_amount
+            total_income.save()
+
+            # 2. Subtract remain_amount from student's remain money
+            if buy_book.remain_amount > 0:
+                student_remain, _ = StudentRemailMoney.objects.get_or_create(
+                    student=buy_book.student, defaults={'amount': 0}
+                )
+                student_remain.amount -= buy_book.remain_amount
+                if student_remain.amount < 0:
+                    student_remain.amount = 0
+                student_remain.save()
+
+            # 3. Restore the book stock
+            for book in buy_book.book.all():
+                try:
+                    # Find the BookRecord for qty
+                    record = BookRecord.objects.filter(buy_book=buy_book, book=book).first()
+                    if record:
+                        total_book = TotalBook.objects.get(book=book)
+                        total_book.total_amount += record.number_of_book
+                        total_book.save()
+                        record.delete()  # 4. delete BookRecord
+                except TotalBook.DoesNotExist:
+                    pass
+
+            # 5. Delete BuyBook record
+            buy_book.delete()
+
+            messages.success(request, "خریداری کتاب موفقانه حذف شد ✅")
+
+    except Exception as e:
+        messages.error(request, f"خطا در حذف ریکارد: {e}")
+    return redirect(referer)
+
+def edit_student_buy_book(request, student_id, buybook_id):
+    student = get_object_or_404(Student, id=student_id)
+    buy_book = get_object_or_404(BuyBook, id=buybook_id)
+    total_book = TotalBook.objects.all()
+
+    if request.method == "POST":
+        form = BuyBookForm(request.POST, instance=buy_book)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # -------------------------------
+                    # 1. Reverse old purchase
+                    # -------------------------------
+                    total_income, _ = TotalIncome.objects.get_or_create(pk=1, defaults={'total_amount': 0})
+                    total_income.total_amount -= buy_book.paid_amount
+                    total_income.save()
+
+                    if buy_book.remain_amount > 0:
+                        student_remain, _ = StudentRemailMoney.objects.get_or_create(
+                            student=student, defaults={'amount': 0}
+                        )
+                        student_remain.amount -= buy_book.remain_amount
+                        if student_remain.amount < 0:
+                            student_remain.amount = 0
+                        student_remain.save()
+
+                    # restore old stock
+                    for record in BookRecord.objects.filter(buy_book=buy_book):
+                        try:
+                            total_book = TotalBook.objects.get(book=record.book)
+                            total_book.total_amount += record.number_of_book
+                            total_book.save()
+                        except TotalBook.DoesNotExist:
+                            pass
+                    # delete old BookRecords
+                    BookRecord.objects.filter(buy_book=buy_book).delete()
+
+                    # -------------------------------
+                    # 2. Apply new purchase
+                    # -------------------------------
+                    get_paid_amount = float(request.POST.get('paid_amount', 0))
+                    book_ids = request.POST.getlist('books')
+                    total_price = 0
+                    book_records = []
+
+                    for tb_id in book_ids:
+                        qty = int(request.POST.get(f'quantity_{tb_id}', 0))
+                        if qty <= 0:
+                            continue
+                        tb = TotalBook.objects.select_for_update().get(id=tb_id)
+                        line_total = tb.per_price * qty
+                        total_price += line_total
+
+                        # reduce stock
+                        tb.total_amount -= qty
+                        tb.save()
+
+                        book_records.append({
+                            "book": tb.book,  # Books instance
+                            "qty": qty,
+                            "line_total": line_total,
+                        })
+
+                    remain_amount = total_price - get_paid_amount
+
+                    # Update total income
+                    total_income.total_amount = (total_income.total_amount or Decimal(0)) + get_paid_amount
+                    total_income.save(update_fields=['total_amount'])
+
+                    if remain_amount > 0:
+                        student_remain, _ = StudentRemailMoney.objects.get_or_create(
+                            student=student, defaults={'amount': 0}
+                        )
+                        student_remain.amount += remain_amount
+                        student_remain.save()
+
+                    # save BuyBook instance
+                    instance = form.save(commit=False)
+                    instance.student = student
+                    instance.number_of_book = sum(b["qty"] for b in book_records)
+                    instance.total_amount = total_price
+                    instance.remain_amount = remain_amount
+                    instance.paid_amount = get_paid_amount
+                    instance.save()
+                    instance.book.set([b["book"].id for b in book_records])
+
+                    # recreate BookRecords
+                    for b in book_records:
+                        BookRecord.objects.create(
+                            student=student,
+                            book=b["book"],
+                            buy_book=instance,
+                            date=instance.date,
+                            number_of_book=b["qty"],
+                            total_amount=b["line_total"]
+                        )
+
+                    messages.success(request, "خریداری کتاب موفقانه ویرایش شد ✅")
+                    return redirect("students:buy_book", id=student.id)
+
+            except Exception as e:
+                messages.error(request, f"خطا در ویرایش: {e}")
+
+    else:
+        form = BuyBookForm(instance=buy_book)
+
+    # show old BookRecords for this BuyBook
+    records = BookRecord.objects.filter(buy_book=buy_book)
+
+    return render(request, "students/edit-buy-book.html", {
+        "form": form,
+        "student": student,
+        "buy_book": buy_book,
+        "records": records,
+        "total_book": total_book,
+    })
+
 
 def student_paid_Remain_money(request, id):
     referer = request.META.get('HTTP_REFERER', '/')
 
     student = Student.objects.get(id=id)
     get_remain_money = StudentRemailMoney.objects.filter(student=student).first()
-
+    total = TotalIncome.objects.get(pk=1)
     remain_money_records = StudentGiveRemainMoney.objects.filter(studnet=student)
 
     if request.method == "POST":
@@ -529,8 +764,11 @@ def student_paid_Remain_money(request, id):
             get_remain_money.amount -= get_Amount
             instance = g_form.save(commit=False)
             get_remain_money.save()
+            total.total_amount += get_Amount
+            total.save()
             instance.studnet = student
             instance.save()
+            messages.success(request, 'ریکارد پرداخت قرض موفقانه اضافه شد')
             return redirect(referer)
 
     else:
@@ -543,6 +781,63 @@ def student_paid_Remain_money(request, id):
         'get_remain_money':get_remain_money,
     }
     return render(request, 'students/student-remain-money.html', context)
+
+def delete_paid_remain_money(request, id):
+    remain_id = StudentGiveRemainMoney.objects.get(id=id)
+    get_remain_money = StudentRemailMoney.objects.get(student=remain_id.studnet)
+    total = TotalIncome.objects.get(pk=1)
+
+    total.total_amount -= remain_id.amount
+    get_remain_money.amount += remain_id.amount 
+
+    total.save()
+    get_remain_money.save()
+    remain_id.delete()
+    messages.success(request, 'ریکارد ذیل موفقانه حذف شد')
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+def edit_paid_remain_money(request, id):
+    remain_record = get_object_or_404(StudentGiveRemainMoney, id=id)
+    student = remain_record.studnet.id  # watch spelling (you used studnet in model)
+    get_remain_money = StudentRemailMoney.objects.get(student=student)
+    total = TotalIncome.objects.get(pk=1)
+
+    past_amount = remain_record.amount  # old value before edit
+
+    if request.method == "POST":
+        form = StudentGiveRemainMoneyForm(request.POST, instance=remain_record)
+        if form.is_valid():
+            new_amount = form.cleaned_data.get("amount")
+
+            # Restore old state first
+            get_remain_money.amount += past_amount
+            total.total_amount -= past_amount
+
+            # Now apply new amount
+            if new_amount > get_remain_money.amount:
+                messages.error(request, "مقدار پرداخت شده بیشتر از مقدار قرض باقی‌مانده است")
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+
+            get_remain_money.amount -= new_amount
+            total.total_amount += new_amount
+
+            # Save everything
+            get_remain_money.save()
+            total.save()
+            form.save()
+
+            messages.success(request, "ریکارد پرداخت قرض موفقانه ویرایش شد")
+            return redirect("students:student_paid_Remain_money", id=student)
+    else:
+        form = StudentGiveRemainMoneyForm(instance=remain_record)
+
+    context = {
+        "form": form,
+        "remain_record": remain_record,
+        "student": student,
+        "get_remain_money": get_remain_money,
+    }
+    return render(request, "students/edit-remain-money.html", context)
 
 def student_buyed_book(request, stu_id, book_id):
     student = Student.objects.get(id=stu_id)

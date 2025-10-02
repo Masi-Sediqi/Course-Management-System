@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+            </ul>
+            <div class="card">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+                        <!-- ====== Edit Station Form ====== -->
+                        <form method="POST" action="{% url 'students:edit_student_buy_book' student_id=student.id buybook_id=buy_book.id %}">
+                            {% csrf_token %}
+                            <div class="modal-dialog modal-lg">
+                              <div class="modal-content p-3">
+                                <div class="card-title h5 mb-3">ایدیت صنف "{{ instance.name }}"</div>
+                                <div>
+                                    <div class="row g-3">
+                                        <!-- تاریخ -->
+                                        <div class="col-md-6">
+                                            <label for="datepicker21" class="form-label">تاریخ</label>
+                                            {{ form.date }}
+                                        </div><script> document.addEventListener('DOMContentLoaded', function () { $('#datepicker21').datepicker({ }); }); </script>
+                        
+                                        <div class="col-md-6">
+                                            <label for="paid_amount" class="form-label">مقدار پول</label>
+                                            {{ form.paid_amount }}
+                                        </div>
+                                        
+                                        <div class="p-2 border rounded" style="max-height: 220px; overflow-y: auto;">
+                                            {% for tb in total_book %}
+                                                <div class="form-check d-flex align-items-center mb-2">
+                                                    <input 
+                                                        class="form-check-input book-checkbox" 
+                                                        type="checkbox" 
+                                                        name="books" 
+                                                        value="{{ tb.id }}" 
+                                                        data-price="{{ tb.book.per_book_price_for_buy }}"
+                                                        id="book{{ tb.id }}">
+                                                    
+                                                    <label class="form-check-label ms-2 flex-grow-1" for="book{{ tb.id }}" style="padding-right: 20px;">
+                                                        {{ tb.book.name }}
+                                                        <span class="badge bg-secondary">موجودی: {{ tb.total_amount }}</span>
+                                                        <span class="badge bg-info">قیمت: {{ tb.book.per_book_price_for_buy }}</span>
+                                                    </label>
+                                        
+                                                    <input 
+                                                        type="number" 
+                                                        name="quantity_{{ tb.id }}" 
+                                                        class="form-control form-control-sm d-none book-qty" 
+                                                        min="1" 
+                                                        max="{{ tb.total_amount }}" 
+                                                        value="1" 
+                                                        style="width: 90px;">
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <strong>مجموع قیمت: <span id="totalPrice">0</span> افغانی</strong><br>
+                                            <strong>مبلغ باقی مانده: <span id="remainAmount">0</span> افغانی</strong>
+                                        </div>
+                                        <!-- توضیحات -->
+                                        <div class="col-md-12">
+                                            <label for="description" class="form-label">تفصیل</label>
+                                            {{ form.description }}
+                                        </div>
+                                    </div>
+                                    <script>
+                                        document.addEventListener("DOMContentLoaded", () => {
+                                        
+                                            const totalPriceElem = document.getElementById("totalPrice");
+                                            const remainElem = document.getElementById("remainAmount");
+                                            const paidInput = document.querySelector('input[name="paid_amount"]');
+                                        
+                                            function updateTotalPrice() {
+                                                let total = 0;
+                                                document.querySelectorAll(".book-checkbox:checked").forEach(cb => {
+                                                    const qtyInput = cb.closest(".form-check").querySelector(".book-qty");
+                                                    const qty = parseInt(qtyInput.value) || 1;
+                                                    const price = parseFloat(cb.dataset.price) || 0;
+                                                    total += qty * price;
+                                                });
+                                                totalPriceElem.textContent = total;
+                                                updateRemain();
+                                            }
+                                        
+                                            function updateRemain() {
+                                                const total = parseFloat(totalPriceElem.textContent) || 0;
+                                                const paid = parseFloat(paidInput.value) || 0;
+                                                const remain = total - paid;
+                                                remainElem.textContent = remain >= 0 ? remain : 0;
+                                            }
+                                        
+                                            // Toggle quantity input when checkbox is checked
+                                            document.querySelectorAll(".book-checkbox").forEach(cb => {
+                                                cb.addEventListener("change", function() {
+                                                    const qtyInput = this.closest(".form-check").querySelector(".book-qty");
+                                                    if (this.checked) {
+                                                        qtyInput.classList.remove("d-none");
+                                                    } else {
+                                                        qtyInput.classList.add("d-none");
+                                                        qtyInput.value = 1;
+                                                    }
+                                                    updateTotalPrice();
+                                                });
+                                            });
+                                        
+                                            // Update total when quantity changes
+                                            document.querySelectorAll(".book-qty").forEach(qtyInput => {
+                                                qtyInput.addEventListener("input", updateTotalPrice);
+                                            });
+                                        
+                                            // Update remaining when paid amount changes
+                                            paidInput.addEventListener("input", updateRemain);
+                                        });
+                                        </script>
+                        
+                                  <div class="text-end">
+                                    
+                                    <!-- Dismiss button -->
+                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
+                                      بستن
+                                    </button>
+                                  
+                                    <!-- Submit button -->
+                                    <button class="btn btn-primary mt-2" type="submit">
+                                      ذخیره کردن
+                                    </button>
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                          </form>
+                               
+    
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          $('#datepicker3').datepicker({});
+        });
+        </script>
+        
+                        <!-- ====== / Edit Station Form ====== -->
+                      </div>
+                      
+                </div>
+            </div>
+        </div>
+    </div><!-- end of main-content -->
+</div>
+
+{% endblock %}

@@ -10,6 +10,28 @@
             <li>صنوف</li>
         </ul>
     </div>
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <script src="{% static 'js/sweet.js' %}"></script>
+
+        <script>
+            {% if messages %}
+                {% for message in messages %}
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                        title: "{{ message|escapejs }}",
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                {% endfor %}
+            {% endif %}
+        </script>
     <div class="separator-breadcrumb border-top"></div>
     <!-- content goes here-->
     <section class="ul-todo-list-content">
@@ -227,15 +249,47 @@
                                                                     {% if i.active == True %}فعال
                                                                 {% else %}غیر فعال
                                                                 {% endif %}
-                                                                </span></td>
-                                                                <td><a class="text-success mr-2" href="{% url 'classes:edit_sub_class' i.pk %}"><i class="nav-icon i-Pen-2 font-weight-bold"></i></a>
-                                                                  <a class="text-danger mr-2" 
-                                                                    href="#" 
-                                                                    data-url="{% url 'classes:delete_sub_class' i.pk %}" 
-                                                                    onclick="return showDeletePopup(this)">
-                                                                    <i class="nav-icon i-Close-Window font-weight-bold"></i>
-                                                                    </a>
-                                                            </tr>
+                                                                </span></td>    
+                                                                <td>
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                    aria-haspopup="true" aria-expanded="false">
+                                                                    <i class="fas fa-ellipsis-v"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
+                                                                    <a class="dropdown-item text-info" href="{% url 'classes:edit_sub_class' i.pk %}">تغیرات</a>
+                                                                    {% if i.active == False %}
+                                                                    <a class="dropdown-item text-info" href="{% url 'classes:active_sub_class' i.pk %}"> فعال</a>
+                                                                    {% else %}
+                                                                    <a class="dropdown-item text-info" href="{% url 'classes:deactive_sub_class' i.pk %}">غیر فعال</a>
+                                                                    {% endif %}
+                                                                    <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
+                                                                        حذف
+                                                                        </a>                                      
+                                                                </div>
+                                                                </div>
+                                                                </td>
+                                                                </tr>
+                                                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg" role="document">
+                                                                      <div class="modal-content text-center">
+                                                                        <div class="modal-header">
+                                                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
+                                                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                            <span aria-hidden="true">&times;</span>
+                                                                          </button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                          <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                                                          <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                                                                          <div class="d-flex justify-content-center gap-2">
+                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                                                            <a href="{% url 'classes:delete_sub_class' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                                                          </div>
+                                                                        </div>
+                                                                      </div>
+                                                                    </div>
+                                                                  </div>
                                                             {% endfor %}
                                                         </tbody>
                                                     </table>
@@ -304,36 +358,5 @@
     </section><!-- end of main-content -->
 </div>
 
-
-<script>
-function showDeletePopup(link) {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position:fixed; top:0; left:0; width:100%; height:100%;
-        background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:10000;
-        font-family:Tahoma, sans-serif; direction:rtl;
-    `;
-
-    overlay.innerHTML = `
-        <div style="
-            background:#fff; padding:25px 30px; border-radius:12px;
-            box-shadow:0 8px 20px rgba(0,0,0,0.4); text-align:center; max-width:400px;">
-            <h3 style="color:#e74c3c; margin-bottom:15px;">هشدار!</h3>
-            <p style="margin-bottom:25px; font-size:16px;">
-                آیا مطمئن هستید که می‌خواهید این زیرکلاس حذف شود؟ این عملیات قابل بازگشت نیست.
-            </p>
-            <button id="cancelBtn" style="padding:8px 18px; margin-right:10px; border:none; border-radius:5px; background:#7f8c8d; color:#fff; cursor:pointer;">لغو</button>
-            <button id="deleteBtn" style="padding:8px 18px; border:none; border-radius:5px; background:#e74c3c; color:#fff; cursor:pointer;">حذف</button>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    overlay.querySelector('#cancelBtn').onclick = () => overlay.remove();
-    overlay.querySelector('#deleteBtn').onclick = () => window.location.href = link.dataset.url;
-
-    return false;
-}
-</script>
 
 {% endblock %}

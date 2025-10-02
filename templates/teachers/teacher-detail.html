@@ -27,7 +27,7 @@
                     <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                         <div class="card-body text-center"><i class="i-Financial"></i>
                             <div class="content">
-                                <p class="text-muted mt-2 mb-0">فیس</p>
+                                <p class="text-muted mt-2 mb-0" style="font-size: 13px;">پول داده شده</p>
                                 <p class="text-primary text-24 line-height-1 mb-2"> {{ total_paid_amount_for_teacher.total_amount }} </p>
                             </div>
                         </div>
@@ -127,11 +127,11 @@
 
             <div class="text-center mt-4">
                 <div class="btn-group flex-wrap" role="group">
-                    <a href="" class="btn btn-outline-secondary me-2">بازگشت</a>
-                    <a href="" class="btn btn-outline-warning me-2">تغیرات</a>
-                    <a href="" class="btn btn-outline-danger me-2"
+                    <a onclick="window.history.back()" class="btn btn-outline-secondary me-2">بازگشت</a>
+                    <a href="{% url 'teachers:edit_teacher' teacher.id %}" class="btn btn-outline-warning me-2">تغیرات</a>
+                    <a href="{% url 'teachers:deactive_teacher' teacher.id %}" class="btn btn-outline-danger me-2"
                        onclick="return confirm('آیا مطمئن هستید که می‌خواهید این استاد را حذف کنید؟')">
-                       حذف
+                       غیر فعال
                     </a>
                     <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-outline-primary me-2">
                         <i class="fas fa-money-bill-wave"></i> پرداخت ماش
@@ -142,10 +142,11 @@
                     <a href="{% url 'teachers:add_attendance' teacher.id %}" class="btn btn-outline-dark me-2">
                         <i class="fas fa-credit-card"></i> درخواست رخصتی
                     </a>
-                    
+                    {% if get_total_remain_money.total_amount > 0 %}
                     <a href="{% url 'teachers:teacher_paid_remain_money' teacher.id %}" class="btn btn-outline-success me-2">
                         <i class="fas fa-credit-card"></i> پرداخت پول باقی مانده
                     </a>
+                    {% endif %}
                 </div>
             </div>
             

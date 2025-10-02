@@ -22,7 +22,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                         <div class="card-body text-center"><i class="i-Financial"></i>
                             <div class="content">
@@ -31,13 +31,13 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                         <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
                             <div class="content">
                                 <p class="text-muted mt-2 mb-0">قرض</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">{{remain_amount.amount}}</p>
+                                <p class="text-primary text-24 line-height-1 mb-2">{{ remain_amount.amount|default:"0" }}                                </p>
                             </div>
                         </div>
                     </div>
@@ -163,58 +163,67 @@
             </div>
 
             <div class="text-end mt-4">
-                <a href="{% url 'students:students_registration' %}" class="btn btn-secondary me-2">بازگشت</a>
-                <a href="{% url 'students:edit_students' student.id %}" class="btn btn-warning me-2">تغیرات</a>
-                <a href="{% url 'students:delete_students' student.id %}" class="btn btn-danger"
+                <a href="{% url 'students:students_registration' %}" class="btn btn-back">بازگشت</a>
+                <a href="{% url 'students:student_activate' student.id %}" class="btn btn-activate">فعال</a>
+                <a href="{% url 'students:edit_students' student.id %}" class="btn btn-edit">تغیرات</a>
+                <a href="{% url 'students:delete_students' student.id %}" class="btn btn-delete"
                    onclick="return confirm('آیا مطمئن هستید که می‌خواهید این شاگرد را حذف کنید؟')">حذف</a>
-                   <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-warning btn-icon m-1" type="button"><span class="ul-btn__icon"><i class="fas fa-money-bill-wave"></i>
-                   </span><span class="ul-btn__text"> فیس </span></a>
-
-                   <a href="{% url 'students:student_paid_Remain_money' student.id %}" class="btn btn-dark btn-icon m-1" type="button"><span class="ul-btn__icon"><i class="fas fa-money-bill-wave"></i>
-                   </span><span class="ul-btn__text">  پول باقی مانده</span></a>
-                   
-                   <a href="{% url 'students:buy_book' student.id %}" class="btn btn-light m-1">خرید قرطاسیه & کتاب</a>
-               <!-- Button -->
+                <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-fees">
+                    <i class="fas fa-money-bill-wave"></i> فیس
+                </a>
+                <a href="{% url 'students:student_paid_Remain_money' student.id %}" class="btn btn-remain">
+                    <i class="fas fa-coins"></i> پول باقی مانده
+                </a>
+                <a href="{% url 'students:buy_book' student.id %}" class="btn btn-book">خرید قرطاسیه & کتاب</a>
                 <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote">
                     <span class="text">ارتقاع شاگرد</span>
                     <span class="icon">⬆️</span>
                 </a>
-                
-                <!-- Style -->
-                <style>
-                    .btn-promote {
-                    background-color: #bc12f0;
-                    color: white;
-                    font-size: 1rem;
+            </div>
+            
+            <!-- Style -->
+            <style>
+                .text-end .btn {
                     border: none;
                     border-radius: 8px;
+                    padding: 8px 16px;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    margin: 4px;
+                    transition: all 0.3s ease-in-out;
+                    color: #fff !important;
                     display: inline-flex;
                     align-items: center;
-                    gap: 8px;
-                    transition: all 0.3s ease-in-out;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    overflow: hidden;
-                    }
-                
-                    .btn-promote:hover {
-                    background-color: #218838;
-                    transform: translateY(-4px);
-                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-                    }
-                
-                    .btn-promote .icon {
-                    opacity: 0;
-                    transform: translateY(5px);
-                    transition: all 0.3s ease-in-out;
-                    }
-                
-                    .btn-promote:hover .icon {
-                    opacity: 1;
-                    transform: translateY(0);
-                    }
-                </style>
-  
-            </div>
+                    gap: 6px;
+                    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+                }
+            
+                /* Colors for each button */
+                .btn-back       { background: #6c757d; }   /* Gray */
+                .btn-activate   { background: #17a2b8; }   /* Teal/Info */
+                .btn-edit       { background: #ffc107; color:#000 !important;} /* Yellow */
+                .btn-delete     { background: #dc3545; }   /* Red */
+                .btn-fees       { background: #28a745; }   /* Green */
+                .btn-remain     { background: #343a40; }   /* Dark */
+                .btn-book       { background: #007bff; }   /* Blue */
+                .btn-promote    { background: #bc12f0; }   /* Purple */
+            
+                /* Hover effects */
+                .btn:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+                    opacity: 0.9;
+                    color: #000 !important;   /* text turns black */
+                }
+
+                /* Special case for promote button */
+                .btn-promote:hover { 
+                    background: #218838; 
+                    color: #000 !important;   /* also black text */
+                }
+
+            </style>
+            
         </div>
     </div>
 </div>

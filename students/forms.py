@@ -106,7 +106,7 @@ class StudentImporvmentForm(forms.ModelForm):
 
     class Meta:
         model = StudentImporvment
-        fields = ["date","description","file","change_book","past_book"]
+        fields = ["date","description","file","after_class","past_class"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["date"].widget.attrs.update(
@@ -118,10 +118,10 @@ class StudentImporvmentForm(forms.ModelForm):
         self.fields["file"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
-        self.fields["change_book"].widget.attrs.update(
+        self.fields["after_class"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
-        self.fields["past_book"].widget.attrs.update(
+        self.fields["past_class"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
 

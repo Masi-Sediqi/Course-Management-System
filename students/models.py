@@ -25,6 +25,8 @@ class Student(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+
+        
 class StudentWithoutClass(models.Model):
     first_name = models.CharField(max_length=100 , blank=False)
     last_name = models.CharField(max_length=100 , blank=True)
@@ -47,8 +49,9 @@ class StudentWithoutClass(models.Model):
 
 class Student_fess_info(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    orginal_fees = models.FloatField(blank=False)  # <--- This is your فیس
-    give_fees = models.FloatField(blank=False)  # <--- This is your فیس
+    st_class = models.ForeignKey(SubClass, on_delete=models.SET_NULL, blank=True, null=True)
+    orginal_fees = models.FloatField(blank=False)
+    give_fees = models.FloatField(blank=False)
     remain_fees = models.FloatField(blank=True, null=True)
     date = models.CharField(max_length=15, blank=False)
     description = models.TextField(blank=True, null=True)
@@ -60,20 +63,12 @@ class StudentGiveRemainMoney(models.Model):
     studnet = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True)
     date = models.CharField(max_length=15, blank=False)
     amount = models.FloatField(blank=False)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 class StudentRemailMoney(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="student_remains", blank=True, null=True)
     amount = models.FloatField()
-
-class StudentImporvment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
-    date = models.CharField(max_length=14, blank=False)
-    past_book = models.ForeignKey(Books, on_delete=models.CASCADE, null=True, related_name="books")
-    change_book = models.ForeignKey(Books, on_delete=models.CASCADE, null=True)
-    file = models.FileField(upload_to=f"student/", blank=True)
-    description = models.TextField(blank=True)
 
 class BuyBook(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
@@ -112,3 +107,11 @@ class StationeryRecord(models.Model):
     number_of_stationery = models.IntegerField(default=1)
     total_amount = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class StudentImporvment(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
+    date = models.CharField(max_length=14, blank=False)
+    past_class = models.ForeignKey(SubClass, on_delete=models.CASCADE, null=True, related_name="past_class")
+    after_class = models.ForeignKey(SubClass, on_delete=models.CASCADE, null=True, related_name="after_class")
+    file = models.FileField(upload_to=f"student/", blank=True)
+    description = models.TextField(blank=True)

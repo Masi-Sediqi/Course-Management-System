@@ -62,10 +62,30 @@
                                     <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                                     <td>
                                         <!-- Actions like edit/delete buttons go here -->
-                                        <a href="#" class="btn btn-sm btn-primary">ویرایش</a>
-                                        <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                                        <a href="{% url 'teachers:edit_loan_request' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
+                                        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">حذف</button>
                                     </td>
                                 </tr>
+                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                      <div class="modal-content text-center">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                          <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                                          <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                            <a href="{% url 'teachers:delete_loan_request' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                             

@@ -92,42 +92,30 @@ class TeacherLoanForm(forms.ModelForm):
         )
 
 
-class Attendance_and_LeavesForm(forms.ModelForm):
+class AttendanceAndLeavesForm(forms.ModelForm):
     # Custom Jalali date widget for start_date
     start_date = forms.CharField(
         label='تاریخ شروع',
         widget=AdminJalaliDateWidget(
-            attrs={
-                "placeholder": "0/0/0000",
-                "id": "datepicker9",
-                "class": "form-control"
-            }
-        )
-    )
-
-    end_date = forms.CharField(
-        label='تاریخ پایان',
-        widget=AdminJalaliDateWidget(
-            attrs={
-                "placeholder": "0/0/0000",
-                "id": "datepicker10",
-                "class": "form-control"
+            attrs={"placeholder": "0/0/0000","id": "datepicker9","class": "form-control"
             }
         )
     )
 
     class Meta:
-        model = Attendance_and_Leaves
+        model = AttendanceAndLeaves
         fields = [
             "start_date",
-            "end_date",
-            
+            "number_of_day",
             "description",
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields['number_of_day'].widget.attrs.update(
+            {'class': 'form-control', 'placeholder': 'تعداد روز های رخصتی'}
+        )
         self.fields['description'].widget.attrs.update(
             {'class': 'form-control', 'placeholder': 'توضیحات'}
         )

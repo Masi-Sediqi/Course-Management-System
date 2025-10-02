@@ -141,6 +141,9 @@ def delete_category(request, id):
 def delete_station(request, id):
     record = get_object_or_404(StationeryItem, id=id)
     if record:
+        expenses_base = TotalExpenses.objects.get(pk=1)
+        expenses_base.total_amount -= record.stationery_paid_price
+        expenses_base.save()
         record.delete()
         messages.success(request, 'جنس مذکور موفقانه حذف شد ....')
         return redirect('library:library_view')
@@ -150,6 +153,9 @@ def delete_station(request, id):
 def delete_book(request, id):
     record = get_object_or_404(Books, id=id)
     if record:
+        expenses_base = TotalExpenses.objects.get(pk=1)
+        expenses_base.total_amount -= record.paid_price
+        expenses_base.save()
         record.delete()
         messages.success(request, 'کتاب مذکور موفقانه حذف شد ....')
         return redirect('library:library_view')

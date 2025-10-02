@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+            </ul>
+            <div class="card">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+                        <!-- ====== Edit Station Form ====== -->
+                        <form class="needs-validation" novalidate="novalidate" action="{% url 'teachers:edit_paid_remain_money' paid_record.id %}" method="post">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  {% csrf_token %}
+                            <div class="row">
+                              
+                                <!-- Personal Info -->
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="firstName1">تاریخ<span style="color: red;">*</span></label>
+                                    {{ form.date }}
+                                </div>
+                                
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="firstName1">مقدار<span style="color: red;">*</span></label>
+                                    {{ form.amount }}
+                                </div>
+                                
+                                <div class="col-md-12 form-group mb-3">
+                                    <label for="gender">توضیحات</label>
+                                    {{ form.description }}
+                                </div>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        $('#datepicker12').datepicker({});
+                                    });
+                                </script>
+                        
+                                <!-- Submit Buttons -->
+                                <div class="col-12 modal-footer">
+                                
+                                        <button class="btn btn-secondary" type="button" data-dismiss="modal">بستن</button>
+        
+                                    <button class="btn btn-primary " type="submit">ذخیره کردن</button>
+                                </div>
+                            </div>
+                        </form>
+                        <!-- ====== / Edit Station Form ====== -->
+                      </div>
+                      
+                </div>
+            </div>
+        </div>
+    </div><!-- end of main-content -->
+</div>
+
+{% endblock %}

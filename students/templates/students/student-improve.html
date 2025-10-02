@@ -67,8 +67,8 @@
                                                     {% for record in records %}
                                                     <tr role="row" class="{% cycle 'odd' 'even' %}">
                                                         <td>{{ record.date }}</td> <!-- or student full name -->
-                                                        <td>{{ record.past_book.name }}</td>
-                                                        <td>{{ record.change_book.name }}</td>
+                                                        <td>{{ record.past_class.name }}</td>
+                                                        <td>{{ record.after_class.name }}</td>
                                                         <td>
                                                             {% if record.file %}
                                                                 <a href="{{ record.file.url }}" target="_blank">Download</a>
@@ -127,11 +127,11 @@ aria-hidden="true">
                     </div>
                     <div class="col-md-6 form-group mb-3">
                         <label for="lastName1">کتاب‌های قبلی<span style="color: red;">*</span></label>
-                       {{form.past_book}}
+                       {{form.past_class}}
                     </div>                    
                     <div class="col-md-6 form-group mb-3">
                         <label for="lastName1">کتاب بعدی<span style="color: red;">*</span></label>
-                        {{ form.change_book }}
+                        {{ form.after_class }}
                     </div>
                     <div class="col-md-6 form-group mb-3">
                         <label for="email">تقدیر نامه </label>

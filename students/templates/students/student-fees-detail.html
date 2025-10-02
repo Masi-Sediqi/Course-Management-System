@@ -4,7 +4,7 @@
 
 <div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
     <div class="breadcrumb">
-        <h1>بخش جمع آوری فیس شاگردان</h1>
+        <h1>مجموع صنف های شاگرد</h1>
         <ul>
             <li><a href="" onclick="window.history.back();">برگشت</a></li>
             <li>داشبورد</li>
@@ -26,11 +26,6 @@
                                   <a href="javascript:history.back()" class="btn btn-info mr-2">
                                     بازگشت
                                 </a>
-                                
-                                  <button class="btn btn-outline-success mr-2" type="button" data-toggle="modal" data-target=".bd-example-modal-lg">
-                                      فیس جدید
-                                  </button>
-
                               </div>                              
                             </div>
                         </div>
@@ -42,24 +37,37 @@
                                           <table class="table table-bordered table-hover table-striped mb-0">
                                             <thead class="table-light">
                                                 <tr class="text-center">
-                                                    <th>تاریخ</th>
-                                                    <th>ماه</th>
-                                                    <th>فیس اصلی</th>
-                                                    <th>فیس داده شده</th>
-                                                    <th>باقی مانده</th>
-                                                    <th>توضیحات</th>
+                                                    <th>نام صنف</th>
+                                                    <th>اساتید</th>
+                                                    <th>مضامین</th>
+                                                    <th>فیس</th>
+                                                    <th>صنف</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for i in fees_record_related_student %}
+                                                {% for i in student_classes %}
                                                 <tr class="text-center">
-                                                    <td>{{ i.date }}</td>
-                                                    <td>{{ i.month }}</td>
-                                                    <td>{{ i.orginal_fees }}</td>
-                                                    <td>{{ i.give_fees }}</td>
-                                                    <td>{{ i.remain_fees }}</td>
-                                                    <td>{{ i.description }}</td>
+                                                    <td>
+                                                      <a href="{% url 'students:student_paid_fees' student.id i.id %}">{{ i.name }}</a></td>
+                                                    <td>
+                                                      {% for t in i.teacher.all %}
+                                                          <span class="badge bg-primary">{{ t.name }} {{ t.last_name }}</span>
+                                                          {% if not forloop.last %} + {% endif %}
+                                                      {% empty %}
+                                                          -
+                                                      {% endfor %}
+                                                    </td>
+                                                    <td>
+                                                        {% for b in i.books.all %}
+                                                            <span class="badge bg-primary">{{ b.name }}</span>
+                                                            {% if not forloop.last %} + {% endif %}
+                                                        {% empty %}
+                                                            -
+                                                        {% endfor %}
+                                                      </td>                                                      
+                                                    <td>{{ i.fees }}</td>
+                                                    <td>{{ i.room }}</td>
                                                     <td class="text-center position-relative">
                                                       <div class="dropdown">
                                                           <button class="btn bg-gray _r_btn border-0" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -68,14 +76,8 @@
                                                               <span class="_dot _inline-dot bg-primary"></span>
                                                           </button>
                                                           <div class="dropdown-menu dropdown-menu-left">
-                                                              <a class="dropdown-item text-success" href="#">
-                                                                  <i class="nav-icon i-Pen-2 mr-2"></i> ویرایش
-                                                              </a>
-                                                              <a class="dropdown-item text-danger" href="#">
-                                                                  <i class="nav-icon i-Close-Window mr-2"></i> حذف
-                                                              </a>
-                                                              <a class="dropdown-item text-primary" href="{% url 'students:student_bill' fees_id=i.id student_id=i.student.id %}">
-                                                                  <i class="nav-icon i-File-PDF mr-2"></i> چاپ بل
+                                                              <a class="dropdown-item text-success" href="{% url 'students:student_paid_fees' student.id i.id %}">
+                                                                  <i class="nav-icon i-Pen-2 mr-2"></i> پرداخت فیس
                                                               </a>
                                                           </div>
                                                       </div>
@@ -103,101 +105,11 @@
             </div>
         </div>
     </section><!-- end of main-content -->
-    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <form method="POST" action="{% url 'students:student_fees_detail' student_id=student.id %}">
-          {% csrf_token %}
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content p-3">
-              <div class="card-title h5 mb-3">اضافه کردن فیس</div>
-              <div>
-                <div class="row">
-                  <div class="col-md-4 form-group mb-3">
-                    <label for="{{ form.date.id_for_label }}">تاریخ</label>
-                    {{ form.date }}
-                  </div>
-                  <div class="col-md-4 form-group mb-3">
-                    <label for="{{ form.orginal_fees.id_for_label }}">فیس اصلی</label>
-                    {{ form.orginal_fees }}
-                  </div>
-                  <div class="col-md-4 form-group mb-3 position-relative">
-                    <label for="{{ form.give_fees.id_for_label }}">مقدار فیس داده شده <span class="text-danger">*</span></label>
-                    {{ form.give_fees }}
-                    <div id="warning-msg" class="text-danger mt-1" style="display: none;">
-                      مقدار فیس داده شده نباید بزرگتر از مقدار اصلی فیس باشد!
-                    </div>
-                    <div id="overlay" style="
-                      display: none;
-                      position: absolute;
-                      top: 38px; /* adjust this if needed */
-                      left: 0;
-                      right: 0;
-                      height: 38px;
-                      background: rgba(255, 255, 255, 0.6);
-                      z-index: 10;
-                      pointer-events: none;
-                      border-radius: 4px;
-                    "></div>
-                  </div>
-                </div>
-      
-                <div class="col-md-12 form-group mb-3">
-                  <label for="{{ form.description.id_for_label }}">توضیحات</label>
-                  {{ form.description }}
-                </div>
-      
-                <div class="text-end">
-                  <input type="hidden" name="form_type" value="givefees">
-                  <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const orginalFeesInput = document.getElementById('id_orginal_fees');
-          const giveFeesInput = document.getElementById('id_give_fees');
-          const warningMsg = document.getElementById('warning-msg');
-          const overlay = document.getElementById('overlay');
-      
-          function validateFees() {
-            const orginalValue = parseFloat(orginalFeesInput.value);
-            const giveValue = parseFloat(giveFeesInput.value);
-      
-            if (!isNaN(orginalValue) && !isNaN(giveValue)) {
-              if (giveValue > orginalValue) {
-                warningMsg.style.display = 'block';
-                overlay.style.display = 'block';
-                giveFeesInput.style.borderColor = 'red';
-              } else {
-                warningMsg.style.display = 'none';
-                overlay.style.display = 'none';
-                giveFeesInput.style.borderColor = '';
-              }
-            } else {
-              warningMsg.style.display = 'none';
-              overlay.style.display = 'none';
-              giveFeesInput.style.borderColor = '';
-            }
-          }
-      
-          orginalFeesInput.addEventListener('input', validateFees);
-          giveFeesInput.addEventListener('input', validateFees);
-        });
-      </script>
-      
 
 </div>
   
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker3').datepicker({});
-    });
-</script>
 
 
 

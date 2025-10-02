@@ -73,17 +73,6 @@ def main_classes(request):
     }
     return render(request, 'classes/class-main.html', context)
 
-
-
-
-
-
-
-
-
-
-
-
 def edit_sub_class(request, pk):
     instance = get_object_or_404(SubClass, pk=pk)
     if request.method == "POST":
@@ -97,6 +86,19 @@ def edit_sub_class(request, pk):
     return render(request, 'classes/edit_sub_class.html', {'form': form, 'instance': instance})
 
 
+def deactive_sub_class(request, pk):
+    instance = get_object_or_404(SubClass, pk=pk)
+    instance.active = False
+    instance.save()
+    messages.success(request, "صنف موفقانه غیر فعال شد")
+    return redirect('classes:main_classes')
+
+def active_sub_class(request, pk):
+    instance = get_object_or_404(SubClass, pk=pk)
+    instance.active = True
+    instance.save()
+    messages.success(request, "صنف موفقانه فعال شد")
+    return redirect('classes:main_classes')
 
 
 def delete_sub_class(request, pk):

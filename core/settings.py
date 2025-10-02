@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'library',
     "django_htmx",
     "classes",
-    "subjects",
 ]
 
 JALALI_DATE_DEFAULTS = {

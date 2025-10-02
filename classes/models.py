@@ -1,7 +1,6 @@
 from django.db import models
 from library.models import Books
 from teachers.models import Teacher
-from subjects.models import Subjects
 import jdatetime
 
 
