@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+
+  <h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">داشبورد / </span>گزارشات
+  </h4>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body text-center">
+      <h5 class="mb-4 fw-bold text-info">بخش گزارشات سیستم</h5>
+
+      <div class="row justify-content-center g-4">
+        
+        <!-- 🔹 Students Report Card -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'reports:students_reports' %}" class="report-card text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+              <img src="{% static 'images/Reports/student-repo.png' %}" class="card-img-top rounded-top" alt="Students Report">
+              <div class="card-body">
+                <h5 class="card-title text-center fw-bold text-info mb-2">
+                  <i class="fas fa-users me-1"></i> گزارشات شاگردان
+                </h5>
+                <p class="card-text text-muted small">
+                  مشاهده و مدیریت تمام شاگردان فعال، غیر فعال و قرضدار.
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 🔹 Teachers Report Card -->
+        <div class="col-md-4 col-sm-6">
+          <a href="{% url 'reports:teachers_reports' %}" class="report-card text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+              <img src="{% static 'images/Reports/teahcer-repo.jpg' %}" class="card-img-top rounded-top" alt="Teachers Report">
+              <div class="card-body">
+                <h5 class="card-title text-center fw-bold text-primary mb-2">
+                  <i class="fas fa-chalkboard-teacher me-1"></i> گزارشات استادان
+                </h5>
+                <p class="card-text text-muted small">
+                  دسترسی به تمام گزارشات استادان فعال، غیر فعال و دارای قرض.
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+           <div class="col-md-4 col-sm-6">
+          <a href="{% url 'reports:books_reports' %}" class="report-card text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+              <img src="{% static 'images/Reports/books-repo.jpeg' %}" class="card-img-top rounded-top" alt="Teachers Report">
+              <div class="card-body">
+                <h5 class="card-title text-center fw-bold text-primary mb-2">
+                  <i class="fas fa-book me-1"></i> گزارشات کتابها
+                </h5>
+                <p class="card-text text-muted small">
+                  دسترسی به تمام گزارشات کتابهای باقی مانده، فروخته شده.
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+            <div class="col-md-4 col-sm-6">
+          <a href="{% url 'reports:income_expenses' %}" class="report-card text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+              <img src="{% static 'images/Reports/books-repo.jpeg' %}" class="card-img-top rounded-top" alt="Teachers Report">
+              <div class="card-body">
+                <h5 class="card-title text-center fw-bold text-primary mb-2">
+                  <i class="fas fa-book me-1"></i> گزارشات عواید و مصارف
+                </h5>
+                <p class="card-text text-muted small">
+                  دسترسی به تمام گزارشات عواید و مصارف.
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+<style>
+  .hover-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+  }
+
+  .hover-card img {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .hover-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .hover-card:hover img {
+    transform: scale(1.05);
+  }
+
+  .report-card .card-body {
+    background: #f9f9f9;
+    border-top: 2px solid #17a2b8;
+    border-radius: 0 0 15px 15px;
+  }
+
+  .card-title i {
+    font-size: 20px;
+    vertical-align: middle;
+  }
+
+  .card-text {
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .hover-card img {
+      height: 160px;
+    }
+  }
+</style>
+
+
+{% endblock %}

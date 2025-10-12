@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'library',
     "django_htmx",
     "classes",
+    "reports",
+    "settings",
 ]
 
 JALALI_DATE_DEFAULTS = {
@@ -99,6 +101,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
+                'home.context_processors.system_settings',
             ],
         },
     },

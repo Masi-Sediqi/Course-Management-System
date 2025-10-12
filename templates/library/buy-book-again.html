@@ -3,18 +3,28 @@
 
 {% block content %}
 
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} text-center h3"  style="font-family: XW_Zar_Bd_0;" role="alert">
-                        {{ message }}
-                    </div>
-                    <script>
-                        setTimeout(function () {
-                            $('.alert').fadeOut('slow');
-                        }, 3000); // 3 seconds
-                    </script>
-                    {% endfor %}
-                    {% endif %}
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<script>
+  {% if messages %}
+  {% for message in messages %}
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+    title: "{{ message|escapejs }}",
+    showConfirmButton: false,
+    timer: 4000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer)
+      toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+  });
+  {% endfor %}
+  {% endif %}
+</script>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
     <h4 class="py-3 mb-4">
@@ -156,14 +166,40 @@
                                     <td class="text-muted">{{ i.description|default:"—" }}</td>
                                     <td>
                                         <div class="d-flex justify-content-center gap-2">
-                                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <a href="{% url 'library:edit_buy_book_again' i.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                                 <i class="bi bi-pencil"></i> ویرایش
                                             </a>
-                                            <a href="{% url 'library:delete_buy_again' id=i.id %}" 
-                                            class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                            onclick="return confirm('آیا مطمئن هستید که می‌خواهید این رکورد را حذف کنید؟');">
-                                             <i class="bi bi-trash"></i> حذف
-                                         </a>
+                           
+
+                                         <a class="btn btn-sm btn-outline-danger rounded-pill px-3" data-toggle="modal"
+                                         data-target="#deleteConfirmModal{{ i.id }}">
+                                       حذف
+                                       </a>
+
+
+                                          <!-- Delete Confirmation Modal -->
+                                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog"
+                                        aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content text-center">
+                                            <div class="modal-header">
+                                            <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            </div>
+                                            <div class="modal-body">
+                                            <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                            <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                                <a href="{% url 'library:delete_buy_again' id=i.id %}" class="btn btn-danger">بلی، حذف
+                                                کن</a>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
                                          
                                         </div>
                                     </td>

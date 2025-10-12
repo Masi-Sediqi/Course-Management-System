@@ -12,6 +12,8 @@ urlpatterns = [
     path('teachers/', include('teachers.urls', namespace="teachers")),
     path('library/', include('library.urls', namespace="library")),
     path('classes/', include('classes.urls', namespace="classes")),
+    path('reports/', include('reports.urls', namespace="reports")),
+    path('settings/', include('settings.urls', namespace="settings")),
 ]
 
 if settings.DEBUG:

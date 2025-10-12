@@ -181,9 +181,43 @@ def edit_category(request, id):
 
 def edit_station(request, id):
     record = get_object_or_404(StationeryItem, id=id)
+    past_paid = record.stationery_paid_price
+    past_number_of_stationery = record.number_of_stationery
+
     if request.method == "POST":
         form = StationeryItemForm(request.POST, instance=record)
         if form.is_valid():
+            new_past_number_of_stationery = form.cleaned_data.get('number_of_stationery')
+            new_per_price_stationery = form.cleaned_data.get('per_price_stationery')
+            new_stationery_paid_price = form.cleaned_data.get('stationery_paid_price')
+
+            multiply = new_past_number_of_stationery * new_per_price_stationery
+            if new_stationery_paid_price > multiply or new_stationery_paid_price < multiply:
+                messages.error(request, 'مقدار پرداخت نباید کوچکتر ویا بزرگتر از مقدار پرداخت باشد')
+                return redirect('library:library_view')
+            
+            if new_past_number_of_stationery > past_number_of_stationery:
+                total = TotalStationery.objects.get(stationery=record)
+                find_new_count_book = new_past_number_of_stationery - total.total_amount
+                total.total_stationery += find_new_count_book
+                total.total_amount += find_new_count_book
+                total.save()
+                find_new_paid = new_stationery_paid_price - past_paid
+                get_expenses = TotalExpenses.objects.get(pk=1)
+                get_expenses.total_amount += find_new_paid
+                get_expenses.save()
+            elif new_past_number_of_stationery < past_number_of_stationery:
+                total = TotalStationery.objects.get(stationery=record)
+                find_new_count_book = total.total_amount - new_past_number_of_stationery
+                total.total_stationery -= find_new_count_book
+                total.total_amount -= find_new_count_book
+                total.save()
+                find_new_paid = past_paid - new_stationery_paid_price
+                get_expenses = TotalExpenses.objects.get(pk=1)
+                get_expenses.total_amount -= find_new_paid
+                get_expenses.save()
+            else:
+                return redirect('library:library_view')
             form.save()
             messages.success(request, 'ریکارد ذیل موفقانه ایدیت شد ')
             return redirect('library:library_view')
@@ -199,9 +233,44 @@ def edit_station(request, id):
 
 def edit_book(request, id):
     record = get_object_or_404(Books, id=id)
+    past_number_of_book = record.number_of_book
+    past_paid = record.paid_price
+
     if request.method == "POST":
         form = BooksForm(request.POST, instance=record)
         if form.is_valid():
+            new_past_number_of_book = form.cleaned_data.get('number_of_book')
+            new_price = form.cleaned_data.get('per_price')
+            new_paid_price = form.cleaned_data.get('paid_price')
+
+            multiply = new_past_number_of_book * new_price
+            if new_paid_price > multiply or new_paid_price < multiply:
+                messages.error(request, 'مقدار پرداخت نباید کوچکتر ویا بزرگتر از مقدار پرداخت باشد')
+                return redirect('library:library_view')
+
+            if new_past_number_of_book > past_number_of_book:
+                total = TotalBook.objects.get(book=record)
+                find_new_count_book = new_past_number_of_book - total.total_amount
+                total.total_book += find_new_count_book
+                total.total_amount += find_new_count_book
+                total.save()
+                find_new_paid = new_paid_price - past_paid
+                get_expenses = TotalExpenses.objects.get(pk=1)
+                get_expenses.total_amount += find_new_paid
+                get_expenses.save()
+            elif new_past_number_of_book < past_number_of_book:
+                total = TotalBook.objects.get(book=record)
+                find_new_count_book = total.total_amount - new_past_number_of_book
+                total.total_book -= find_new_count_book
+                total.total_amount -= find_new_count_book
+                total.save()
+                find_new_paid = past_paid - new_paid_price
+                get_expenses = TotalExpenses.objects.get(pk=1)
+                get_expenses.total_amount -= find_new_paid
+                get_expenses.save()
+            else:
+                return redirect('library:library_view')
+
             form.save()
             messages.success(request, 'ریکارد ذیل موفقانه ایدیت شد ')
             return redirect('library:library_view')
@@ -209,7 +278,8 @@ def edit_book(request, id):
         form = BooksForm(instance=record)
 
     context = {
-        'form':form
+        'form':form,
+        'record':record,
     }
     return render(request, 'library/edit_main_library.html', context)
 
@@ -219,7 +289,7 @@ def find_category_item(request, id):
     context = {
         'find_Stationery':find_Stationery,
         'find_Stationery_items':find_Stationery_items,
-    }
+        }
     return render(request, 'library/category-item.html', context)
 
 def buy_book_again(request, id):
@@ -234,7 +304,11 @@ def buy_book_again(request, id):
             get_number_of_book_field = form.cleaned_data.get('number_of_book')
             get_per_book_price = form.cleaned_data.get('per_book_price_for_buy')
 
-
+            multiply = get_number_of_book_field * form.cleaned_data.get('per_price')
+            if form.cleaned_data.get('paid_price') > multiply or form.cleaned_data.get('paid_price') < multiply:
+                messages.warning(request, 'مقدار پرداخت نباید کوچکتر یا بزرگتر از مقدار پرداخت باشد')
+                return redirect(referer)
+            
             instance = form.save(commit=False)
             instance.book = book
             instance.save()
@@ -255,6 +329,10 @@ def buy_book_again(request, id):
                 total_obj.per_price = get_per_book_price  # or maybe update only if needed
                 total_obj.save()
 
+            total = TotalExpenses.objects.get(pk=1)
+            total.total_amount += form.cleaned_data.get('paid_price')
+            total.save()
+
             return redirect(referer)
     else:
         form = BuyBookAgainForm(initial={
@@ -272,25 +350,72 @@ def buy_book_again(request, id):
 
 def delete_buy_again(request, id):
     record = get_object_or_404(BuyBookAgain, id=id)
+    total_book = TotalBook.objects.get(book=record.book.id)
+    total_book.total_book -= record.number_of_book
+    total_book.total_amount -= record.number_of_book
+    total_book.save()
 
-    # Find related total record
-    try:
-        total_record = TotalBook.objects.get(book=record.book)
-    except TotalBook.DoesNotExist:
-        total_record = None
-
-    # Subtract the amount
-    if total_record:
-        total_record.total_amount -= record.number_of_book
-        if total_record.total_amount < 0:
-            total_record.total_amount = 0  # safety
-        total_record.save()
-
-    # Delete the BuyBookAgain record
+    total_ex = TotalExpenses.objects.get(pk=1)
+    total_ex.total_amount -= record.paid_price
+    total_ex.save()
+    messages.success(request, 'ریکارد موفقانه حذف شد')
     record.delete()
-
-    messages.success(request, "رکورد حذف شد و از مجموع کل کسر گردید.")
     return redirect("library:buy_book_again", id=record.book.id)  # change this to your list view name
+
+def edit_buy_book_again(request, id):
+    record = get_object_or_404(BuyBookAgain, id=id)
+    past_number_of_book = record.number_of_book
+    past_paid_price = record.paid_price
+
+    if request.method == "POST":
+        form = BuyBookAgainForm(request.POST, instance=record)
+        if form.is_valid():
+            get_new_number_of_book = form.cleaned_data.get('number_of_book')
+            get_new_per_price = form.cleaned_data.get('per_price')
+
+
+            multiply = get_new_number_of_book * get_new_per_price
+
+            if form.cleaned_data.get('paid_price') > multiply or form.cleaned_data.get('paid_price') < multiply:
+                messages.warning(request, 'مقدار پرداخت نباید کوچکتر یا بزرگتر از مقدار پرداخت باشد')
+                return redirect("library:buy_book_again", id=record.book.id) 
+            
+            if get_new_number_of_book > past_number_of_book:
+                total_book = TotalBook.objects.get(book=record.book.id)
+                find_new_number_of_book = get_new_number_of_book - past_number_of_book
+                total_book.total_amount += find_new_number_of_book
+                total_book.total_book += find_new_number_of_book
+                total_book.save()
+
+                total_ex = TotalExpenses.objects.get(pk=1)
+                find_new_paid = form.cleaned_data.get('paid_price') - past_paid_price
+                total_ex.total_amount += find_new_paid
+                total_ex.save()
+
+            elif get_new_number_of_book < past_number_of_book:
+                total_book = TotalBook.objects.get(book=record.book.id)
+                find_new_number_of_book = past_number_of_book - get_new_number_of_book
+                total_book.total_amount -= find_new_number_of_book
+                total_book.total_book -= find_new_number_of_book
+                total_book.save()
+
+                total_ex = TotalExpenses.objects.get(pk=1)
+                find_new_paid = past_paid_price - form.cleaned_data.get('paid_price')
+                total_ex.total_amount -= find_new_paid
+                total_ex.save()
+            else:
+                return redirect("library:buy_book_again", id=record.book.id) 
+            form.save()
+            messages.success(request, 'ریکارد ذیل موفقانه ایدیت شد')
+            return redirect("library:buy_book_again", id=record.book.id) 
+    else:
+        form = BuyBookAgainForm(instance=record)
+
+    context = {
+        'record':record,
+        'form':form,
+    }
+    return render(request, 'library/edit-buy-book-again.html', context)
 
 def update_per_price(request, id):
     total_book = get_object_or_404(TotalBook, id=id)
@@ -333,6 +458,10 @@ def buy_stationery_again(request, id):
                 total_obj.per_price = per_price_for_buy  # or maybe update only if needed
                 total_obj.save()
 
+            total = TotalExpenses.objects.get(pk=1)
+            total.total_amount += form.cleaned_data.get('stationery_paid_price')    
+            total.save()
+
             return redirect(referer)
     else:
         form = BuyStationeryAgainForm(initial={
@@ -358,3 +487,71 @@ def update_stationery_per_price(request, id):
             total_book.save()
             messages.success(request, "مقدار فی با موفقیت تغییر یافت.")
     return redirect("library:buy_stationery_again", id=total_book.book.id)  # change to your view name
+
+def delete_buy_stationery_again(request, id):
+    record = get_object_or_404(BuyStationeryAgain, id=id)
+    total_book = TotalStationery.objects.get(stationery=record.stationery.id)
+    total_book.total_stationery -= record.number_of_stationery
+    total_book.total_amount -= record.number_of_stationery
+    total_book.save()
+
+    total_ex = TotalExpenses.objects.get(pk=1)
+    total_ex.total_amount -= record.stationery_paid_price
+    total_ex.save()
+    messages.success(request, 'ریکارد موفقانه حذف شد')
+    record.delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))  # change this to your list view name
+
+def edit_buy_stationery_again(request, id):
+    record = get_object_or_404(BuyStationeryAgain, id=id)
+    past_number_of_stationery = record.number_of_stationery
+    past_paid_price = record.stationery_paid_price
+
+    if request.method == "POST":
+        form = BuyStationeryAgainForm(request.POST, instance=record)
+        if form.is_valid():
+            get_new_number_of_stationery = form.cleaned_data.get('number_of_stationery')
+            get_new_per_price = form.cleaned_data.get('per_price_stationery')
+
+
+            multiply = get_new_number_of_stationery * get_new_per_price
+
+            if form.cleaned_data.get('stationery_paid_price') > multiply or form.cleaned_data.get('stationery_paid_price') < multiply:
+                messages.warning(request, 'مقدار پرداخت نباید کوچکتر یا بزرگتر از مقدار پرداخت باشد')
+                return redirect("library:buy_stationery_again", id=record.stationery.id) 
+            
+            if get_new_number_of_stationery > past_number_of_stationery:
+                total_book = TotalStationery.objects.get(stationery=record.stationery.id)
+                find_new_number_of_stationery = get_new_number_of_stationery - past_number_of_stationery
+                total_book.total_amount += find_new_number_of_stationery
+                total_book.total_stationery += find_new_number_of_stationery
+                total_book.save()
+
+                total_ex = TotalExpenses.objects.get(pk=1)
+                find_new_paid = form.cleaned_data.get('stationery_paid_price') - past_paid_price
+                total_ex.total_amount += find_new_paid
+                total_ex.save()
+
+            elif get_new_number_of_stationery < past_number_of_stationery:
+                total_book = TotalStationery.objects.get(stationery=record.stationery.id)
+                find_new_number_of_stationery = past_number_of_stationery - get_new_number_of_stationery
+                total_book.total_amount -= find_new_number_of_stationery
+                total_book.total_stationery -= find_new_number_of_stationery
+                total_book.save()
+
+                total_ex = TotalExpenses.objects.get(pk=1)
+                find_new_paid = past_paid_price - form.cleaned_data.get('stationery_paid_price')
+                total_ex.total_amount -= find_new_paid
+                total_ex.save()
+            else:
+                return redirect("library:buy_stationery_again", id=record.stationery.id) 
+            form.save()
+            messages.success(request, 'ریکارد ذیل موفقانه ایدیت شد')
+            return redirect("library:buy_stationery_again", id=record.stationery.id) 
+    else:        
+        form = BuyStationeryAgainForm(instance=record)
+    context = {
+        'record':record,   
+        'form':form,
+    }
+    return render(request, 'library/edit-buy-stationery-again.html', context)

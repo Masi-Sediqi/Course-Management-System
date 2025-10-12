@@ -332,7 +332,7 @@
                             
                               <td>
                                   <!-- Actions like edit/delete buttons go here -->
-                                  <a href="#" data-toggle="modal" data-target="#editBookModal{{ i.id }}" class="btn btn-sm btn-primary">تغییرات</a>
+                                  <a href="{% url 'library:edit_book' i.id %}" class="btn btn-sm btn-primary">تغییرات</a>
                                   <!-- Delete Button (opens modal) -->
                                   <button class="btn btn-sm btn-danger"
                                   data-toggle="modal" data-target="#deletebookConfirmModal{{ i.id }}">
@@ -343,76 +343,7 @@
                         
 
 
-                          
-                          <div class="modal fade" id="editBookModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editBookModalLabel{{ i.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                              <div class="modal-content">
-                                <form method="POST" action="{% url 'library:edit_book' i.id %}" class="needs-validation" novalidate>
-                                  {% csrf_token %}
-                          
-                                  <!-- Header -->
-                                  <div class="modal-header bg-primary text-white">
-                                    <h5 class="modal-title w-100" id="editBookModalLabel{{ i.id }}">ویرایش کتاب</h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                  </div>
-                          
-                                  <!-- Body -->
-                                  <div class="modal-body">
-                                    <div class="row g-3">
-                                      
-                                      <div class="col-md-6">
-                                        <label class="form-label">تاریخ <span class="text-danger">*</span></label>
-                                        {{form.date}}
-                                      </div>
-                          
-                                      <div class="col-md-6">
-                                        <label class="form-label">نام کتاب <span class="text-danger">*</span></label>
-                                        <input type="text" name="name" class="form-control" value="{{ i.name }}" required>
-                                      </div>
-                          
-                                      <div class="col-md-6">
-                                        <label class="form-label">تعداد کتاب <span class="text-danger">*</span></label>
-                                        <input type="number" name="number_of_book" class="form-control" value="{{ i.number_of_book }}" required>
-                                      </div>
-                          
-                                      <div class="col-md-6">
-                                        <label class="form-label">قیمت فی کتاب (خرید)</label>
-                                        <input type="number" name="per_price" class="form-control" value="{{ i.per_price }}">
-                                      </div>
-                          
-                                      <div class="col-md-6">
-                                        <label class="form-label">قیمت فی کتاب (فروش)</label>
-                                        <input type="number" name="per_book_price_for_buy" class="form-control" value="{{ i.per_book_price_for_buy }}">
-                                      </div>
-                          
-                                      <div class="col-md-6">
-                                        <label class="form-label">قیمت مجموعی</label>
-                                        <input type="number" name="price" class="form-control" value="{{ i.price }}">
-                                      </div>
-                          
-                                      <div class="col-md-6">
-                                        <label class="form-label">قیمت پرداخت شده</label>
-                                        <input type="number" name="paid_price" class="form-control" value="{{ i.paid_price }}">
-                                      </div>
-                          
-                                      <div class="col-12">
-                                        <label class="form-label">توضیحات</label>
-                                        <textarea name="description" class="form-control" rows="3">{{ i.description }}</textarea>
-                                      </div>
-                          
-                                    </div>
-                                  </div>
-                          
-                                  <!-- Footer -->
-                                  <div class="modal-footer">
-                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">بستن</button>
-                                    <button type="submit" class="btn btn-sm btn-primary">ذخیره تغییرات</button>
-                                  </div>
-                                </form>
-                              </div>
-                            </div>
-                          </div>
-                          
+                      
                           
                               <div class="modal fade" id="deletebookConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
                                   <div class="modal-dialog modal-lg" role="document">

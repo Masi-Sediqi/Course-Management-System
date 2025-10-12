@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+            </ul>
+            <div class="card">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+                        <!-- ====== Edit Station Form ====== -->
+                        <form method="POST" action="{% url 'library:edit_buy_book_again' record.id %}">
+                            {% csrf_token %}
+                            <div class="modal-dialog modal-lg">
+                              <div class="modal-content p-3">
+                                <div class="card-title h5 mb-3">ایدیت صنف "{{ instance.name }}"</div>
+                                <div>
+                                    <div class="row g-3">
+            
+                                        <div class="col-md-4">
+                                          <label for="{{ form.date.id_for_label }}" class="form-label">
+                                            تاریخ <span class="text-danger">*</span>
+                                          </label>
+                                          {{ form.date }}
+                                        </div>
+              
+                                        <script>
+                                          document.addEventListener('DOMContentLoaded', function () {
+                                              $('#datepicker6').datepicker({
+                                          
+                                              });
+                                          });
+                                      </script>
+              
+                                        <div class="col-md-4">
+                                          <label for="{{ form.number_of_book.id_for_label }}" class="form-label">
+                                            تعداد <span class="text-danger">*</span>
+                                          </label>
+                                          {{ form.number_of_book }}
+                                        </div>
+                          
+                                        <div class="col-md-4">
+                                          <label for="{{ form.per_price.id_for_label }}" class="form-label">
+                                            مقدار فی <span class="text-danger">*</span>
+                                          </label>
+                                          {{ form.per_price }}
+                                        </div>
+                          
+                                        <div class="col-md-4">
+                                          <label for="{{ form.price.id_for_label }}" class="form-label">
+                                            قیمت <span class="text-danger">*</span>
+                                          </label>
+                                          {{ form.price }}
+                                        </div>
+                                        <div class="col-md-4">
+                                          <label for="{{ form.paid_price.id_for_label }}" class="form-label">
+                                            مقدار پرداخت شده <span class="text-danger">*</span>
+                                          </label>
+                                          {{ form.paid_price }}
+                                        </div>
+                          
+                                        <div class="col-md-4">
+                                          <label for="{{ form.per_book_price_for_buy.id_for_label }}" class="form-label"  data-bs-toggle="tooltip" 
+                                          data-bs-placement="top" 
+                                          title="*">
+                                            مقدار فی برای فروش <span class="text-danger">*</span>
+                                          </label>
+                                          {{ form.per_book_price_for_buy }}
+                                        </div>
+                          
+                                        <script>
+                                          document.addEventListener("DOMContentLoaded", function() {
+                                              const numberBookField = document.getElementById("{{ form.number_of_book.id_for_label }}");
+                                              const perPriceBookField = document.getElementById("{{ form.per_price.id_for_label }}");
+                                              const totalBookField = document.getElementById("{{ form.price.id_for_label }}");
+                                          
+                                              function calculateBookTotal() {
+                                                  let number = parseFloat(numberBookField.value) || 0;
+                                                  let perPrice = parseFloat(perPriceBookField.value) || 0;
+                                                  let total = number * perPrice;
+                                          
+                                                  totalBookField.value = total.toFixed(2); // 2 decimals
+                                              }
+                                          
+                                              numberBookField.addEventListener("input", calculateBookTotal);
+                                              perPriceBookField.addEventListener("input", calculateBookTotal);
+                                          });
+                                          </script>
+                                          
+                                       
+                          
+                                        <div class="col-md-12">
+                                          <label for="{{ form.description.id_for_label }}" class="form-label">
+                                            توضیحات
+                                          </label>
+                                          {{ form.description }}
+                                        </div>
+                          
+                                      </div>
+                        
+                                  <div class="text-end">
+                                    
+                                    <!-- Dismiss button -->
+                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
+                                      بستن
+                                    </button>
+                                  
+                                    <!-- Submit button -->
+                                    <button class="btn btn-primary mt-2" type="submit">
+                                      ذخیره کردن
+                                    </button>
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                          </form>
+                               
+    
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          $('#datepicker3').datepicker({});
+        });
+        </script>
+        
+                        <!-- ====== / Edit Station Form ====== -->
+                      </div>
+                      
+                </div>
+            </div>
+        </div>
+    </div><!-- end of main-content -->
+</div>
+
+{% endblock %}

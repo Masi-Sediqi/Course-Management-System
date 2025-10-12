@@ -5,6 +5,7 @@ from students.models import *
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Sum
+from jdatetime import date as jdate
 # Create your views here.
 from management.models import *
 
@@ -12,13 +13,19 @@ from management.models import *
 def teacher_registration(request):
     referer = request.META.get('HTTP_REFERER', '/')
     teachers = None
+    # Get today's Jalali date
+    today_jalali = jdatetime.date.today()
+
+    # Format it as "DD/MM/YYYY"
+    formatted_date = today_jalali.strftime("%d/%m/%Y")
+
     if request.method == "POST":
         form = TeacherForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect(referer)
     else:
-        form = TeacherForm()
+        form = TeacherForm(initial={'date': formatted_date})
         teachers = Teacher.objects.filter(is_active=True)
     context = {
         'teachers':teachers,

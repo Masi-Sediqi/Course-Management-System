@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> بخش گزارشات شاگردان 
+    </h4>
+
+
+    <div class="row">
+        <div class="col-lg-12 col-md-6 col-sm-6">
+            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
+                <div class="card-body text-center">  
+                    <div class="card-title mb-3">
+                        <button id="pwa-install-btn" class="btn btn-primary" data-toggle="modal" data-target="#filterModal">
+                            فلتر
+                        </button>
+                    </div>
+                    {% if filter_active == True %}
+                    <div class="card-title mb-3">
+                        <a href="{% url 'reports:teachers_reports' %}" id="pwa-install-btn" class="btn btn-danger">
+                            حذف فلتر
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Typing text -->
+                    <div class="typing-text">
+                        <span class="badge badge-pill badge-success fs-4">  {{title}}</span>
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CSS -->
+    <style>
+    .typing-text {
+        font-family: 'XW_Zar_Bd_0', sans-serif;
+        font-size: 16px;
+        color: #000000;
+        border-right: 2px solid #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 0;
+        animation: typing 3s steps(40, end) forwards, blink 0.75s step-end infinite;
+        margin: 10px auto 0;
+    }
+    
+    /* Typing animation */
+    @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+    }
+    
+    /* Blinking cursor */
+    @keyframes blink {
+        0%, 100% { border-color: transparent }
+        50% { border-color: #fff }
+    }
+    </style>
+    
+
+
+    <div class="card">
+        <div class="card-body">
+
+                <!-- Tab 1: Income Table -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel">
+                    <!-- ✅ Paste your full income table & modals here -->
+    
+                    <!-- your full code... -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle"id="comma_decimal_table" style="width:100%">
+                            <thead class="table-dark">
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">نام کامل</th>
+                        
+                                <th scope="col">تاریخ</th>
+                                <th scope="col">جنسیت</th>
+                                <th scope="col">شماره تماس</th>
+                          
+                                <th scope="col">فیصدی</th>
+                                <th scope="col">فایل</th>
+                                {% if filter_type == "loan_teachers" %}
+                                <th>مجموع قرض</th>
+                                {% endif %}
+                                {% if filter_type == "teachers_remain" %}
+                                <th>باقی‌مانده</th>
+                                {% endif %}
+                                <th scope="col">توضیحات</th>
+                                <th scope="col" style="min-width: 140px;">عملیات</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for i in teachers %}
+                                <tr>
+                                  <th scope="row">{{ i.id }}</th>
+                               <td>   <a href="{% url 'teachers:teacher_detail' i.id %}">{{ i.name }} {{ i.last_name }}</a></td>
+                          
+                                  <td>{{ i.date }}</td>
+                                  <td>{{ i.gender }}</td>
+                                  <td>{{ i.phone|default:"ندارد" }}</td>
+                                  <td>{{ i.percentage }}</td>
+                                  <td>
+                                    {% if i.file %}
+                                      <a href="{{ i.file.url }}" target="_blank">فایل</a>
+                                    {% else %}
+                                      ندارد
+                                    {% endif %}
+                                  </td>
+                                    {% if filter_type == "loan_teachers" %}
+                                        <td>
+                                            {% with i.teacher_loans.first.total_loan_amount as loan %}
+                                            {% if loan %}
+                                                <span class="text-danger fw-bold">{{ loan }}</span>
+                                            {% else %}
+                                                <span class="text-muted">۰</span>
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    {% endif %}
+
+                                    {% if filter_type == "teachers_remain" %}
+                                    <td>
+                                        {% with i.teacher_remains.first.total_amount as remain %}
+                                            {% if remain %}
+                                            <span class="text-success fw-bold">{{ remain }}</span>
+                                            {% else %}
+                                            <span class="text-muted">0</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    {% endif %}
+
+
+                                  <td>{{ i.description|truncatechars:20 }}</td>
+                                  <td>
+                                    <div class="dropdown">
+                                      <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton{{ i.id }}" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                      </button>
+                                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ i.id }}" style="max-height: 150px; overflow-y: auto;">
+                                        <a class="dropdown-item text-info" href="{% url 'teachers:teacher_detail' i.id %}">معلومات کامل</a>
+                                        <a class="dropdown-item text-info" href="{% url 'teachers:edit_teacher' i.id %}">تغیرات</a>
+                                        <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
+                                          غیر فعال
+                                        </a>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                            
+                                <!-- Delete Confirmation Modal -->
+                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                                  <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content text-center">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">غیر فعال کردن</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را غیر فعال کنید؟</p>
+                                        <div class="text-danger font-weight-bold mb-3">در حال غیر فعال ...</div>
+                                        <div class="d-flex justify-content-center gap-2">
+                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                          <a href="{% url 'teachers:deactive_teacher' i.id %}" class="btn btn-danger">بلی، غیر فعال کن</a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            
+                              {% empty %}
+                                <tr>
+                                  <td colspan="9" class="text-center py-3">هیچ دانش‌آموزی یافت نشد</td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                            
+                          </table>
+                    </div>
+                </div>
+ 
+        </div>
+    </div>
+    
+
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow rounded-4">
+    
+                <!-- Modal Header -->
+                <div class="modal-header bg-gradient-primary text-white border-0">
+                    <h5 class="modal-title" id="filterModalLabel"><i class="bi bi-funnel me-2"></i>فیلتر وظایف</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
+                </div>
+    
+                <!-- Modal Body -->
+                <div class="modal-body p-5">
+                    <form method="get" action="{% url 'reports:teachers_reports' %}" class="needs-validation tablelist-form" novalidate="novalidate">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">تاریخ آغاز</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
+                                    {{ form.start_date }}
+                                </div>
+                            </div>
+    
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">تاریخ پایان</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
+                                    {{ form.end_date }}
+                                </div>
+                            </div>
+                        </div>
+                        
+          <!-- Dropdown -->
+          <div class="form-group">
+            <label for="filterType">نوع فلتر</label>
+            <select class="form-control" id="filterType" name="filter_type" required>
+              <option value="active_teachers">استادان فعال</option>
+              <option value="deactive_teachers">استادان غیر فعال</option>
+              <option value="loan_teachers">استادان قرضدار</option>
+              <option value="teachers_remain">استادان که پول شان باقی مانده</option>
+            </select>
+          </div>
+    
+                        <div class="d-flex justify-content-end mt-4 gap-2">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold">
+                                <i class="bi bi-funnel-fill me-2"></i>اعمال فیلتر
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-2"></i>لغو
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+
+<style>
+    /* Apply styles for all screen sizes */
+    #pwa-install-btn {
+        position: relative;
+        border-radius: 50px;
+        background: radial-gradient(circle at center, #ff6a00, #ff0080);
+        /* Starting blend */
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 10px 25px;
+        margin-top: 10px;
+        font-family: XW_Zar_Bd_0;
+        z-index: 1;
+        overflow: hidden;
+        animation: centerColorBlend 6s ease-in-out infinite;
+        background-size: 200% 200%;
+        border: none;
+    }
+
+    /* Animated multicolor border */
+    #pwa-install-btn:after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-radius: 50px;
+        background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        z-index: -1;
+        animation: animatedborder 3s linear infinite;
+        background-size: 300% 300%;
+    }
+
+    /* Border animation */
+    @keyframes animatedborder {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Center gradient animation */
+    @keyframes centerColorBlend {
+        0% {
+            background: radial-gradient(circle at center, #ff6a00, #ff0080);
+        }
+
+        33% {
+            background: radial-gradient(circle at center, #ff0080, #00c3ff);
+        }
+
+        66% {
+            background: radial-gradient(circle at center, #00c3ff, #00ff72);
+        }
+
+        100% {
+            background: radial-gradient(circle at center, #ff6a00, #ff0080);
+        }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker20').datepicker({});
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker21').datepicker({});
+    });
+</script>
+{% endblock %}

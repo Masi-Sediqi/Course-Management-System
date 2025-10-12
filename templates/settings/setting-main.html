@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+  <script src="{% static 'js/sweet.js' %}"></script>
+  <!-- Bootstrap CSS -->
+
+    <link href="{% static 'css/bootstrap@5.3.2.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap JS (bundle includes Popper) -->
+    <script src="{% static 'js/bootstrap@5.3.2.js' %}"></script>
+
+
+  <script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+      title: "{{ message|escapejs }}",
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+    {% endfor %}
+    {% endif %}
+  </script>
+
+<!-- Full-page background image -->
+<div class="background-image"></div>
+
+<!-- Settings container -->
+<div class="container py-5" style="position: relative; z-index: 2;font-family: XW_Zar_Bd_0;">
+
+
+<div class="d-flex align-items-center mb-3 mt-4">
+    <hr class="glass-hr flex-grow-1">
+    <h5 class="text-white mb-0 mx-3 glow-text" style="font-size: 1.3rem;padding-left: 21px;">بخش تنظیمات سیستم</h5>
+    <hr class="glass-hr flex-grow-1">
+</div>
+<style>.glass-hr {
+    border: none;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 15px rgba(0, 246, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    margin: 2rem 0;
+}
+
+.glass-hr::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #00f6ff, #ff00d4, #00ff9d, #00f6ff);
+    animation: hrSlide 3s linear infinite;
+}
+
+@keyframes hrSlide {
+    0% { left: -100%; }
+    50% { left: 0%; }
+    100% { left: 100%; }
+}
+</style>
+   <!-- First group of sections -->
+<div class="row g-4 mb-4">
+
+    <!-- Section 7 -->
+  <div class="col-md-3">
+  <div class="card glass-card text-center p-4">
+    <h5 class="card-title glow-text">تنظیمات سیستم</h5>
+    <p class="card-text">عنوان و لوگوی سیستم را تغییر دهید.</p>
+    <button class="btn btn-primary btn-hover" data-bs-toggle="modal" data-bs-target="#systemSettingModal">اضافه کردن</button>
+  </div>
+</div>
+
+</div>
+       
+    </div>
+</div>
+
+<style>
+/* Background image */
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("{% static 'images/2.jpg' %}") no-repeat center center;
+    background-size: cover;
+    filter: brightness(0.6);
+    z-index: 1;
+}
+
+/* Glass effect card */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(14px);
+    border-radius: 1.2rem;
+    color: white;
+    transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0, 246, 255, 0.3);
+    position: relative;
+}
+
+
+.glass-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    border-color: rgba(0, 246, 255, 0.6);
+}
+
+/* Glow text */
+.glow-text {
+    background: linear-gradient(90deg, #00f6ff, #ff00d4, #00ff9d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 8px rgba(0,246,255,0.6);
+}
+
+/* Buttons with ripple effect */
+.btn-hover {
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+    z-index: 0;
+}
+
+.btn-hover::after {
+    content: '';
+    position: absolute;
+    background: rgba(255,255,255,0.2);
+    width: 100px;
+    height: 100px;
+    display: block;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1);
+    transition: 0.6s;
+}
+
+.btn-hover:active::after {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 1;
+    transition: 0s;
+}
+
+</style>
+
+<div class="modal fade" id="systemSettingModal" tabindex="-1" aria-labelledby="systemSettingModalLabel" aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content glass-card text-center p-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title glow-text w-100" id="systemSettingModalLabel">تنظیمات سیستم</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" action="{% url 'settings:settings' %}">
+        {% csrf_token %}
+        <div class="modal-body text-white">
+          <div class="mb-3 text-start">
+            <label for="title" class="form-label text-white">عنوان سیستم</label>
+            <input type="text" id="title" name="title" class="form-control" placeholder="نام سیستم را وارد کنید">
+          </div>
+
+          <div class="mb-3 text-start">
+            <label for="logo" class="form-label text-white">لوگوی سیستم</label>
+            <input type="file" id="logo" name="logo" class="form-control" accept="image/*">
+          </div>
+
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button type="button" class="btn btn-secondary btn-hover" data-bs-dismiss="modal">لغو</button>
+            <button type="submit" class="btn btn-primary btn-hover">ذخیره</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

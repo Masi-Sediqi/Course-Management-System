@@ -5,11 +5,11 @@ from jalali_date.widgets import AdminJalaliDateWidget
 
 
 class TeacherForm(forms.ModelForm):
-    # birth_date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
+    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
 
     class Meta:
         model = Teacher
-        fields = ["name","last_name","phone","file","description","percentage","gender"]
+        fields = ["name","last_name","phone","file","description","percentage","gender","date"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

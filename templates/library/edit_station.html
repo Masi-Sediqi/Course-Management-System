@@ -2,7 +2,8 @@
 {% block content %}
 {% load static %}
 
-<div class="main-content pt-4">
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
     <div class="row">
         <div class="col-md-12">
             <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
@@ -11,45 +12,115 @@
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
                         <!-- ====== Edit Station Form ====== -->
-                        <form method="POST" action="{% url 'library:edit_station' id=record.id %}" class="needs-validation" novalidate>
-                          {% csrf_token %}
-                          <div class="modal-body">
-                            <div class="container-fluid">
-                              <div class="row g-3">
-                                
-                                <!-- Station Name -->
-                                <div class="col-md-6">
-                                  <label for="{{ form.name.id_for_label }}" class="form-label">نام قرطاسیه <span class="text-danger">*</span></label>
-                                  {{ form.name }}
+                        <form method="POST" action="{% url 'library:edit_station' id=record.id %}">
+                            {% csrf_token %}
+                            <div class="modal-dialog modal-lg">
+                              <div class="modal-content p-3">
+                                <div class="card-title h5 mb-3">ایدیت صنف "{{ instance.name }}"</div>
+                                <div>
+                                      <div class="row g-3">
+                                <div class="col-md-3">
+                                  <label for="{{ form.date.id_for_label }}" class="form-label">
+                                    تاریخ <span class="text-danger">*</span>
+                                  </label>
+                                  {{ form.date }}
                                 </div>
-                      
-                                <!-- Category -->
-                                <div class="col-md-6">
-                                  <label for="{{ form.category.id_for_label }}" class="form-label">دسته‌بندی <span class="text-danger">*</span></label>
+
+                                <script>
+                                  document.addEventListener('DOMContentLoaded', function () {
+                                      $('#datepicker7').datepicker({
+                                  
+                                      });
+                                  });
+                              </script>
+                                   <div class="col-md-3">
+                                  <label for="{{ form.category.id_for_label }}" class="form-label">دسته‌بندی<span class="text-danger">*</span></label>
                                   {{ form.category }}
                                 </div>
-                      
-                                <!-- Price -->
-                                <div class="col-md-6">
-                                  <label for="{{ form.price.id_for_label }}" class="form-label">قیمت <span class="text-danger">*</span></label>
-                                  {{ form.price }}
+
+                                <div class="col-md-3">
+                                  <label for="{{ form.name.id_for_label }}" class="form-label">نام قرطاسیه<span class="text-danger">*</span></label>
+                                  {{ form.name }}
                                 </div>
-                      
-                                <!-- Description -->
+                                <div class="col-md-3">
+                                  <label for="{{ form.number_of_stationery.id_for_label }}" class="form-label">تعداد<span class="text-danger">*</span></label>
+                                  {{ form.number_of_stationery }}
+                                </div>
+                  
+                                <div class="col-md-3">
+                                  <label for="{{ form.per_price_stationery.id_for_label }}" class="form-label">مقدار فی <span class="text-danger">*</span></label>
+                                  {{ form.per_price_stationery }}
+                                </div>
+
+                                
+                                <div class="col-md-3">
+                                  <label for="{{ form.stationery_price.id_for_label }}" class="form-label">قیمت<span class="text-danger">*</span></label>
+                                  {{ form.stationery_price }}
+                                </div>
+                  
+
+                                <div class="col-md-3">
+                                  <label for="{{ form.stationery_paid_price.id_for_label }}" class="form-label">مقدار برای پرداخت<span class="text-danger">*</span></label>
+                                  {{ form.stationery_paid_price }}
+                                </div>
+                  
+
+                                <div class="col-md-3">
+                                  <label for="{{ form.per_price_for_buy.id_for_label }}" class="form-label">مقدار فی برای فروش <span class="text-danger">*</span></label>
+                                  {{ form.per_price_for_buy }}
+                                </div>
+                  
+                               
                                 <div class="col-md-12">
                                   <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
                                   {{ form.description }}
                                 </div>
-                      
+                  
+                              </div>
+                                  <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const numberField = document.getElementById("{{ form.number_of_stationery.id_for_label }}");
+                                const perPriceField = document.getElementById("{{ form.per_price_stationery.id_for_label }}");
+                                const totalField = document.getElementById("{{ form.stationery_price.id_for_label }}");
+                            
+                                function calculateTotal() {
+                                    let number = parseFloat(numberField.value) || 0;
+                                    let perPrice = parseFloat(perPriceField.value) || 0;
+                                    let total = number * perPrice;
+                            
+                                    totalField.value = total.toFixed(2);  // 2 decimal places
+                                }
+                            
+                                numberField.addEventListener("input", calculateTotal);
+                                perPriceField.addEventListener("input", calculateTotal);
+                            });
+                            </script>  
+                        
+                                  <div class="text-end">
+                                    
+                                    <!-- Dismiss button -->
+                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
+                                      بستن
+                                    </button>
+                                  
+                                    <!-- Submit button -->
+                                    <button class="btn btn-primary mt-2" type="submit">
+                                      ذخیره کردن
+                                    </button>
+                                  </div>
+                                  
+                                </div>
                               </div>
                             </div>
-                          </div>
-                      
-                          <div class="modal-footer mt-3 d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-                            <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
-                          </div>
-                        </form>
+                          </form>
+                               
+    
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          $('#datepicker3').datepicker({});
+        });
+        </script>
+        
                         <!-- ====== / Edit Station Form ====== -->
                       </div>
                       

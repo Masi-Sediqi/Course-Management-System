@@ -19,6 +19,7 @@ urlpatterns = [
     path('student/improvment/top/<int:id>/', views.student_improvment, name='student_improvment'),
     path('student/buy/book/<int:id>/', views.buy_book, name='buy_book'),
     path('student/delete/buy/book/<int:id>/', views.delete_student_buy_book, name='delete_student_buy_book'),
+    path('student/delete/buy/stationery/<int:id>/', views.delete_student_buy_stationery, name='delete_student_buy_stationery'),
     path('student/edit/buy/book/<int:student_id>/<int:buybook_id>/', views.edit_student_buy_book, name='edit_student_buy_book'),
     path('student/paid/remain/money/<int:id>/', views.student_paid_Remain_money, name='student_paid_Remain_money'),
     path('student/delete/paid/remain/money/<int:id>/', views.delete_paid_remain_money, name='delete_paid_remain_money'),
@@ -28,4 +29,6 @@ urlpatterns = [
     path('student/paid/fess/<int:stu_id>/<int:cla_id>/', views.student_paid_fees, name='student_paid_fees'),
     path('student/paid/deleting/<int:id>', views.delete_paid_fess, name='delete_paid_fess'),
     path('student/edit/paid/<int:id>', views.edit_paid_fees, name='edit_paid_fees'),
+
+    path('export/students/excel/', views.export_students_excel, name='export_students_excel'),
 ]

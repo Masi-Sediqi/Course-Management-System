@@ -1,4 +1,3 @@
-from django import forms
 from .models import *
 from django import forms
 from jalali_date.widgets import AdminJalaliDateWidget
@@ -106,7 +105,7 @@ class StudentImporvmentForm(forms.ModelForm):
 
     class Meta:
         model = StudentImporvment
-        fields = ["date","description","file","after_class","past_class"]
+        fields = ["date","description","file","after_class","past_class","number"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["date"].widget.attrs.update(
@@ -119,6 +118,9 @@ class StudentImporvmentForm(forms.ModelForm):
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["after_class"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["number"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["past_class"].widget.attrs.update(

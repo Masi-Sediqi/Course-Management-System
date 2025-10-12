@@ -112,6 +112,7 @@ class StudentImporvment(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     date = models.CharField(max_length=14, blank=False)
     past_class = models.ForeignKey(SubClass, on_delete=models.CASCADE, null=True, related_name="past_class")
+    number = models.FloatField(blank=False)
     after_class = models.ForeignKey(SubClass, on_delete=models.CASCADE, null=True, related_name="after_class")
     file = models.FileField(upload_to=f"student/", blank=True)
     description = models.TextField(blank=True)

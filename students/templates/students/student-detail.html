@@ -12,7 +12,7 @@
 
             <div class="row">
                 <!-- ICON BG-->
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                         <div class="card-body text-center"><i class="i-Add-User"></i>
                             <div class="content">
@@ -21,7 +21,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!-- <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
                         <div class="card-body text-center"><i class="i-Financial"></i>
@@ -156,6 +156,17 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        <tr>
+                            <th>جنسیت</th>
+                            <td>
+                                {% if student.is_active == False %}
+                                <span class="badge badge-pill badge-danger" style="font-size: 1rem;">غیر فعال</span>
+
+                                {% else %}
+                                <span class="badge badge-pill badge-success" style="font-size: 1rem;">فعال</span>
+                                {% endif %}
+                            </td>
+                        </tr>
                       
                       
                     </tbody>
@@ -164,16 +175,23 @@
 
             <div class="text-end mt-4">
                 <a href="{% url 'students:students_registration' %}" class="btn btn-back">بازگشت</a>
-                <a href="{% url 'students:student_activate' student.id %}" class="btn btn-activate">فعال</a>
+                {% if student.is_active == False %}
+                <a href="{% url 'students:student_activate_on' student.id %}" class="btn btn-activate">فعال</a>
+                {% else %}
+                <a href="{% url 'students:student_activate' student.id %}" class="btn btn-activate">غیر فعال</a>
+                {% endif %}
+
                 <a href="{% url 'students:edit_students' student.id %}" class="btn btn-edit">تغیرات</a>
                 <a href="{% url 'students:delete_students' student.id %}" class="btn btn-delete"
                    onclick="return confirm('آیا مطمئن هستید که می‌خواهید این شاگرد را حذف کنید؟')">حذف</a>
                 <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-fees">
                     <i class="fas fa-money-bill-wave"></i> فیس
                 </a>
+                {% if remain_amount.amount > 0 %}
                 <a href="{% url 'students:student_paid_Remain_money' student.id %}" class="btn btn-remain">
                     <i class="fas fa-coins"></i> پول باقی مانده
                 </a>
+                {% endif %}
                 <a href="{% url 'students:buy_book' student.id %}" class="btn btn-book">خرید قرطاسیه & کتاب</a>
                 <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote">
                     <span class="text">ارتقاع شاگرد</span>

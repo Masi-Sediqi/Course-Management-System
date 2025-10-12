@@ -12,6 +12,7 @@ class Teacher(models.Model):
     ]
     name = models.CharField(max_length=100, blank=False)
     last_name = models.CharField(max_length=100, blank=True)
+    date = models.CharField(max_length=12, blank=False)
     phone = models.CharField(max_length=10, blank=True)
     gender = models.CharField(max_length=120, choices=GENDER_CHOICES)
     percentage = models.FloatField(blank=False)
@@ -39,7 +40,7 @@ class TeacherPaidSalary(models.Model):
     description = models.TextField(blank=True)
 
 class TeacherRemainMoney(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="teacher_remains")
     total_amount = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -61,7 +62,7 @@ class TeacherLoan(models.Model):
     description = models.TextField(blank=True)
 
 class TeacherTotalLoan(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="teacher_loans")
     total_loan_amount = models.FloatField()
     def save(self, *args, **kwargs):
         if self.total_loan_amount < 0:

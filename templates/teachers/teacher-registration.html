@@ -57,6 +57,7 @@
                               <th scope="col">#</th>
                               <th scope="col">نام کامل</th>
                       
+                              <th scope="col">تاریخ</th>
                               <th scope="col">جنسیت</th>
                               <th scope="col">شماره تماس</th>
                         
@@ -72,6 +73,7 @@
                                 <th scope="row">{{ i.id }}</th>
                              <td>   <a href="{% url 'teachers:teacher_detail' i.id %}">{{ i.name }} {{ i.last_name }}</a></td>
                         
+                                <td>{{ i.date }}</td>
                                 <td>{{ i.gender }}</td>
                                 <td>{{ i.phone|default:"ندارد" }}</td>
                                 <td>{{ i.percentage }}</td>
@@ -168,18 +170,22 @@
                             {{ form.last_name }}
                         </div>
                         <div class="col-md-4 form-group mb-3">
+                            <label for="lastName1">تاریخ</label>
+                            {{ form.date }}
+                        </div>
+                        <div class="col-md-3 form-group mb-3">
                             <label for="phone">شماره تماس</label>
                             {{ form.phone }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="phone">جنسیت</label>
                             {{ form.gender }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="date_of_registration">فیصدی<span style="color: red;">*</span></label>
                             {{ form.percentage }}
                         </div>
-                        <div class="col-md-4 form-group mb-3">
+                        <div class="col-md-3 form-group mb-3">
                             <label for="gender">فایل</label>
                             {{ form.file }}
                         </div>

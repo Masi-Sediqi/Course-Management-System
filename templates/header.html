@@ -6,33 +6,22 @@
 <div class="sidebar-panel bg-white" style="font-family: XW_Zar_Bd_0;">
 
 
-<a href="{% url 'home:notification' %}" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
-      <img class="pl-3" src="{% static 'images/logo.jpg'%}" alt="alt" />
-     <!-- <span class=" item-name text-20 text-primary font-weight-700">GULL</span> -->
-     <div class="notification-badge ml-auto">
-         {{ notifications_count }}
-     </div>
-    <style>
-        .notification-badge {
-        position: relative;
-        min-width: 18px;
-        height: 18px;
-        background: red;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2px;
-        }
-
-    </style>
-
+<a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
+  <img class="system-logo" src="{{ system_logo }}" alt="System Logo" />
 </a>
 
-<br>
+<style>.system-logo {
+  width: 95px; /* slightly larger */
+  height: auto;
+  border-radius: 10px; /* smooth corner cut */
+  transition: transform 0.3s ease;
+}
+
+.system-logo:hover {
+  transform: scale(1.05); /* small hover effect */
+}
+</style>
+
   <hr>
   <!--  user -->
   <div class="scroll-nav ps ps--active-y" data-perfect-scrollbar="data-perfect-scrollbar" data-suppress-scroll-x="true">
@@ -87,9 +76,15 @@
                     </a>
                 </li>
                 <li class="Ul_li--hover">
-                    <a href="{% url 'management:Total_income' %}" class="d-flex align-items-center">
+                    <a href="{% url 'reports:standard' %}" class="d-flex align-items-center">
                         <img src="{% static 'icon/streamline-plump--file-report.svg' %}" alt="" style="margin-left: 8px;">
                         <span class="item-name text-15 text-muted">راپورها</span>
+                    </a>
+                </li>
+                <li class="Ul_li--hover">
+                    <a href="{% url 'settings:settings' %}" class="d-flex align-items-center">
+                       <img src="{% static 'icon/weui--setting-outlined.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">تنظیمات</span>
                     </a>
                 </li>
                 <li class="Ul_li--hover">
