@@ -8,124 +8,123 @@
             <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
             </ul>
 <div class="card">
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
-            <!-- ====== Edit Teacher Salary Form ====== -->
-            <form method="POST" action="{% url 'teachers:edit_teacher_salary_record' salary_id=salary_id.id %}">
-                {% csrf_token %}
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content p-3">
-                        <div class="card-title h5 mb-3">ویرایش پرداخت معاش</div>
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+      <!-- ====== Edit Teacher Salary Form ====== -->
+      <form method="POST" action="{% url 'teachers:edit_teacher_salary_record' salary_id=salary_id.id %}">
+        {% csrf_token %}
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content p-3">
+            <div class="card-title h5 mb-3">ویرایش پرداخت معاش</div>
 
-                        <div class="row">
-                            <div class="col-md-4 form-group mb-3">
-                                <label for="{{ form.date.id_for_label }}">تاریخ</label>
-                                {{ form.date }}
-                            </div>
+            <!-- 🧾 Display current loan information -->
+            {% if total_teacher_loan %}
+            <div class="alert alert-info text-center" style="font-weight: 500;">
+              مقدار قرض این استاد: <span class="text-danger">{{ total_teacher_loan.total_loan_amount }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-secondary text-center">این استاد قرض ندارد</div>
+            {% endif %}
 
-                            <div class="col-md-4 form-group mb-3">
-                                <label for="{{ form.amount_of_fees_bell.id_for_label }}">تعداد فیس بل</label>
-                                {{ form.amount_of_fees_bell }}
-                            </div>
+            <div class="row">
+              <div class="col-md-4 form-group mb-3">
+                <label for="{{ form.date.id_for_label }}">تاریخ</label>
+                {{ form.date }}
+              </div>
 
-                            <div class="col-md-4 form-group mb-3 position-relative">
-                                <label for="{{ form.amount.id_for_label }}">مقدار <span class="text-danger">*</span></label>
-                                {{ form.amount }}
-                                <div id="warning-msg" class="text-danger mt-1" style="display: none;">
-                                    مقدار فیس داده شده نباید بزرگتر از مقدار اصلی فیس باشد!
-                                </div>
-                                <div id="overlay" style="
-                                    display: none;
-                                    position: absolute;
-                                    top: 38px;
-                                    left: 0;
-                                    right: 0;
-                                    height: 38px;
-                                    background: rgba(255, 255, 255, 0.6);
-                                    z-index: 10;
-                                    pointer-events: none;
-                                    border-radius: 4px;
-                                "></div>
-                            </div>
-                        </div>
+              <div class="col-md-4 form-group mb-3">
+                <label for="{{ form.amount_of_fees_bell.id_for_label }}">تعداد فیس بل</label>
+                {{ form.amount_of_fees_bell }}
+              </div>
 
-                        <div class="row">
-                            <div class="col-md-4 form-group mb-3">
-                                <label for="loan_amount">مقدار قرض برای کسر</label>
-                                <input type="number" id="loan_amount" name="loan_amount" class="form-control"
-                                       value="{{ salary_id.loan_deduction|default:0 }}" 
-                                       max="{{ total_teacher_loan_amount }}" step="0.01">
-                                <div id="loan-warning-msg" class="text-danger mt-1" style="display: none;">
-                                    مقدار قرض بیشتر از قرض باقی مانده است!
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 form-group mb-3">
-                                <label for="{{ form.paid_salary.id_for_label }}">مقدار برای پرداخت</label>
-                                {{ form.paid_salary }}
-                            </div>
-                        </div>
-
-                        <div class="col-md-12 form-group mb-3">
-                            <label for="{{ form.description.id_for_label }}">توضیحات</label>
-                            {{ form.description }}
-                        </div>
-
-                        <div class="text-end">
-                            <!-- Dismiss button -->
-                            <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
-                                بستن
-                            </button>
-
-                            <!-- Submit button -->
-                            <button class="btn btn-primary mt-2" type="submit">
-                                ذخیره کردن
-                            </button>
-                        </div>
-
-                    </div>
+              <div class="col-md-4 form-group mb-3 position-relative">
+                <label for="{{ form.amount.id_for_label }}">مقدار <span class="text-danger">*</span></label>
+                {{ form.amount }}
+                <div id="warning-msg" class="text-danger mt-1" style="display: none;">
+                  مقدار فیس داده شده نباید بزرگتر از مقدار اصلی فیس باشد!
                 </div>
-            </form>
+              </div>
+            </div>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    // Initialize datepicker
-                    $('#datepicker3').datepicker({});
+            <div class="row">
+              <!-- Loan deduction input -->
+              <div class="col-md-4 form-group mb-3">
+                <label for="loan_amount">مقدار قرض برای کسر</label>
+                <input type="number"
+                       id="loan_amount"
+                       name="loan_amount"
+                       class="form-control"
+                       value="{{ salary_id.loan_amount|default:0 }}"
+                       max="{{ total_teacher_loan.total_loan_amount|add:salary_id.loan_amount|default:0 }}"
 
-                    const amountInput = document.getElementById("id_amount");
-                    const loanInput = document.getElementById("loan_amount");
-                    const paidSalaryInput = document.getElementById("id_paid_salary");
-                    const loanWarning = document.getElementById("loan-warning-msg");
-                    const maxLoan = parseFloat("{{ total_teacher_loan_amount|default:0 }}");
+                       step="0.01">
+                <div id="loan-warning-msg" class="text-danger mt-1" style="display: none;">
+                  مقدار قرض بیشتر از قرض باقی مانده است!
+                </div>
+              </div>
 
-                    // Prevent loan input from exceeding available loan
-                    loanInput.addEventListener("input", function () {
-                        const value = parseFloat(loanInput.value) || 0;
-                        if (value > maxLoan) {
-                            loanWarning.style.display = "block";
-                            loanInput.value = maxLoan;
-                        } else {
-                            loanWarning.style.display = "none";
-                        }
-                        updatePaidSalary();
-                    });
+              <div class="col-md-4 form-group mb-3">
+                <label for="{{ form.paid_salary.id_for_label }}">مقدار برای پرداخت</label>
+                {{ form.paid_salary }}
+              </div>
+            </div>
 
-                    // Update paid salary based on amount and loan
-                    function updatePaidSalary() {
-                        const amount = parseFloat(amountInput.value) || 0;
-                        const loan = parseFloat(loanInput.value) || 0;
-                        const result = amount - loan;
-                        paidSalaryInput.value = result >= 0 ? result : 0;
-                    }
+            <div class="col-md-12 form-group mb-3">
+              <label for="{{ form.description.id_for_label }}">توضیحات</label>
+              {{ form.description }}
+            </div>
 
-                    amountInput.addEventListener("input", updatePaidSalary);
-                    updatePaidSalary();
-                });
-            </script>
-            <!-- ====== / Edit Teacher Salary Form ====== -->
+            <div class="text-end">
+              <a href="{{ referer }}" class="btn btn-secondary mt-2">برگشت</a>
+              <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
+            </div>
+          </div>
         </div>
+      </form>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          // Initialize datepicker if you are using one
+          if (typeof $ !== "undefined" && $("#datepicker3").length) {
+            $("#datepicker3").datepicker({});
+          }
+
+          const amountInput = document.getElementById("id_amount");
+          const loanInput = document.getElementById("loan_amount");
+          const paidSalaryInput = document.getElementById("id_paid_salary");
+          const loanWarning = document.getElementById("loan-warning-msg");
+          const maxLoan = parseFloat("{{ total_teacher_loan.total_loan_amount|add:salary_id.loan_amount|default:0 }}") || 0;
+
+          // Prevent entering loan greater than available
+          loanInput.addEventListener("input", function () {
+            const value = parseFloat(loanInput.value) || 0;
+            if (value > maxLoan) {
+              loanWarning.style.display = "block";
+              loanInput.value = maxLoan;
+            } else {
+              loanWarning.style.display = "none";
+            }
+            updatePaidSalary();
+          });
+
+          // Update paid salary automatically
+          function updatePaidSalary() {
+            const amount = parseFloat(amountInput.value) || 0;
+            const loan = parseFloat(loanInput.value) || 0;
+            let result = amount - loan;
+            if (result < 0) result = 0;
+            paidSalaryInput.value = result;
+          }
+
+          amountInput.addEventListener("input", updatePaidSalary);
+          updatePaidSalary();
+        });
+      </script>
+      <!-- ====== / Edit Teacher Salary Form ====== -->
     </div>
+  </div>
 </div>
+
 
         </div>
     </div><!-- end of main-content -->
