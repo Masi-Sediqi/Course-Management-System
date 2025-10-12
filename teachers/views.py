@@ -528,3 +528,22 @@ def delete_attendance(request, attendance_id):
     attendance.delete()
     messages.success(request, "ریکارد حضور و غیاب حذف شد")
     return redirect("teachers:add_attendance", teacher_id=teacher_id)
+
+def edit_attendance(request, attendance_id):
+    attendance = get_object_or_404(AttendanceAndLeaves, id=attendance_id)
+    teacher = attendance.teacher
+
+    if request.method == "POST":
+        form = AttendanceAndLeavesForm(request.POST, instance=attendance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "ریکارد حضور و غیاب موفقانه ویرایش شد")
+            return redirect("teachers:add_attendance", teacher_id=teacher.id)
+    else:
+        form = AttendanceAndLeavesForm(instance=attendance)
+
+    return render(request, "teachers/edit_attendance.html", {
+        "form": form,
+        "teacher": teacher,
+        "attendance": attendance
+    })

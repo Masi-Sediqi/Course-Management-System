@@ -187,74 +187,95 @@ def books_reports(request):
     return render(request, "reports/books_report.html", context)
 
 def income_expenses(request):
-    filter_active = False
     title = "در حال حاضر تمام عایدات و مصارفات نمایش داده می‌شوند"
-
     form = StudentFilterForm(request.GET or None)
+    filter_type = request.GET.get('filter_type', 'income_expenses')
 
+    # Default: show all
+    filter_active = False
     income_data = []
     expense_data = []
 
+    # helper filter for date range
+    def date_filter(qs, start_date, end_date):
+        if start_date and end_date:
+            return qs.filter(date__range=[start_date, end_date])
+        elif start_date:
+            return qs.filter(date__gte=start_date)
+        elif end_date:
+            return qs.filter(date__lte=end_date)
+        return qs
+
+    # ========== INCOMES ==========
+    income_sources = [
+        ("عواید عمومی", OtherIncome),
+        ("فیس شاگردان", Student_fess_info),
+        ("فروش کتاب", BuyBook),
+        ("فروش قرطاسیه", BuyStationery),
+        ("پرداخت پول باقی مانده توسط شاگرد", StudentGiveRemainMoney),
+    ]
+    
+    # ========== EXPENSES ==========
+    expense_sources = [
+        ("مصارف عمومی", Expenses),
+        ("ماش استادان", TeacherPaidSalary),
+        ("قرض استادان", TeacherLoan),
+        ("خرید قرطاسیه", StationeryItem),
+        ("خرید دوباره قرطاسیه", BuyStationeryAgain),
+        ("خرید کتاب", Books),
+        ("خرید دوباره کتاب", BuyBookAgain),
+    ]
+
+    # ========== FILTER BY DATE (if form valid) ==========
     if form.is_valid():
         start_date = form.cleaned_data.get('start_date')
         end_date = form.cleaned_data.get('end_date')
 
-        filter_active = True
-        title = f"گزارش عواید و مصارف از تاریخ {start_date} تا {end_date}"
+        if start_date or end_date:
+            filter_active = True
+            title = f"گزارش عواید و مصارف از تاریخ {start_date} تا {end_date}"
+    else:
+        start_date = end_date = None
 
-        # helper filter for date range
-        def date_filter(qs):
-            if start_date and end_date:
-                return qs.filter(date__range=[start_date, end_date])
-            elif start_date:
-                return qs.filter(date__gte=start_date)
-            elif end_date:
-                return qs.filter(date__lte=end_date)
-            return qs
-
-        # ========== INCOMES ==========
-        income_sources = [
-            ("عواید عمومی", OtherIncome),
-            ("فیس شاگردان", Student_fess_info),
-            ("فروش کتاب", BuyBook),
-            ("فروش قرطاسیه", BuyStationery),
-            ("پرداخت پول باقی مانده توسط شاگرد", StudentGiveRemainMoney),
-        ]
-
+    # ========== FETCH DATA ==========
+    if filter_type in ["income_expenses", "income"]:
         for label, model in income_sources:
-            qs = date_filter(model.objects.all())
+            qs = date_filter(model.objects.all(), start_date, end_date)
             for obj in qs:
                 income_data.append({
-                    'id': obj.id,  # ✅ include ID
+                    'id': obj.id,
                     'type': label,
                     'date': getattr(obj, 'date', None),
-                    'amount': getattr(obj, 'amount', getattr(obj, 'give_fees', getattr(obj, 'paid_amount',getattr(obj, 'paid_stationery_amount', 0)))),
+                    'amount': getattr(obj, 'amount', getattr(obj, 'give_fees',
+                               getattr(obj, 'paid_amount',
+                               getattr(obj, 'paid_stationery_amount', 0)))),
                 })
 
-        # ========== EXPENSES ==========
-        expense_sources = [
-            ("مصارف عمومی", Expenses),
-            ("ماش استادان", TeacherPaidSalary),
-            ("قرض استادان", TeacherLoan),
-            ("خرید قرطاسیه", StationeryItem),
-            ("خرید دوباره قرطاسیه", BuyStationeryAgain),
-            ("خرید کتاب", Books),
-            ("خرید دوباره کتاب", BuyBookAgain),
-        ]
 
+
+    if filter_type in ["income_expenses", "expenses"]:
         for label, model in expense_sources:
-            qs = date_filter(model.objects.all())
+            qs = date_filter(model.objects.all(), start_date, end_date)
             for obj in qs:
                 expense_data.append({
-                    'id': obj.id,  # ✅ include ID
+                    'id': obj.id,
                     'type': label,
                     'date': getattr(obj, 'date', None),
-                    'amount': getattr(obj, 'amount', getattr(obj, 'paid_salary', getattr(obj, 'stationery_paid_price',getattr(obj, 'paid_price', 0)))),
+                    'amount': getattr(obj, 'amount', getattr(obj, 'paid_salary',
+                               getattr(obj, 'stationery_paid_price',
+                               getattr(obj, 'paid_price', 0)))),
                 })
 
-        # Sort by date descending
-        income_data = sorted(income_data, key=lambda x: x['date'] or '', reverse=True)
-        expense_data = sorted(expense_data, key=lambda x: x['date'] or '', reverse=True)
+    if filter_type == "income":
+        title = f"نمایش تمام عواید از تاریخ {start_date} الی {end_date}"
+    elif filter_type == "expenses":
+        title = f"نمایش تمام مصارفات از تاریخ {start_date} الی {end_date}"
+    # elif filter_type == "income_expenses":
+    #     title = f"نمایش تمام عواید و مصارفات از تاریخ {start_date} الی {end_date}"
+
+    # ========== SORT RESULTS ==========
+    income_data = sorted(income_data, key=lambda x: x['date'] or '', reverse=True)
+    expense_data = sorted(expense_data, key=lambda x: x['date'] or '', reverse=True)
 
     context = {
         'title': title,
@@ -263,5 +284,4 @@ def income_expenses(request):
         'income_data': income_data,
         'expense_data': expense_data,
     }
-
     return render(request, 'reports/income-expenses.html', context)
