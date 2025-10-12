@@ -112,7 +112,7 @@
             </div>
         </div><!-- end of main-content -->
     </div>
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -125,49 +125,54 @@
             <div class="modal-body">
                 <form class="needs-validation" novalidate action="{% url 'teachers:teacher_paid_salary' id=teacher.id %}" method="post">
                     {% csrf_token %}
-                    
-                        <div class="row p-3">
-                        <!-- Personal Info -->
+
+                    <!-- Display teacher's current loan at top -->
+                    <div class="mb-3">
+                        <p class="text-info fw-bold">
+                            مقدار قرض این استاد: 
+                            {{ total_teacher_loan.total_loan_amount|default:"0" }}
+                        </p>
+                    </div>
+
+                    <div class="row p-3">
+                        <!-- تاریخ -->
                         <div class="col-md-3 form-group mb-3">
                             <label for="lastName1">تاریخ<span style="color: red;">*</span></label>
                             {{ form.date }}
                         </div>
+
+                        <!-- تعداد فیس بل -->
                         <div class="col-md-3 form-group mb-3">
-                            <label for="firstName1"> تعداد فیس بل<span style="color: red;">*</span></label>
+                            <label for="firstName1">تعداد فیس بل<span style="color: red;">*</span></label>
                             {{ form.amount_of_fees_bell }}
                         </div>
-                  
+
+                        <!-- مقدار -->
                         <div class="col-md-3 form-group mb-3">
-                            <label for="id_amount"> مقدار<span style="color: red;">*</span></label>
+                            <label for="id_amount">مقدار<span style="color: red;">*</span></label>
                             {{ form.amount }}
                         </div>
-                        
+
+                        <!-- قرض -->
                         <div class="col-md-3 form-group mb-3">
-                            <label for="id_paid_salary"> مقدار برای پرداخت<span style="color: red;">*</span></label>
+                            <label for="loan_amount">قرض استاد<span style="color: red;">*</span></label>
+                            <input type="number" step="0.01" min="0" id="loan_amount" name="loan_amount"
+                                   class="form-control"
+                                   value="{{ total_teacher_loan.total_loan_amount|default:"0" }}">
+                            <div id="loan-error" style="color:red; display:none; font-size: 0.9em;">
+                                مقدار قرض بیشتر از قرض گرفته شده است
+                            </div>
+                        </div>
+
+                        <!-- مقدار برای پرداخت -->
+                        <div class="col-md-3 form-group mb-3">
+                            <label for="id_paid_salary">مقدار برای پرداخت<span style="color: red;">*</span></label>
                             {{ form.paid_salary }}
                         </div>
-                        
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                const amountInput = document.getElementById("id_amount");
-                                const loanInput = document.getElementById("loan_amount");
-                                const paidSalaryInput = document.getElementById("id_paid_salary");
-                        
-                                function calculatePaidSalary() {
-                                    let amount = parseFloat(amountInput.value) || 0;
-                                    let loan = parseFloat(loanInput?.value) || 0;
-                                    let result = amount - loan;
-                        
-                                    paidSalaryInput.value = result >= 0 ? result : 0; // don’t allow negative
-                                }
-                        
-                                amountInput.addEventListener("input", calculatePaidSalary);
-                                if (loanInput) loanInput.addEventListener("input", calculatePaidSalary);
-                            });
-                        </script>
-                        
+
+                        <!-- توضیحات -->
                         <div class="col-md-12 form-group mb-3">
-                            <label for="email">توضیحات </label>
+                            <label for="email">توضیحات</label>
                             {{ form.description }}
                         </div>
 
@@ -183,6 +188,40 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const amountInput = document.getElementById("id_amount");
+    const loanInput = document.getElementById("loan_amount");
+    const paidSalaryInput = document.getElementById("id_paid_salary");
+    const loanErrorDiv = document.getElementById("loan-error");
+
+    // Maximum loan available
+    const maxLoan = parseFloat(loanInput.value) || 0;
+
+    function calculatePaidSalary() {
+        let amount = parseFloat(amountInput.value) || 0;
+        let loan = parseFloat(loanInput.value) || 0;
+
+        // Check if entered loan exceeds maximum
+        if (loan > maxLoan) {
+            loanErrorDiv.style.display = "block";
+            loanInput.value = maxLoan; // reset to maximum
+            loan = maxLoan;
+        } else {
+            loanErrorDiv.style.display = "none";
+        }
+
+        // Calculate paid salary
+        let result = amount - loan;
+        paidSalaryInput.value = result >= 0 ? result : 0;
+    }
+
+    amountInput.addEventListener("input", calculatePaidSalary);
+    loanInput.addEventListener("input", calculatePaidSalary);
+});
+</script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
