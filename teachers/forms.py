@@ -39,10 +39,15 @@ class TeacherForm(forms.ModelForm):
 
 class TeacherPaidSalaryForm(forms.ModelForm):
     date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
+    loan_amount = forms.FloatField(
+    label='قرض قابل کسر',
+    required=False,
+    widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'loan_amount', 'placeholder': '0'})
+)
 
     class Meta:
         model = TeacherPaidSalary
-        fields = ["amount","date","description","amount_of_fees_bell","paid_salary"]
+        fields = ["amount","date","description","amount_of_fees_bell","paid_salary","loan_amount"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,6 +63,7 @@ class TeacherPaidSalaryForm(forms.ModelForm):
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
+        self.fields["loan_amount"].widget.attrs.update({"class": "form-control", "placeholder": "0"})
 
 class TeacherPaidRemainMoneyForm(forms.ModelForm):
     date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker12",'class': 'form-control' }))

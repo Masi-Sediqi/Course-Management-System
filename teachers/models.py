@@ -38,6 +38,8 @@ class TeacherPaidSalary(models.Model):
     paid_salary = models.FloatField()
     remain_salary = models.FloatField(default=0)
     description = models.TextField(blank=True)
+    loan_amount = models.FloatField(default=0)
+    
 
 class TeacherRemainMoney(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="teacher_remains")
