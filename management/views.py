@@ -150,3 +150,6 @@ def edit_expense(request, expense_id):
         'expense_instance': expense_instance,
     } 
     return render(request, 'management/edit-expense.html', context)
+
+def hesabpay(request):
+    return render(request, 'management/hesabpay.html')
