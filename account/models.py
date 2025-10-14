@@ -52,6 +52,7 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     is_agree_policy = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    date_in_persian = models.CharField(max_length=150)
 
     objects = CustomAccountManager()
 

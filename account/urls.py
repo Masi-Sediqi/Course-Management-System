@@ -34,4 +34,12 @@ urlpatterns = [
     path('password_reset/password_reset_email_confirm', TemplateView.as_view(template_name="account/user/reset_status.html"), name='password_reset_done'),
     path('password_reset_complete/', TemplateView.as_view(template_name="account/user/reset_status.html"), name='password_reset_complete'),
     path('dashboard/password/change/', views.change_password, name='change_password'),
+
+    path('accounts/', views.accounts, name='accounts'),
+    path('delete_account/<int:id>/',views.delete_account, name='delete_account'),
+    path('activate_employee/<int:employee_id>/', views.activate_employee, name='activate_employee'), 
+    path('diactivate_employee/<int:employee_id>/', views.diactivate_employee, name='diactivate_employee'), 
+    path('edit_accounts/<int:id>/', views.edit_accounts, name='edit_accounts'), 
+    path('change_account_password/<int:id>/', views.change_account_password, name='change_account_password'), 
+    path('assign_permission_for_user/<int:id>/', views.assign_permission_for_user, name='assign_permission_for_user'), 
 ]

@@ -15,6 +15,14 @@ class TotalIncome(models.Model):
             self.total_amount = 0  # automatically set negative values to 0
         super().save(*args, **kwargs)
 
+    class Meta:
+        verbose_name = "TotalIncome"
+        verbose_name_plural = "TotalIncomes"
+        default_permissions = ()  # disable default English ones
+        permissions = [
+            ("view_totalIncome", "can view total income"),
+        ]
+
 class TotalExpenses(models.Model):
     total_amount = models.FloatField(default=0)
     # Optional: last updated time
@@ -28,12 +36,36 @@ class TotalExpenses(models.Model):
             self.total_amount = 0  # automatically set negative values to 0
         super().save(*args, **kwargs)
 
+    class Meta:
+        verbose_name = "TotalExpenses"
+        verbose_name_plural = "TotalExpensess"
+        default_permissions = ()  # disable default English ones
+        permissions = [
+            ("view_totalexpenses", "can view total expenses"),
+        ]
+
 class OtherIncome(models.Model):
     date = models.CharField(max_length=14, blank=False)
     amount = models.FloatField()
     description = models.TextField()
 
+    class Meta:
+        verbose_name = "OtherIncome"
+        verbose_name_plural = "OtherIncomes"
+        default_permissions = ()  # disable default English ones
+        permissions = [
+            ("view_otherincome", "can view income records"),
+        ]
+
 class Expenses(models.Model):
     date = models.CharField(max_length=14, blank=False)
     amount = models.FloatField()
     description = models.TextField()
+
+    class Meta:
+        verbose_name = "Expenses"
+        verbose_name_plural = "Expensess"
+        default_permissions = ()  # disable default English ones
+        permissions = [
+            ("view_expenses", "can view expenses records"),
+        ]

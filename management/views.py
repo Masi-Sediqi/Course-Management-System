@@ -4,6 +4,8 @@ from management.forms import *
 from .models import *
 from django.contrib import messages
 from django.http import HttpResponse
+import requests
+from django.conf import settings
 # Create your views here.
 
 def Total_income(request):

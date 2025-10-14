@@ -39,7 +39,9 @@
                 <div class="card-body text-center"><i class="i-Add-User"></i>
                     <div class="content">
                         <p class="text-muted mt-2 mb-0">عواید</p>
+                        {% if perms.management.view_totalIncome %}
                         <p class="lead text-success text-24 mb-2">{{get_total_income.total_amount}}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -49,7 +51,9 @@
                 <div class="card-body text-center"><i class="i-Financial"></i>
                     <div class="content">
                         <p class="text-muted mt-2 mb-0">مصارف</p>
+                         {% if perms.management.view_totalexpenses %}
                         <p class="lead text-danger text-24 mb-2">{{get_total_expenses.total_amount}}</p>
+                         {% endif %}
                     </div>
                 </div>
             </div>
@@ -108,8 +112,7 @@
                 <div class="tab-pane fade show active" id="income" role="tabpanel">
                     <!-- ✅ Paste your full income table & modals here -->
                     <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
-    
-                    <!-- your full code... -->
+                    {% if perms.management.view_otherincome %}
                     <div class="table-responsive">
                         <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
                             <thead class="thead-dark">
@@ -162,13 +165,15 @@
                             
                         </table>
                     </div>
+                    {% endif %}
                 </div>
     
                 <!-- Tab 2: Extra Content -->
                 <div class="tab-pane fade" id="extra" role="tabpanel">
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
+                    <p>در بخش پایین، معلومات کامل در مورد تمامی مصارف قابل مشاهده است.</p>
     
                     <!-- your full code... -->
+                    {% if perms.management.view_expenses %}
                     <div class="table-responsive">
                         <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
                             <thead class="thead-dark">
@@ -221,6 +226,7 @@
                             
                         </table>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

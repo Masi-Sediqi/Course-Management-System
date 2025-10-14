@@ -1,0 +1,300 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+
+
+    <div class="page-content wrapper" style="font-family: XW_Zar_Bd_0;">
+        <div class="container-fluid">
+
+              <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+  <script src="{% static 'js/sweet.js' %}"></script>
+
+  <script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+      title: "{{ message|escapejs }}",
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+    {% endfor %}
+    {% endif %}
+  </script>
+
+  <div class="main-content pt-4">
+                <div class="breadcrumb">
+                    <h1>بخش ساختن اکونت ها</h1>
+                    <ul>
+                        <li><a href="/">داشبورد</a></li>
+                        <li>ساختن اکونت</li>
+                    </ul>
+                </div>
+                <div class="separator-breadcrumb border-top"></div>
+                <!-- content goes here-->
+                <section class="ul-todo-list-content">
+                    <div class="ul-todo-sidebar">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="pr-3 pb-3"><i class="todo-sidebar-close i-Close pb-3 text-right" data-sidebar-toggle="main"></i>
+                                    <!-- Large modal-->
+                                    <button class="btn btn-primary btn-block mb-4" type="button" data-toggle="modal" data-target=".bd-example-modal-lg">استفاده کننده جدید</button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                      <form method="post" action="#" class="needs-validation" novalidate="novalidate">
+                        {% csrf_token %}
+        
+                        <div class="modal-body p-4">
+                            <div id="alert-error-msg" class="d-none alert alert-danger py-2"></div>
+                            <input type="hidden" id="id-field">
+        
+                            <h5 style="text-align: center;" class="modal-title">معلومات عمومی</h5>
+                            <br>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="contact-number-input" class="form-label">اسم </label>
+                                        {{registerForm.name}}
+                                    </div>
+                                </div>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        document.querySelector("input[name='name']").setAttribute("placeholder", "اسم یوزر جدید را بنویسید");
+                                    });
+                                </script>
+                              
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="contact-number-input" class="form-label">ایمیل آدرس</label>
+                                        {{ registerForm.email }}
+                                    </div>
+                                </div>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        document.querySelector("input[name='email']").setAttribute("placeholder", "ایمل آدرس را وارد کنید");
+                                    });
+                                </script>
+                                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+                                <div class="col-12">
+                                    <div class="mb-3 position-relative">
+                                        <label for="password-input" class="form-label">پسورد</label>
+                                        {{ registerForm.password }}
+                                        <i class="fa fa-eye position-absolute" id="togglePassword" 
+                                            style="top: 70%; left: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        const togglePassword = document.getElementById('togglePassword');
+                                        const passwordInput = document.querySelector('input[name="{{ registerForm.password.name }}"]');
+
+                                        togglePassword.addEventListener('click', function () {
+                                            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                                            passwordInput.setAttribute('type', type);
+                                            this.classList.toggle('fa-eye');
+                                            this.classList.toggle('fa-eye-slash');
+                                        });
+                                    });
+                                </script>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        document.querySelector("input[name='password']").setAttribute("placeholder", "پسورد عبور را وارد کنید");
+                                    });
+                                </script>
+                                <div class="col-12">
+                                    <div class="mb-3 position-relative">
+                                        <label for="contact-number-input" class="form-label">پسورد دوباره</label>
+                                        {{ registerForm.password2 }}
+                                        <i class="fa fa-eye position-absolute" id="toggle" 
+                                            style="top: 70%; left: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+                                    </div>
+                                </div>
+                                 <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        const togglePassword = document.getElementById('toggle');
+                                        const passwordInput = document.querySelector('input[name="{{ registerForm.password2.name }}"]');
+
+                                        togglePassword.addEventListener('click', function () {
+                                            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                                            passwordInput.setAttribute('type', type);
+                                            this.classList.toggle('fa-eye');
+                                            this.classList.toggle('fa-eye-slash');
+                                        });
+                                    });
+                                </script>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        document.querySelector("input[name='password2']").setAttribute("placeholder", "پسورد عبور را دوباره وارد کنید");
+                                    });
+                                </script>
+                               
+    
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="hstack gap-2 justify-content-end">
+                                <button type="submit" class="btn btn-primary">ذخیره کردن</button>
+                              
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                        بستن
+                                      </button>     
+                            </div>
+                        </div>
+                        
+                                    </form>
+                                </div>
+                            </div>
+                   
+                    </div>
+                    <div class="ul-todo-content-right">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                 
+                                    <div class="card-body">
+                                        <div class="ul-todo-body">
+                                           <div class="card-body">
+                               <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>معلومات شخصی</th>
+                  <th>کارمند</th>
+                  <th>فعال</th>
+                  <th class="text-end">ساخته شده</th>
+                  <th class="text-end">اکانت شما</th>
+                  <th class="text-end">عملیات</th>
+                </tr>
+              </thead>
+              
+              <tbody>
+                {% for account in accounts %}
+                <tr class="animate-row">
+                  <td>{{ account.id }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="{% static 'images/student/user.jpg' %}" class="rounded-circle me-3" width="45" height="45" alt="User">
+                      <div>
+                        <h6 class="mb-0 fw-bold">{{ account.name }}</h6>
+                        <small class="text-muted ml-2">{{ account.email }}</small>
+                      </div>
+                    </div>
+                  </td>
+  
+                  <td>
+                    {% if account.is_staff %}
+                    <span class="badge bg-success">بلی</span>
+                    {% else %}
+                    <span class="badge bg-secondary">نخیر</span>
+                    {% endif %}
+                  </td>
+  
+                  <td>
+                    {% if account.is_active %}
+                    <span class="badge bg-success">بلی</span>
+                    {% else %}
+                    <span class="badge bg-danger">نخیر</span>
+                    {% endif %}
+                  </td>
+  
+                  <td class="text-end fw-medium">{{ account.date_in_persian }}</td>
+
+                  <td class="text-end">
+                    {% if account.email == request.user.email %}
+                    <span class="badge bg-info text-dark">این اکانت مربوط شما است</span>
+                    {% endif %}
+                  </td>
+  
+
+                     <td>
+                      <div class="dropdown">
+                        <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton"
+                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+                          style="max-height: 150px; overflow-y: auto;">
+                          <a class="dropdown-item text-info" href="{% url 'account:change_account_password' account.id %}">تغییر پسورد
+                            کامل</a>
+                             {% if not account.is_active %}
+                              <a class="dropdown-item text-info" href="{% url 'account:activate_employee' account.id %}">فعال نمودن</a>
+                             {% else %} 
+                              <a class="dropdown-item text-info" href="{% url 'account:diactivate_employee' account.id %}">غیر فعال نمودن </a>
+                             {% endif %}
+                         
+                          <a class="dropdown-item text-info" href="{% url 'account:assign_permission_for_user' account.id %}">دادن صلاحیت</a>
+
+                          <a class="dropdown-item text-danger" data-toggle="modal"
+                            data-target="#deleteConfirmModal{{ account.id }}">
+                           حذف
+                          </a>
+
+                             <!-- Delete Confirmation Modal -->
+                    
+
+                          <a href="{% url 'account:edit_accounts' account.id %}" class="dropdown-item text-info">تغییرات</a>
+                        </div>
+                      </div>
+                    </td>
+                
+                </tr>
+  
+               <div class="modal fade" id="deleteConfirmModal{{ account.id }}" tabindex="-1" role="dialog"
+                      aria-labelledby="deleteModalLabel{{ account.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content text-center">
+                          <div class="modal-header">
+                            <h5 class="modal-title w-100" id="deleteModalLabel{{ account.id }}">حذف کردن</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                            <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                            <div class="d-flex justify-content-center gap-2">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                              <a href="{% url 'account:delete_account' account.id %}" class="btn btn-danger">بلی، حذف
+                                کن</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+  
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section><!-- end of main-content -->
+            </div>
+        <!-- container-fluid -->
+    </div>
+</div>
+{% endblock %}

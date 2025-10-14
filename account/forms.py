@@ -129,3 +129,37 @@ class PwdResetConfirmForm(SetPasswordForm):
         label='Repeat password', widget=forms.PasswordInput(
             attrs={'class': 'form-control mb-3', 'placeholder': 'New Password', 'id': 'form-new-pass2'}))
 
+
+class ChangeEmployeePasswordForm(forms.Form):
+    new_password = forms.CharField(
+        label='رمز جدید',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'id': 'id_new_password',
+            'placeholder': 'رمز جدید',
+        })
+    )
+
+    confirm_password = forms.CharField(
+        label='تکرار رمز',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'id': 'id_confirm_password',
+            'placeholder': 'تکرار رمز',
+        })
+    )
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("new_password")
+        password2 = cleaned_data.get("confirm_password")
+
+        if password and password2 and password != password2:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data
+    
+class UserPermissionAssignForm(forms.Form):
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-select', 'id': 'permissions-select'}),
+        required=False,
+    )
