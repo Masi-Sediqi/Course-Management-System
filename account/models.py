@@ -82,3 +82,8 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.name
+
+class Licsanse_check(models.Model):
+    password = models.CharField(max_length=1200)
+    date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
