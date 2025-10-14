@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from students.models import *
 from .forms import *
 from django.db.models import Sum
@@ -6,13 +6,33 @@ from teachers.models import *
 from khayyam import JalaliDatetime  # for Jalali date conversion
 from django.http import HttpResponse
 from management.models import *
+from account.models import *
+from django.utils import timezone
 # Create your views here.
 
 def statndart(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     return render(request, "reports/standart.html")
 
 
 def students_reports(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     form = StudentFilterForm(request.GET or None)
     students = Student.objects.filter(is_active=True)
     filter_type = None
@@ -81,6 +101,15 @@ def students_reports(request):
     return render(request, "reports/students_reports.html", context)
 
 def teachers_reports(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     form = StudentFilterForm(request.GET or None)
     teachers = Teacher.objects.filter(is_active=True)
     filter_type = request.GET.get('filter_type', 'active_teachers')
@@ -143,6 +172,15 @@ def teachers_reports(request):
     return render(request, "reports/teachers_reports.html", context)
 
 def books_reports(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     books = Books.objects.all()
 
     # Attach total_amount from TotalBook to each book
@@ -187,6 +225,15 @@ def books_reports(request):
     return render(request, "reports/books_report.html", context)
 
 def income_expenses(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     title = "در حال حاضر تمام عایدات و مصارفات نمایش داده می‌شوند"
     form = StudentFilterForm(request.GET or None)
     filter_type = request.GET.get('filter_type', 'income_expenses')

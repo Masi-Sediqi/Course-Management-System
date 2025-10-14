@@ -1,19 +1,21 @@
 from django.contrib import messages
-from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from.forms import *
-
-
-
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-
-
-from django.contrib import messages
 from .models import MainClass, SubClass
-from .forms import MainClassForm, SubClassForm
+from account.models import *
+from django.utils import timezone
 
 def main_classes(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     main_form = None
     sub_form = None
@@ -74,6 +76,15 @@ def main_classes(request):
     return render(request, 'classes/class-main.html', context)
 
 def edit_sub_class(request, pk):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     instance = get_object_or_404(SubClass, pk=pk)
     if request.method == "POST":
         form = SubClassForm(request.POST, instance=instance)
@@ -87,6 +98,15 @@ def edit_sub_class(request, pk):
 
 
 def deactive_sub_class(request, pk):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     instance = get_object_or_404(SubClass, pk=pk)
     instance.active = False
     instance.save()
@@ -94,6 +114,15 @@ def deactive_sub_class(request, pk):
     return redirect('classes:main_classes')
 
 def active_sub_class(request, pk):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     instance = get_object_or_404(SubClass, pk=pk)
     instance.active = True
     instance.save()
@@ -102,6 +131,15 @@ def active_sub_class(request, pk):
 
 
 def delete_sub_class(request, pk):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     instance = get_object_or_404(SubClass, pk=pk)
     instance.delete()
     messages.success(request, "صنف موفقانه حذف شد")

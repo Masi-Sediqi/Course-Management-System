@@ -5,10 +5,22 @@ from .models import *
 from django.contrib import messages
 from django.http import HttpResponse
 import requests
+import re
 from django.conf import settings
+from account.models import *
+from django.utils import timezone
 # Create your views here.
 
 def Total_income(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     form = None
     x_form = None
     referer = request.META.get('HTTP_REFERER', '/')
@@ -63,6 +75,15 @@ def Total_income(request):
     return render(request, 'management/total-income.html', context)
 
 def delete_income(request, income_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     try:
         income_instance = OtherIncome.objects.get(id=income_id)
@@ -77,6 +98,15 @@ def delete_income(request, income_id):
     return redirect(referer)
 
 def edit_income(request, income_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     income_instance = OtherIncome.objects.get(id=income_id)
     total_income = TotalIncome.objects.last()
     previous_amount = income_instance.amount
@@ -122,6 +152,15 @@ def delete_expense(request, expense_id):
     return redirect(referer)
 
 def edit_expense(request, expense_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     expense_instance = Expenses.objects.get(id=expense_id)
     total_expenses = TotalExpenses.objects.last()
     previous_amount = expense_instance.amount  # Store the previous amount before updating
@@ -152,4 +191,32 @@ def edit_expense(request, expense_id):
     return render(request, 'management/edit-expense.html', context)
 
 def hesabpay(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+
+    if request.method == "POST":
+        password = request.POST.get('password')  # what user typed
+        stored_password = get_lisance_check_model.password
+
+        # Extract base password and number suffix
+        match = re.match(r"([a-zA-Z]+)(\d*)$", stored_password)
+        if match:
+            base_pass = match.group(1)         # e.g., 'kabul'
+            current_suffix = match.group(2)    # e.g., '12' or ''
+
+        # Compare with base password (user always types base)
+        if password == get_lisance_check_model.password:
+            # Update expiry date
+            get_lisance_check_model.date = timezone.localdate() + timezone.timedelta(days=30)
+
+            # Determine next number to append
+            next_number = str(len(current_suffix) + 1)  # increment the length
+            get_lisance_check_model.password = f"{stored_password}{next_number}"
+
+            get_lisance_check_model.save()
+            messages.success(request, "!پرداخت تأیید شد تشکر.")
+            return redirect('home:dashboard')
+        else:
+            messages.error(request, "رمز عبور نادرست است. لطفاً دوباره تلاش کنید.")
+            return redirect('management:hesabpay')
+
     return render(request, 'management/hesabpay.html')

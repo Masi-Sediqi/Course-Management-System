@@ -5,9 +5,20 @@ from .models import *
 from management.models import *
 from django.db import transaction
 from django.http import HttpResponse
+from account.models import *
+from django.utils import timezone
 # Create your views here.
 
 def library_view(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     category_form = StationeryCategoryForm()
     form = StationeryItemForm()
@@ -129,6 +140,15 @@ def library_view(request):
     return render(request, 'library/main_library.html', context)
 
 def delete_category(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(StationeryCategory, id=id)
     if record:
         record.delete()
@@ -139,6 +159,15 @@ def delete_category(request, id):
 
 
 def delete_station(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(StationeryItem, id=id)
     if record:
         expenses_base = TotalExpenses.objects.get(pk=1)
@@ -151,6 +180,15 @@ def delete_station(request, id):
         return HttpResponse('مشکل در آیدی کتگوری است')
 
 def delete_book(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(Books, id=id)
     if record:
         expenses_base = TotalExpenses.objects.get(pk=1)
@@ -164,6 +202,15 @@ def delete_book(request, id):
 
 
 def edit_category(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(StationeryCategory, id=id)
     if request.method == "POST":
         form = StationeryCategoryForm(request.POST, instance=record)
@@ -180,6 +227,15 @@ def edit_category(request, id):
     return render(request, 'library/edit_main_library.html', context)
 
 def edit_station(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(StationeryItem, id=id)
     past_paid = record.stationery_paid_price
     past_number_of_stationery = record.number_of_stationery
@@ -232,6 +288,15 @@ def edit_station(request, id):
 
 
 def edit_book(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(Books, id=id)
     past_number_of_book = record.number_of_book
     past_paid = record.paid_price
@@ -284,6 +349,15 @@ def edit_book(request, id):
     return render(request, 'library/edit_main_library.html', context)
 
 def find_category_item(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     find_Stationery = StationeryCategory.objects.get(id=id)
     find_Stationery_items = StationeryItem.objects.filter(category=find_Stationery)
     context = {
@@ -293,6 +367,15 @@ def find_category_item(request, id):
     return render(request, 'library/category-item.html', context)
 
 def buy_book_again(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     book = Books.objects.get(id=id)
     total_book = TotalBook.objects.get(book=book)
@@ -349,6 +432,15 @@ def buy_book_again(request, id):
     return render(request, 'library/buy-book-again.html', context)
 
 def delete_buy_again(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(BuyBookAgain, id=id)
     total_book = TotalBook.objects.get(book=record.book.id)
     total_book.total_book -= record.number_of_book
@@ -363,6 +455,15 @@ def delete_buy_again(request, id):
     return redirect("library:buy_book_again", id=record.book.id)  # change this to your list view name
 
 def edit_buy_book_again(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(BuyBookAgain, id=id)
     past_number_of_book = record.number_of_book
     past_paid_price = record.paid_price
@@ -418,6 +519,15 @@ def edit_buy_book_again(request, id):
     return render(request, 'library/edit-buy-book-again.html', context)
 
 def update_per_price(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     total_book = get_object_or_404(TotalBook, id=id)
     if request.method == "POST":
         per_price = request.POST.get("per_price")
@@ -428,6 +538,15 @@ def update_per_price(request, id):
     return redirect("library:buy_book_again", id=total_book.book.id)  # change to your view name
 
 def buy_stationery_again(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     stationery = StationeryItem.objects.get(id=id)
     total_book = TotalStationery.objects.get(stationery=stationery)
@@ -479,6 +598,15 @@ def buy_stationery_again(request, id):
 
 
 def update_stationery_per_price(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     total_book = get_object_or_404(TotalStationery, id=id)
     if request.method == "POST":
         per_price = request.POST.get("per_price_stationery")
@@ -489,6 +617,15 @@ def update_stationery_per_price(request, id):
     return redirect("library:buy_stationery_again", id=total_book.book.id)  # change to your view name
 
 def delete_buy_stationery_again(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(BuyStationeryAgain, id=id)
     total_book = TotalStationery.objects.get(stationery=record.stationery.id)
     total_book.total_stationery -= record.number_of_stationery
@@ -503,6 +640,15 @@ def delete_buy_stationery_again(request, id):
     return redirect(request.META.get('HTTP_REFERER', '/'))  # change this to your list view name
 
 def edit_buy_stationery_again(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     record = get_object_or_404(BuyStationeryAgain, id=id)
     past_number_of_stationery = record.number_of_stationery
     past_paid_price = record.stationery_paid_price

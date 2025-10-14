@@ -5,6 +5,8 @@ from management.models import TotalIncome
 from .forms import *
 from django.db import transaction
 from .models import *
+from account.models import Licsanse_check
+from django.utils import timezone
 from django.http import HttpResponse
 from django.db.models import Sum
 from django.contrib import messages
@@ -14,6 +16,15 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 # Create your views here.
 
 def students_registration(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     form = None
     students = None
 
@@ -67,6 +78,15 @@ def students_registration(request):
     return render(request, 'students/students-registration.html', context)
 
 def export_students_excel(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     # Create workbook and active sheet
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -134,6 +154,24 @@ def export_students_excel(request):
     return response
 
 def delete_students(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     get_student_id = Student.objects.get(id=id)
     if get_student_id:
         get_student_id.delete()
@@ -143,6 +181,15 @@ def delete_students(request, id):
         return HttpResponse('User Is Not in Detabase')
 
 def delete_students_withoutclass(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     get_student_id = StudentWithoutClass.objects.get(id=id)
     if get_student_id:
         get_student_id.delete()
@@ -153,6 +200,15 @@ def delete_students_withoutclass(request, id):
 
     
 def edit_students(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     get_student_id = Student.objects.get(id=id)
     if request.method == "POST":
         form = StudentForm(request.POST, instance=get_student_id)
@@ -172,6 +228,15 @@ def edit_students(request, id):
     return render(request, 'students/students-without-class.html', context)
 
 def students_edit_withoutclass(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     student = get_object_or_404(StudentWithoutClass, id=id)
     if request.method == "POST":
@@ -194,6 +259,15 @@ def students_edit_withoutclass(request, id):
     return render(request, "students/student_edit_modal.html", {"form": form, "student": student})
 
 def student_bill(request, student_id, fees_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     get_student_fees = Student_fess_info.objects.get(id=fees_id)
     student = Student.objects.get(id=student_id)
     return render(request, 'students/student-bill.html', {
@@ -203,6 +277,15 @@ def student_bill(request, student_id, fees_id):
 
 
 def student_detail(request, student_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = get_object_or_404(Student, id=student_id)
     remain_amount = StudentRemailMoney.objects.filter(student=student).last()
 
@@ -230,6 +313,15 @@ shamsi_months = {
 }
 
 def student_fees_detail(request, student_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     g_form=None
     form=None
     referer = request.META.get('HTTP_REFERER', '/')
@@ -245,6 +337,15 @@ def student_fees_detail(request, student_id):
     return render(request, 'students/student-fees-detail.html', context)
 
 def student_paid_fees(request, stu_id, cla_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     student = Student.objects.get(id=stu_id)
     stu_class = SubClass.objects.get(id=cla_id)
@@ -306,6 +407,15 @@ def student_paid_fees(request, stu_id, cla_id):
     return render(request, 'students/student-paid-fees.html', context)
 
 def delete_paid_fess(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     fess_id = Student_fess_info.objects.get(id=id)
     income = TotalIncome.objects.get(pk=1)
@@ -321,6 +431,15 @@ def delete_paid_fess(request, id):
     return redirect(referer)
 
 def edit_paid_fees(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     fess_id = Student_fess_info.objects.get(id=id)
     past_paid_amount = fess_id.give_fees
@@ -389,27 +508,72 @@ def edit_paid_fees(request, id):
     return render(request, 'students/edit-student-paid-fees.html', context)
 
 def student_activate(request, student_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = get_object_or_404(Student, id=student_id)
     student.is_active = False
     student.save()
     return redirect(request.META.get('HTTP_REFERER'))
 
 def students_without_class(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     get_students = StudentWithoutClass.objects.all()
     form = StudentWithoutClassForm()
     return render(request, 'students/students-without-class.html', {'get_students':get_students,'form':form,})
     
 def off_students(request):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     get_students = Student.objects.filter(is_active=False)
     return render(request, 'students/do-not-active-students.html', {'get_students':get_students})
 
 def student_activate_on(request, student_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = get_object_or_404(Student, id=student_id)
     student.is_active = True
     student.save()
     return redirect(request.META.get('HTTP_REFERER'))
 
 def student_improvment(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = get_object_or_404(Student, id=id)
     if request.method == "POST":
         form = StudentImporvmentForm(request.POST, request.FILES)
@@ -432,11 +596,29 @@ def student_improvment(request, id):
     return render(request, 'students/student-improve.html', context)
 
 def student_improvement_classes(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = Student.objects.get(id=id)
     student_classes = student.classs.all()
     return render(request, 'students/student-class-improvemtn.html')
 
 def buy_book(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     total_book = TotalBook.objects.all()
     student = Student.objects.get(id=id)
@@ -660,6 +842,15 @@ def buy_book(request, id):
     return render(request, 'students/student-buy-book.html', context)
 
 def delete_student_buy_book(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get("HTTP_REFERER", "/")
     buy_book = get_object_or_404(BuyBook, id=id)
 
@@ -704,6 +895,15 @@ def delete_student_buy_book(request, id):
 
 
 def delete_student_buy_stationery(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get("HTTP_REFERER", "/")
     buy_book = get_object_or_404(BuyStationery, id=id)
 
@@ -748,6 +948,15 @@ def delete_student_buy_stationery(request, id):
 
 
 def edit_student_buy_book(request, student_id, buybook_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = get_object_or_404(Student, id=student_id)
     buy_book = get_object_or_404(BuyBook, id=buybook_id)
     total_book = TotalBook.objects.all()
@@ -870,6 +1079,15 @@ def edit_student_buy_book(request, student_id, buybook_id):
 
 
 def student_paid_Remain_money(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
 
     student = Student.objects.get(id=id)
@@ -906,6 +1124,15 @@ def student_paid_Remain_money(request, id):
     return render(request, 'students/student-remain-money.html', context)
 
 def delete_paid_remain_money(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     remain_id = StudentGiveRemainMoney.objects.get(id=id)
     get_remain_money = StudentRemailMoney.objects.get(student=remain_id.studnet)
     total = TotalIncome.objects.get(pk=1)
@@ -920,6 +1147,15 @@ def delete_paid_remain_money(request, id):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 def edit_paid_remain_money(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     remain_record = get_object_or_404(StudentGiveRemainMoney, id=id)
     student = remain_record.studnet  # keep your model spelling if "studnet"
     get_remain_money = get_object_or_404(StudentRemailMoney, student=student)
@@ -970,6 +1206,15 @@ def edit_paid_remain_money(request, id):
     return render(request, "students/edit-remain-money.html", context)
 
 def student_buyed_book(request, stu_id, book_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = Student.objects.get(id=stu_id)
     book_id = BuyBook.objects.get(id=book_id)
     buyed_books = BookRecord.objects.filter(buy_book=book_id)
@@ -982,6 +1227,15 @@ def student_buyed_book(request, stu_id, book_id):
     return render(request, 'students/student-buyed-books.html', context)
 
 def student_buyed_stationery(request, stu_id, stationery_id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
     student = Student.objects.get(id=stu_id)
     stationery_id = BuyStationery.objects.get(id=stationery_id)
 
