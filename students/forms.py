@@ -38,11 +38,11 @@ class StudentForm(forms.ModelForm):
 
 class StudentWithoutClassForm(forms.ModelForm):
     date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker5",'class': 'form-control' }))
-    date_for_notification = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker4",'class': 'form-control' }))
+    # date_for_notification = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker4",'class': 'form-control' }))
 
     class Meta:
         model = StudentWithoutClass
-        fields = ["first_name","last_name","father_name","phone","date","gender","date_for_notification"]
+        fields = ["first_name","last_name","father_name","phone","date","gender"]
 
 
     def __init__(self, *args, **kwargs):

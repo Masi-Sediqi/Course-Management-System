@@ -83,6 +83,14 @@
     <button class="btn btn-primary btn-hover" data-bs-toggle="modal" data-bs-target="#systemSettingModal">اضافه کردن</button>
   </div>
 </div>
+    <!-- Section 7 -->
+  <div class="col-md-3">
+  <div class="card glass-card text-center p-4">
+    <h5 class="card-title glow-text">حذف تمام دیتا</h5>
+    <p class="card-text"> معلومات وارد شده در سیستم حذف شود.</p>
+    <button class="btn btn-primary btn-hover" data-bs-toggle="modal" data-bs-target="#systemSettingModalno">اضافه کردن</button>
+  </div>
+</div>
 
 </div>
        
@@ -189,6 +197,26 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="systemSettingModalno" tabindex="-1" aria-labelledby="systemSettingModalnoLabel" aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content glass-card text-center p-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title glow-text w-100" id="systemSettingModalnoLabel">معلومات سیستم</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+            <p>آیا مطمعن هستید که میخواهید تمام معلومات سیستم را حذف کنید؟</p>
+
+        
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button type="button" class="btn btn-secondary btn-hover" data-bs-dismiss="modal">نخیر</button>
+            <a href="{% url 'settings:delete_database' %}" class="btn btn-primary btn-hover">بلی</a>
+          </div>
+        </div>
+
     </div>
   </div>
 </div>

@@ -101,3 +101,9 @@ class AttendanceAndLeaves(models.Model):
     @property
     def days(self):
         return self.number_of_day  # already stored
+
+class TeacherGiveLoanAmount(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    date = models.CharField(max_length=14, blank=False)
+    amount = models.IntegerField(blank=False)
+    description = models.TextField(blank=True)

@@ -707,3 +707,96 @@ def edit_attendance(request, attendance_id):
         "teacher": teacher,
         "attendance": attendance
     })
+
+def teacher_paid_loan_amount(request, id):
+    teacher = Teacher.objects.get(id=id)
+    get_total_loan = TeacherTotalLoan.objects.get(teacher=teacher)
+
+    if request.method == "POST":
+        form = TeacherGiveLoanAmountForm(request.POST)
+        if form.is_valid():
+            get_amount = form.cleaned_data.get('amount')
+
+            if get_amount > get_total_loan.total_loan_amount:
+                messages.error(request, 'مقدار بازپسی نباید بزرگتر از مقدار قرض باشد')
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+            
+            get_total_loan.total_loan_amount -= get_amount
+            get_total_loan.save()
+
+            total = TotalIncome.objects.get(pk=1)
+            total.total_amount += get_amount
+            total.save()
+            instance = form.save(commit=False)
+            instance.teacher = teacher
+            instance.save()
+            messages.success(request, 'بازپسی موفقانه ثبت شد')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        else:
+            return HttpResponse('فورم درست نمی باشد')
+    else:
+        form = TeacherGiveLoanAmountForm()
+        teachers = TeacherGiveLoanAmount.objects.filter(teacher=teacher)
+
+    context = {
+        'teacher':teacher,
+        'get_total_loan':get_total_loan,
+        'form':form,
+        'teachers':teachers,
+    }
+    return render(request, 'teachers/paid_loan_amount.html', context)
+
+def delete_paid_loan_amout(request, id):
+    give_loan = TeacherGiveLoanAmount.objects.get(id=id)
+    total_loan = TeacherTotalLoan.objects.get(teacher=give_loan.teacher)
+    total_loan.total_loan_amount += give_loan.amount
+    
+    total = TotalIncome.objects.get(pk=1)
+    total.total_amount -= give_loan.amount
+
+    total_loan.save()
+    total.save()
+    give_loan.delete()
+    messages.success(request, 'ریکارد بازپسی موفقانه حذف شد')
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+def edit_paid_total_amount(request, id):
+    loan_amount = TeacherGiveLoanAmount.objects.get(id=id)
+    past_amount = loan_amount.amount
+
+    total_loan = TeacherTotalLoan.objects.get(teacher=loan_amount.teacher)
+    total = TotalIncome.objects.get(pk=1)
+
+    if request.method == "POST":
+        form = TeacherGiveLoanAmountForm(request.POST, instance=loan_amount)
+        if form.is_valid():
+            get_amount = form.cleaned_data.get('amount')
+            instance = form.save(commit=False)
+
+            if get_amount >= past_amount:
+                new_col_amount = get_amount - past_amount
+                total_loan.total_loan_amount -= new_col_amount
+                total.total_amount += new_col_amount
+                total_loan.save()
+                total.save()
+            elif get_amount < past_amount:
+                new_col_amount = past_amount - get_amount
+                total_loan.total_loan_amount += new_col_amount
+                total.total_amount -= new_col_amount
+                total_loan.save()
+                total.save()
+            
+            instance.teacher = loan_amount.teacher
+            instance.save()
+            messages.success(request, 'ریکارد بازپسی موفقانه ایدیت شد')
+            return redirect('teachers:teacher_paid_loan_amount', id=loan_amount.teacher.id)
+        else:
+            return HttpResponse('فورم مشکل دارد')
+    
+    else:
+        form = TeacherGiveLoanAmountForm(instance=loan_amount)
+    context = {
+        'form':form,
+        'loan_amount':loan_amount
+    }
+    return render(request, 'teachers/edit_paid_loan_amount.html', context)

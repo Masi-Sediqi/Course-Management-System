@@ -193,8 +193,8 @@ def delete_students_withoutclass(request, id):
     get_student_id = StudentWithoutClass.objects.get(id=id)
     if get_student_id:
         get_student_id.delete()
-        messages.success(request, 'شاگرد موفقانه ذخیره شد')
-        return redirect('students:students_registration')
+        messages.success(request, 'شاگرد موفقانه حذف شد')
+        return redirect('students:students_without_class')
     else:
         return HttpResponse('User Is Not in Detabase')
 
@@ -225,7 +225,7 @@ def edit_students(request, id):
         'get_student_id':get_student_id,
         'form':form,
     }
-    return render(request, 'students/students-without-class.html', context)
+    return render(request, 'students/edit_student.html', context)
 
 def students_edit_withoutclass(request, id):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
@@ -252,7 +252,7 @@ def students_edit_withoutclass(request, id):
             else:
                 form.save()
             messages.success(request, "معلومات شاگرد موفقانه ویرایش شد ✅")
-            return redirect(referer)
+            return redirect('students:students_without_class')
     else:
         form = StudentWithoutClassForm(instance=student)
 
@@ -533,9 +533,9 @@ def students_without_class(request):
     else:
         print("❌ The license date is not today.")
     get_students = StudentWithoutClass.objects.all()
-    form = StudentWithoutClassForm()
-    return render(request, 'students/students-without-class.html', {'get_students':get_students,'form':form,})
-    
+    return render(request, 'students/students-without-class.html', {'get_students':get_students,})
+
+
 def off_students(request):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
     license_time = get_lisance_check_model.date
