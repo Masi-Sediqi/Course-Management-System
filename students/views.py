@@ -358,17 +358,40 @@ def student_paid_fees(request, stu_id, cla_id):
                 get_date = form.cleaned_data.get('date')
                 get_orginal_fess = form.cleaned_data.get('orginal_fees')
                 get_give_money = form.cleaned_data.get('give_fees')
-                # Extract month part
+
+                # --- Extract Jalali month name ---
                 try:
                     parts = get_date.split('/')
-                    month_number = parts[1].zfill(2)  # Ensures "4" becomes "04"
-                    month_name = shamsi_months.get(month_number, "")
-                except:
-                    month_name = ""
+                    day = int(parts[0])
+                    month = int(parts[1])
+                    year = int(parts[2])
+
+                    # Add 1 month to the Jalali date safely
+                    date_obj = jdatetime.date(year, month, day)
+                    try:
+                        next_month_date = date_obj.replace(month=month + 1)
+                    except ValueError:
+                        # When month > 12, roll over to next year
+                        next_month_date = date_obj.replace(year=year + 1, month=1)
+
+                    # Convert to string again in same format
+                    end_date_str = f"{next_month_date.day:02d}/{next_month_date.month:02d}/{next_month_date.year}"
+                except Exception as e:
+                    end_date_str = ""
+
+                # --- Get month name ---
+                shamsi_months = {
+                    "01": "حمل", "02": "ثور", "03": "جوزا", "04": "سرطان",
+                    "05": "اسد", "06": "سنبله", "07": "میزان", "08": "عقرب",
+                    "09": "قوس", "10": "جدی", "11": "دلو", "12": "حوت",
+                }
+                month_name = shamsi_months.get(f"{month:02d}", "")
+
                 fees_info = form.save(commit=False)
                 fees_info.student = student 
                 fees_info.st_class = stu_class 
                 fees_info.month = month_name  # Save the month name
+                fees_info.end_date = end_date_str
                 # Handle total income safely
                 total_income_obj, created = TotalIncome.objects.get_or_create(pk=1)  # Ensure single row
 
@@ -581,7 +604,7 @@ def student_improvment(request, id):
             instance = form.save(commit=False)
             instance.student = student
             instance.save()
-            messages.success(request, '')
+            messages.success(request, f'ارتقاع جدید برای شاگرد {student.first_name} اضافه شد')
             return redirect(request.META.get('HTTP_REFERER'))
     else:
         form = StudentImporvmentForm()
@@ -594,6 +617,33 @@ def student_improvment(request, id):
         'form':form,
     }
     return render(request, 'students/student-improve.html', context)
+
+def delete_student_improvment(request, id):
+    student_improvement = StudentImporvment.objects.get(id=id)
+    student_improvement.delete()
+    messages.success(request, f'ریکارد ارتقاع شاگرد {student_improvement.student.first_name} موفقانه حذف شد')
+    return redirect(request.META.get('HTTP_REFERER'))
+
+def edit_student_improvement(request, id):
+    student_improvement = StudentImporvment.objects.get(id=id)
+    if request.method == "POST":
+        form = StudentImporvmentForm(request.POST, request.FILES, instance = student_improvement)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.student = student_improvement.student
+            instance.save()
+            messages.success(request, f'ریکارد ارتقاع شاگرد {student_improvement.student.first_name} موفقانه ایدیت شد.')
+            return redirect('students:student_improvment', id=student_improvement.student.id)
+        else:
+            form.errors()
+    else:
+        form = StudentImporvmentForm(instance=student_improvement)
+    
+    context = {
+        'form':form,
+        'student_improvement':student_improvement,
+    }
+    return render(request, 'students/edit-student-improve.html', context)
 
 def student_improvement_classes(request, id):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)

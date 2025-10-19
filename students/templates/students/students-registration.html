@@ -40,32 +40,41 @@
 
       
 
+<div class="d-flex align-items-center justify-content-between flex-wrap">
+  
+  <!-- Left-side buttons -->
+  <div class="d-flex align-items-center flex-wrap">
+    <!-- Dropdown group -->
+    <div class="btn-group dropleft m-1">
+      <button class="btn btn-info btn-lg" type="button" data-toggle="modal" data-target="#exampleModal1">
+        شاگردان بدون صنف
+      </button>
 
-            <div class="d-flex align-items-center flex-wrap">
-              <!-- Dropdown group -->
-              <div class="btn-group dropleft m-1">
-                <button class="btn btn-info btn-lg" type="button" data-toggle="modal" data-target="#exampleModal1">
-                  شاگردان بدون صنف
-                </button>
-            
-                <button class="btn btn-info btn-lg dropdown-toggle dropdown-toggle-split" type="button"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-            
-                <div class="dropdown-menu text-right shadow">
-                  <a class="dropdown-item" href="{% url 'students:students_without_class' %}">شاگردان بدون صنف</a>
-                  <a class="dropdown-item" href="{% url 'students:off_students' %}">شاگردان غیر فعال</a>
-                  <a class="dropdown-item" href="{% url 'students:export_students_excel' %}">بردن به فایل اکسل</a>
-                  <div class="dropdown-divider"></div>
-                </div>
-              </div>
-            
-              <!-- Add new student button -->
-              <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal" data-target="#exampleModal">
-                شاگرد جدید
-              </button>
-            </div>
+      <button class="btn btn-info btn-lg dropdown-toggle dropdown-toggle-split" type="button"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+
+      <div class="dropdown-menu text-right shadow">
+        <a class="dropdown-item" href="{% url 'students:students_without_class' %}">شاگردان بدون صنف</a>
+        <a class="dropdown-item" href="{% url 'students:off_students' %}">شاگردان غیر فعال</a>
+        <a class="dropdown-item" href="{% url 'students:export_students_excel' %}">بردن به فایل اکسل</a>
+        <div class="dropdown-divider"></div>
+      </div>
+    </div>
+
+    <!-- Add new student button -->
+    <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal" data-target="#exampleModal">
+      شاگرد جدید
+    </button>
+  </div>
+
+  <!-- Right-side back button -->
+  <a href="{% url 'home:dashboard' %}" class="btn btn-secondary btn-lg m-1">
+    بازگشت
+  </a>
+</div>
+
             
             <style>
               .dropdown-menu {

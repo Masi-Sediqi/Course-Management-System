@@ -54,6 +54,7 @@ class Student_fess_info(models.Model):
     give_fees = models.FloatField(blank=False)
     remain_fees = models.FloatField(blank=True, null=True)
     date = models.CharField(max_length=15, blank=False)
+    end_date = models.CharField(max_length=15, blank=True)
     description = models.TextField(blank=True, null=True)
     month = models.CharField(max_length=120)
     remaining = models.FloatField(default=0)

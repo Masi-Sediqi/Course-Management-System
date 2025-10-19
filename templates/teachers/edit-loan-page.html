@@ -35,9 +35,9 @@
                                   <div class="text-end">
                                     
                                     <!-- Dismiss button -->
-                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
-                                      بستن
-                                    </button>
+                                    <a href="{% url 'teachers:teacher_loan' loan_record.id %}" class="btn btn-secondary mt-2">
+                                      برگشت
+                                    </a>
                                   
                                     <!-- Submit button -->
                                     <button class="btn btn-primary mt-2" type="submit">

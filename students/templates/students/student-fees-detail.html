@@ -23,7 +23,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="ul-todo-mobile-menu mr-3 p-2"><i class="nav-icon i-Align-Justify-All text-25 ul-contact-mobile-icon"></i></div>
                                 <div class="btn-group">
-                                  <a href="javascript:history.back()" class="btn btn-info mr-2">
+                                  <a href="{% url 'students:student_detail' student.id %}" class="btn btn-info mr-2">
                                     بازگشت
                                 </a>
                               </div>                              

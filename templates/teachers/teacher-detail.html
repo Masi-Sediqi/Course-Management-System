@@ -116,7 +116,7 @@
 
             <div class="text-center mt-4">
                 <div class="btn-group flex-wrap" role="group">
-                    <a onclick="window.history.back()" class="btn btn-outline-secondary me-2">بازگشت</a>
+                    <a href="{% url 'teachers:teacher_registration' %}" class="btn btn-outline-secondary me-2">بازگشت</a>
                     <a href="{% url 'teachers:edit_teacher' teacher.id %}" class="btn btn-outline-warning me-2">تغیرات</a>
                     <a href="{% url 'teachers:deactive_teacher' teacher.id %}" class="btn btn-outline-danger me-2"
                        onclick="return confirm('آیا مطمئن هستید که می‌خواهید این استاد را حذف کنید؟')">

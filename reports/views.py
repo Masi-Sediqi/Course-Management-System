@@ -7,6 +7,7 @@ from khayyam import JalaliDatetime  # for Jalali date conversion
 from django.http import HttpResponse
 from management.models import *
 from account.models import *
+from django.db.models import Max
 from django.utils import timezone
 # Create your views here.
 
@@ -26,70 +27,102 @@ def statndart(request):
 def students_reports(request):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
     license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
     today = timezone.localdate()
 
     if license_time.date() <= today:
         return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
+
     form = StudentFilterForm(request.GET or None)
     students = Student.objects.filter(is_active=True)
-    filter_type = None
+    filter_type = request.GET.get('filter_type', 'active_students')
     filter_active = False
     title = "در حال حاضر شاگردان فعال نمایش داده می‌شوند"
 
     if form.is_valid():
         start_date = form.cleaned_data.get('start_date')
         end_date = form.cleaned_data.get('end_date')
-        filter_type = request.GET.get('filter_type', 'active_students')
 
+        # Normalize blank strings to None
+        start_date = start_date or None
+        end_date = end_date or None
+
+        # 🔹 Active Students
         if filter_type == "active_students":
             students = Student.objects.filter(is_active=True)
+            if start_date and end_date:
+                students = students.filter(
+                    date_of_registration__gte=start_date,
+                    date_of_registration__lte=end_date
+                )
+                title = f"فلتر شاگردان فعال از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام شاگردان فعال"
 
-            students = students.filter(
-                date_of_registration__gte=start_date,
-                date_of_registration__lte=end_date
-            )
             filter_active = True
-            title = f"فلتر شاگران فعال از تاریخ {start_date} الی {end_date}"
 
+        # 🔹 Deactive Students
         elif filter_type == "deactive_students":
             students = Student.objects.filter(is_active=False)
+            if start_date and end_date:
+                students = students.filter(
+                    date_of_registration__gte=start_date,
+                    date_of_registration__lte=end_date
+                )
+                title = f"فلتر شاگردان غیر فعال از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام شاگردان غیر فعال"
 
-            students = students.filter(
-                date_of_registration__gte=start_date,
-                date_of_registration__lte=end_date
-            )
             filter_active = True
-            title = f"فلتر شاگران غیر فعال از تاریخ {start_date} الی {end_date}"
-            
+
+        # 🔹 Loan Students
         elif filter_type == "loan_students":
             students_with_loans = StudentRemailMoney.objects.filter(
-                student__is_active=True,   
-                amount__gt=0  
+                student__is_active=True,
+                amount__gt=0
             )
-            filter_active = True
             if start_date:
                 students_with_loans = students_with_loans.filter(student__date_of_registration__gte=start_date)
             if end_date:
                 students_with_loans = students_with_loans.filter(student__date_of_registration__lte=end_date)
 
             students = Student.objects.filter(student_remains__in=students_with_loans).distinct()
+            title = f"شاگردان قرضدار {f'از تاریخ {start_date} الی {end_date}' if start_date and end_date else ''}"
 
-            title = f"فلتر شاگران قرضدار از تاریخ {start_date} الی {end_date}"
-
-
-        elif filter_type == "students_withoutclass":
-            students = StudentWithoutClass.objects.all()
-
-            students = students.filter(
-                date__gte=start_date,
-                date__lte=end_date
-            )
             filter_active = True
 
-            title = f"فلتر شاگران بدون صنف از تاریخ {start_date} الی {end_date}"
+        # 🔹 Students Without Class
+        elif filter_type == "students_withoutclass":
+            students = StudentWithoutClass.objects.all()
+            if start_date and end_date:
+                students = students.filter(
+                    date__gte=start_date,
+                    date__lte=end_date
+                )
+                title = f"شاگردان بدون صنف از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام شاگردان بدون صنف"
+
+            filter_active = True
+
+        if filter_type == "students_complete_fess":
+            selected_date = start_date or end_date  # prefer start_date if both filled
+
+            # Start with all fee records
+            qs = Student_fess_info.objects.all()
+
+            if selected_date:
+                # Filter by selected end_date
+                qs = qs.filter(end_date=selected_date)
+
+            # Only keep completed fees if needed
+            # qs = qs.filter(remain_fees=0)  # optional if you want only fully paid
+
+            # Get the latest record per student
+            latest_ids = qs.values('student').annotate(latest_id=Max('id')).values_list('latest_id', flat=True)
+            students = Student_fess_info.objects.filter(id__in=latest_ids).order_by('student__first_name')
+
+            title = f"شاگردانی که فیس شان پوره شده - تاریخ: {selected_date}" if selected_date else "شاگردانی که فیس شان پوره شده"
+            filter_active = True
 
     context = {
         'students': students,
@@ -100,67 +133,71 @@ def students_reports(request):
     }
     return render(request, "reports/students_reports.html", context)
 
+
 def teachers_reports(request):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
     license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
     today = timezone.localdate()
 
     if license_time.date() <= today:
         return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
+
     form = StudentFilterForm(request.GET or None)
     teachers = Teacher.objects.filter(is_active=True)
     filter_type = request.GET.get('filter_type', 'active_teachers')
     filter_active = False
     title = "در حال حاضر استادان فعال نمایش داده می‌شوند"
-    
 
     if form.is_valid():
-        start_date = form.cleaned_data.get('start_date')
-        end_date = form.cleaned_data.get('end_date')
+        start_date = form.cleaned_data.get('start_date') or None
+        end_date = form.cleaned_data.get('end_date') or None
 
         # 🔹 Active Teachers
         if filter_type == "active_teachers":
             teachers = Teacher.objects.filter(is_active=True)
             if start_date and end_date:
                 teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
+                title = f"فلتر استادان فعال از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام استادان فعال"
             filter_active = True
-            title = f"فلتر استادان فعال از تاریخ {start_date} الی {end_date}"
 
         # 🔹 Deactive Teachers
         elif filter_type == "deactive_teachers":
             teachers = Teacher.objects.filter(is_active=False)
             if start_date and end_date:
                 teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
+                title = f"فلتر استادان غیر فعال از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام استادان غیر فعال"
             filter_active = True
-            title = f"فلتر استادان غیر فعال از تاریخ {start_date} الی {end_date}"
 
         # 🔹 Loan Teachers
         elif filter_type == "loan_teachers":
-            # find teachers with loan amount > 0
-            teachers_with_loans = TeacherTotalLoan.objects.filter(total_loan_amount__gt=0).values_list('teacher_id', flat=True)
-            teachers = Teacher.objects.filter(id__in=teachers_with_loans)
+            teachers_with_loans = TeacherTotalLoan.objects.filter(
+                total_loan_amount__gt=0
+            ).values_list('teacher_id', flat=True)
 
-            # filter by date range (Shamsi string comparison)
+            teachers = Teacher.objects.filter(id__in=teachers_with_loans)
             if start_date and end_date:
                 teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
-
+                title = f"فلتر استادان قرضدار از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام استادان قرضدار"
             filter_active = True
-            title = f"فلتر استادان قرضدار از تاریخ {start_date} الی {end_date}"
 
-        # 🔹 Teachers with remaining money
+        # 🔹 Teachers with Remaining Money
         elif filter_type == "teachers_remain":
             teachers = Teacher.objects.filter(
                 teacher_remains__total_amount__gt=0
-            ).distinct()  # ✅ now shows teachers whose total_amount > 0
+            ).distinct()
 
             if start_date and end_date:
                 teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
-
+                title = f"فلتر استادان دارای باقی‌مانده از تاریخ {start_date} الی {end_date}"
+            else:
+                title = "تمام استادان دارای باقی‌مانده"
             filter_active = True
-            title = f"فلتر استادان دارای باقی‌مانده از تاریخ {start_date} الی {end_date}"
 
     context = {
         'teachers': teachers,
@@ -174,13 +211,11 @@ def teachers_reports(request):
 def books_reports(request):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
     license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
     today = timezone.localdate()
 
     if license_time.date() <= today:
         return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
+
     books = Books.objects.all()
 
     # Attach total_amount from TotalBook to each book
@@ -189,61 +224,61 @@ def books_reports(request):
         book.total_amount_value = total_book.total_amount if total_book else 0
 
     form = StudentFilterForm(request.GET or None)
-    filter_type = request.GET.get('filter_type', 'active_teachers')
+    filter_type = request.GET.get('filter_type', 'remain_books')
     filter_active = False
-    title = "در حال حاضر تمام کتابها باقی مانده نمایش داده می‌شوند"
-    
+    title = "در حال حاضر تمام کتاب‌ها نمایش داده می‌شوند"
 
     if form.is_valid():
-        start_date = form.cleaned_data.get('start_date')
-        end_date = form.cleaned_data.get('end_date')
+        start_date = form.cleaned_data.get('start_date') or None
+        end_date = form.cleaned_data.get('end_date') or None
 
-        # 🔹 Active Teachers
+        # Helper function
+        def date_filter(qs):
+            if start_date and end_date:
+                return qs.filter(date__range=[start_date, end_date])
+            elif start_date:
+                return qs.filter(date__gte=start_date)
+            elif end_date:
+                return qs.filter(date__lte=end_date)
+            return qs
+
+        # 🔹 Remaining Books
         if filter_type == "remain_books":
-            teachers = Teacher.objects.filter(is_active=True)
-            if start_date and end_date:
-                teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
+            books = date_filter(Books.objects.all())
             filter_active = True
-            title = f"فلتر استادان فعال از تاریخ {start_date} الی {end_date}"
+            title = f"کتاب‌های باقی‌مانده {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
 
-        # 🔹 Deactive Teachers
+        # 🔹 Purchased Books
         elif filter_type == "buy_books":
-            teachers = Teacher.objects.filter(is_active=False)
-            if start_date and end_date:
-                teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
+            books = date_filter(BuyBook.objects.all())
             filter_active = True
-            title = f"فلتر استادان غیر فعال از تاریخ {start_date} الی {end_date}"
+            title = f"کتاب‌های خریداری‌شده {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
 
     context = {
         'books': books,
-        'books':books,
-        'title':title,
-        'form':form,
-        'filter_type':filter_type,
-        'filter_active':filter_active,
+        'form': form,
+        'filter_type': filter_type,
+        'filter_active': filter_active,
+        'title': title,
     }
     return render(request, "reports/books_report.html", context)
+
 
 def income_expenses(request):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
     license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
     today = timezone.localdate()
 
     if license_time.date() <= today:
         return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
+
     title = "در حال حاضر تمام عایدات و مصارفات نمایش داده می‌شوند"
     form = StudentFilterForm(request.GET or None)
     filter_type = request.GET.get('filter_type', 'income_expenses')
-
-    # Default: show all
     filter_active = False
-    income_data = []
-    expense_data = []
+    income_data, expense_data = [], []
 
-    # helper filter for date range
+    # Helper for flexible date filtering
     def date_filter(qs, start_date, end_date):
         if start_date and end_date:
             return qs.filter(date__range=[start_date, end_date])
@@ -253,7 +288,7 @@ def income_expenses(request):
             return qs.filter(date__lte=end_date)
         return qs
 
-    # ========== INCOMES ==========
+    # Income sources
     income_sources = [
         ("عواید عمومی", OtherIncome),
         ("فیس شاگردان", Student_fess_info),
@@ -261,8 +296,8 @@ def income_expenses(request):
         ("فروش قرطاسیه", BuyStationery),
         ("پرداخت پول باقی مانده توسط شاگرد", StudentGiveRemainMoney),
     ]
-    
-    # ========== EXPENSES ==========
+
+    # Expense sources
     expense_sources = [
         ("مصارف عمومی", Expenses),
         ("ماش استادان", TeacherPaidSalary),
@@ -273,18 +308,21 @@ def income_expenses(request):
         ("خرید دوباره کتاب", BuyBookAgain),
     ]
 
-    # ========== FILTER BY DATE (if form valid) ==========
     if form.is_valid():
-        start_date = form.cleaned_data.get('start_date')
-        end_date = form.cleaned_data.get('end_date')
+        start_date = form.cleaned_data.get('start_date') or None
+        end_date = form.cleaned_data.get('end_date') or None
 
+        # Apply filters dynamically
         if start_date or end_date:
             filter_active = True
-            title = f"گزارش عواید و مصارف از تاریخ {start_date} تا {end_date}"
+            title = f"گزارش از تاریخ {start_date} تا {end_date}"
+        else:
+            title = "تمام عایدات و مصارفات"
+
     else:
         start_date = end_date = None
 
-    # ========== FETCH DATA ==========
+    # Build income and expense lists
     if filter_type in ["income_expenses", "income"]:
         for label, model in income_sources:
             qs = date_filter(model.objects.all(), start_date, end_date)
@@ -297,8 +335,6 @@ def income_expenses(request):
                                getattr(obj, 'paid_amount',
                                getattr(obj, 'paid_stationery_amount', 0)))),
                 })
-
-
 
     if filter_type in ["income_expenses", "expenses"]:
         for label, model in expense_sources:
@@ -313,14 +349,12 @@ def income_expenses(request):
                                getattr(obj, 'paid_price', 0)))),
                 })
 
+    # Smart title updates
     if filter_type == "income":
-        title = f"نمایش تمام عواید از تاریخ {start_date} الی {end_date}"
+        title = f"تمام عواید {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
     elif filter_type == "expenses":
-        title = f"نمایش تمام مصارفات از تاریخ {start_date} الی {end_date}"
-    # elif filter_type == "income_expenses":
-    #     title = f"نمایش تمام عواید و مصارفات از تاریخ {start_date} الی {end_date}"
+        title = f"تمام مصارفات {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
 
-    # ========== SORT RESULTS ==========
     income_data = sorted(income_data, key=lambda x: x['date'] or '', reverse=True)
     expense_data = sorted(expense_data, key=lambda x: x['date'] or '', reverse=True)
 

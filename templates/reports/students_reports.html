@@ -95,63 +95,76 @@
                 <div class="tab-pane fade show active" id="income" role="tabpanel">
                     <!-- ✅ Paste your full income table & modals here -->
     
-                    <!-- your full code... -->
-                    <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>نام و تخلص</th>
-                                    <th>نام پدر</th>
-                                    <th>تاریخ ثبت نام</th>
-                                    <th>شماره موبایل</th>
-                                    <th>جنسیت</th>
-                                    {% if filter_type == "students_withoutclass" %}
-                                    <th>تاریخ برای هشدار</th>
-                                    {% endif %}
-                                    {% if filter_type == "loan_students" %}
-                                    <th>مقدار باقی مانده</th>
-                                    {% endif %}
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                {% for i in students %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td><a href="{% url 'students:student_detail' i.id %}">
-                                        {{ i.first_name }} {{ i.last_name }}</a></td>
-                                    <td>{{ i.father_name }}</td>
-                                    {% if filter_type == "students_withoutclass" %}
-                                    <td>{{ i.date }}</td>
-                                    {% else %}
-                                    <td>{{ i.date_of_registration }}</td>
-                                    {% endif %}
+                <div class="table-responsive">
+    <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>#</th>
+                <th>نام و تخلص</th>
+                <th>نام پدر</th>
 
-                                    <td>{{ i.phone }}</td>
-                                    <td>
-                                        {% if i.gender == 'Male' %}
-                                        <span class="">مرد</span>
-                                        {% else %}
-                                        <span class="">زن</span>
-                                        {% endif %}
-                                      </td>
-                                      {% if filter_type == "students_withoutclass" %}
-                                      <td>{{ i.date_for_notification }}</td>
-                                      {% endif %}
-                                      
-                                        {% if filter_type == "loan_students" %}
-                                        <td>
-                                            {% with i.student_remains.first.amount as remain %}
-                                                {{ remain }}
-                                            {% endwith %}
-                                        </td>
-                                        {% endif %}
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
-                    </div>
+                {% if filter_type == "students_complete_fess" %}
+                    <th>تاریخ پرداخت فیس</th>
+                    <th>تاریخ ختم فیس</th>
+                {% else %}
+                    <th>تاریخ ثبت نام</th>
+                    <th>شماره موبایل</th>
+                {% endif %}
+
+                <th>جنسیت</th>
+
+                {% if filter_type == "students_withoutclass" %}
+                    <th>تاریخ برای هشدار</th>
+                {% endif %}
+
+                {% if filter_type == "loan_students" %}
+                    <th>مقدار باقی مانده</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody id="table-body">
+            {% for i in students %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url 'students:student_detail' i.id %}">
+                      {% if filter_type == "students_complete_fess" %}
+                    {{ i.student.first_name }} {{ i.student.last_name }}</a></td>
+                <td>{{ i.student.father_name }}</td>
+                {% else %}
+                 {{ i.first_name }} {{ i.last_name }}</a></td>
+                <td>{{ i.father_name }}</td>
+                {% endif %}
+
+                {% if filter_type == "students_complete_fess" %}
+                    <td>{{ i.date }}</td>
+                    <td>{{ i.end_date }}</td>
+                {% else %}
+                    <td>{{ i.date_of_registration }}</td>
+                    <td>{{ i.phone }}</td>
+                {% endif %}
+
+                <td>
+                    {% if i.student.gender == 'Male' %}مرد{% else %}زن{% endif %}
+                </td>
+
+                {% if filter_type == "students_withoutclass" %}
+                    <td>{{ i.date_for_notification }}</td>
+                {% endif %}
+
+                {% if filter_type == "loan_students" %}
+                    <td>
+                        {% with i.student_remains.first.amount as remain %}
+                            {{ remain }}
+                        {% endwith %}
+                    </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
                 </div>
  
         </div>
@@ -170,45 +183,87 @@
     
                 <!-- Modal Body -->
                 <div class="modal-body p-5">
-                    <form method="get" action="{% url 'reports:students_reports' %}" class="needs-validation tablelist-form" novalidate="novalidate">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">تاریخ آغاز</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-                                    {{ form.start_date }}
-                                </div>
-                            </div>
-    
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">تاریخ پایان</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-                                    {{ form.end_date }}
-                                </div>
-                            </div>
-                        </div>
-                        
-          <!-- Dropdown -->
-          <div class="form-group">
-            <label for="filterType">نوع فلتر</label>
-            <select class="form-control" id="filterType" name="filter_type" required>
-              <option value="active_students">شاگردان فعال</option>
-              <option value="deactive_students">شاگردان غیر فعال</option>
-              <option value="loan_students">شاگردان قرضدار</option>
-              <option value="students_withoutclass">شاگردان بدون صنف</option>
-            </select>
-          </div>
-    
-                        <div class="d-flex justify-content-end mt-4 gap-2">
-                            <button type="submit" class="btn btn-success btn-lg fw-bold">
-                                <i class="bi bi-funnel-fill me-2"></i>اعمال فیلتر
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-2"></i>لغو
-                            </button>
-                        </div>
-                    </form>
+                  <form method="get" 
+      action="{% url 'reports:students_reports' %}" 
+      class="needs-validation tablelist-form" 
+      id="studentReportForm" 
+      novalidate="novalidate">
+
+  <div class="row g-3 align-items-center">
+    <div class="col-md-6">
+      <label class="form-label fw-semibold">تاریخ آغاز</label>
+      <div class="input-group">
+        <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
+        {{ form.start_date }}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label fw-semibold">تاریخ پایان</label>
+      <div class="input-group">
+        <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
+        {{ form.end_date }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Dropdown -->
+  <div class="form-group mt-3">
+    <label for="filterType" class="fw-semibold">نوع فلتر</label>
+    <select class="form-control" id="filterType" name="filter_type" required>
+      <option value="active_students">شاگردان فعال</option>
+      <option value="deactive_students">شاگردان غیر فعال</option>
+      <option value="loan_students">شاگردان قرضدار</option>
+      <option value="students_withoutclass">شاگردان بدون صنف</option>
+      <option value="students_complete_fess">شاگردان که فیس شان پوره شده</option>
+    </select>
+  </div>
+
+  <!-- Bootstrap Alert -->
+  <div class="alert alert-warning alert-dismissible fade d-none mt-3" id="feesAlert" role="alert">
+    <strong>توجه!</strong> برای دیدن شاگردانی که فیس شان پوره شده، لطفاً تاریخ آغاز یا تاریخ پایان را انتخاب کنید.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <div class="d-flex justify-content-end mt-4 gap-2">
+    <button type="submit" class="btn btn-success btn-lg fw-bold">
+      <i class="bi bi-funnel-fill me-2"></i>اعمال فیلتر
+    </button>
+    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+      <i class="bi bi-x-circle me-2"></i>لغو
+    </button>
+  </div>
+</form>
+
+<!-- JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const filterType = document.getElementById('filterType');
+  const alertBox = document.getElementById('feesAlert');
+
+  // Listen to dropdown changes
+  filterType.addEventListener('change', function () {
+    const startDate = document.querySelector('[name="start_date"]').value.trim();
+    const endDate = document.querySelector('[name="end_date"]').value.trim();
+
+    // Hide first
+    alertBox.classList.add('d-none');
+
+    // Show if condition matches
+    if (this.value === 'students_complete_fess' && (!startDate || !endDate)) {
+      alertBox.classList.remove('d-none');
+      // Use Bootstrap's fade-in animation
+      setTimeout(() => alertBox.classList.add('show'), 10);
+    }
+  });
+
+  // Handle close button properly
+  alertBox.addEventListener('closed.bs.alert', function () {
+    alertBox.classList.add('d-none');
+  });
+});
+</script>
+
                 </div>
             </div>
         </div>

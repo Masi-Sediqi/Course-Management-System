@@ -10,6 +10,28 @@
             <li>ارتقاع شاگرد</li>
         </ul>
     </div>
+      <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+  <script src="{% static 'js/sweet.js' %}"></script>
+
+  <script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+      title: "{{ message|escapejs }}",
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+    {% endfor %}
+    {% endif %}
+  </script>
     <div class="separator-breadcrumb border-top"></div>
     <div class="row">
         <div class="col-lg-12 col-md-12">
@@ -18,75 +40,98 @@
                     <div class="card-title">
                         <button id="pwa-install-btn" data-toggle="modal"
                         data-target="#exampleModal">ارتقاع جدید {{ student.first_name }}</button>
+                          <a href="{% url 'students:student_detail' student.id %}" class="btn btn-secondary btn-lg m-1">
+    بازگشت
+  </a>
                     </div>
                 </div>
 
                 <div class="col-md-12 mb-4">
                     <div class="card text-left">
                         <div class="card-body">
+                            
                             <div class="table-responsive">
                                 <div id="complex_header_table_wrapper"
                                     class="dataTables_wrapper container-fluid dt-bootstrap4">
                                  
                                     <div class="row">
                                         <div class="col-sm-12">
-                                            <table class="display table table-striped table-bordered dataTable"
-                                                id="complex_header_table" style="width: 100%;" role="grid"
-                                                aria-describedby="complex_header_table_info">
-                                                <thead>
-           
-                                                    <tr role="row">
-                                                        <th class="sorting" tabindex="0"
-                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
-                                                            style="width: 120px;"
-                                                            aria-label="Salary: activate to sort column ascending">
-                                                            تاریخ ارتقاع</th>
-                                                        <th class="sorting" tabindex="0"
-                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
-                                                            style="width: 166px;"
-                                                            aria-label="Office: activate to sort column ascending">
-                                                            کتاب گذشته</th>
-                                                        <th class="sorting" tabindex="0"
-                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
-                                                            style="width: 328px;"
-                                                            aria-label="E-mail: activate to sort column ascending">
-                                                            کتاب جدید</th>
-                                                        <th class="sorting" tabindex="0"
-                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
-                                                            style="width: 328px;"
-                                                            aria-label="E-mail: activate to sort column ascending">
-                                                            تقدیر تامه</th>
-                                                        <th class="sorting" tabindex="0"
-                                                            aria-controls="complex_header_table" rowspan="1" colspan="1"
-                                                            style="width: 328px;"
-                                                            aria-label="E-mail: activate to sort column ascending">
-                                                            توضیحات</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for record in records %}
-                                                    <tr role="row" class="{% cycle 'odd' 'even' %}">
-                                                        <td>{{ record.date }}</td> <!-- or student full name -->
-                                                        <td>{{ record.past_class.name }}</td>
-                                                        <td>{{ record.after_class.name }}</td>
-                                                        <td>
-                                                            {% if record.file %}
-                                                                <a href="{{ record.file.url }}" target="_blank">Download</a>
-                                                            {% else %}
-                                                                No file
-                                                            {% endif %}
-                                                        </td>
-                                                        <td colspan="2">{{ record.description|default:"-" }}</td>
-                                                    </tr>
-                                                    {% empty %}
-                                                    <tr>
-                                                        <td colspan="6" class="text-center">No improvement records found.</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                                
-                                 
-                                            </table>
+                                          <div class="table-responsive">
+    <table class="display table table-striped table-bordered dataTable"
+           id="complex_header_table" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>تاریخ ارتقاع</th>
+                <th>کتاب گذشته</th>
+                <th>کتاب جدید</th>
+                <th>تقدیر تامه</th>
+                <th>توضیحات</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for record in records %}
+            <tr class="{% cycle 'odd' 'even' %}">
+                <td>{{ record.date }}</td>
+                <td>{{ record.past_class.name }}</td>
+                <td>{{ record.after_class.name }}</td>
+                <td>
+                    {% if record.file %}
+                        <a href="{{ record.file.url }}" target="_blank">Download</a>
+                    {% else %}
+                        No file
+                    {% endif %}
+                </td>
+                <td>{{ record.description|default:"-" }}</td>
+              <td>
+                      <div class="dropdown">
+                        <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton"
+                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+                          style="max-height: 150px; overflow-y: auto;">
+                     
+                          <a class="dropdown-item text-info" href="{% url 'students:edit_student_improvement' record.id %}">تغیرات</a>
+                          
+
+                          <a class="dropdown-item text-info" data-toggle="modal"
+                          data-target="#deletedConfirmModal{{ record.id }}">حذف</a>
+                        </div>
+                      </div>
+                    </td>
+                  <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deletedConfirmModal{{ record.id }}" tabindex="-1"
+                         aria-labelledby="deleteModalLabel{{ record.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content text-center">
+                                <div class="modal-header">
+                                    <h5 class="modal-title w-100" id="deleteModalLabel{{ record.id }}">حذف کردن</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                    <div class="text-danger fw-bold mb-3">در حال حذف ...</div>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">نخیر</button>
+                                        <a href="{% url 'students:delete_student_improvment' record.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No improvement records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
                                         </div>
                                     </div>
                                 </div>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+            </ul>
+            <div class="card">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+                        <!-- ====== Edit Station Form ====== -->
+                        <form method="POST" action="{% url 'students:edit_student_improvement' id=student_improvement.id %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="modal-dialog modal-lg">
+                              <div class="modal-content p-3">
+                                <div>
+                                          <div class="row">
+                    <div class="col-12">
+                       
+                    
+                    </div>
+                    <!-- Personal Info -->
+                    <div class="col-md-4 form-group mb-3">
+                        <label for="firstName1">تاریخ ارتقاع<span style="color: red;">*</span></label>
+                        {{ form.date }}
+                    </div>
+                    <div class="col-md-4 form-group mb-3">
+                        <label for="lastName1">صنف قبلی<span style="color: red;">*</span></label>
+                       {{form.past_class}}
+                    </div>                    
+                    <div class="col-md-4 form-group mb-3">
+                        <label for="lastName1">نمره اخذ شده<span style="color: red;">*</span></label>
+                       {{form.number}}
+                    </div>                    
+                    <div class="col-md-6 form-group mb-3">
+                        <label for="lastName1">صنف بعدی<span style="color: red;">*</span></label>
+                        {{ form.after_class }}
+                    </div>
+                    <div class="col-md-6 form-group mb-3">
+                        <label for="email">تقدیر نامه </label>
+                        {{ form.file }}
+                    </div>
+                    <div class="col-md-12 form-group mb-3">
+                        <label for="phone">توضیحات</label>
+                        {{ form.description }}
+                    </div>
+            
+                 
+                </div>
+            </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    $('#datepicker21').datepicker({});
+                });
+            </script>
+            
+                        
+                                  <div class="text-end">
+                                    
+                                    <!-- Dismiss button -->
+                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
+                                      بستن
+                                    </button>
+                                  
+                                    <!-- Submit button -->
+                                    <button class="btn btn-primary mt-2" type="submit">
+                                      ذخیره کردن
+                                    </button>
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                            </div>
+                          </form>
+                               
+    
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          $('#datepicker3').datepicker({});
+        });
+        </script>
+        
+                        <!-- ====== / Edit Station Form ====== -->
+                      </div>
+                      
+                </div>
+            </div>
+        </div>
+    </div><!-- end of main-content -->
+</div>
+
+{% endblock %}

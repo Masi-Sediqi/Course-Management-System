@@ -74,7 +74,7 @@
             </div>
 
             <div class="text-end">
-              <a href="{{ referer }}" class="btn btn-secondary mt-2">برگشت</a>
+              <a href="{% url 'teachers:teacher_paid_salary' salary_id.teacher.id %}" class="btn btn-secondary mt-2">برگشت</a>
               <button class="btn btn-primary mt-2" type="submit">ذخیره کردن</button>
             </div>
           </div>
