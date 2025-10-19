@@ -55,7 +55,6 @@
                        name="loan_amount"
                        class="form-control"
                        value="{{ salary_id.loan_amount|default:0 }}"
-                       max="{{ total_teacher_loan.total_loan_amount|add:salary_id.loan_amount|default:0 }}"
 
                        step="0.01">
                 <div id="loan-warning-msg" class="text-danger mt-1" style="display: none;">
@@ -82,9 +81,8 @@
         </div>
       </form>
 
-      <script>
+      <!-- <script>
         document.addEventListener("DOMContentLoaded", function () {
-          // Initialize datepicker if you are using one
           if (typeof $ !== "undefined" && $("#datepicker3").length) {
             $("#datepicker3").datepicker({});
           }
@@ -95,7 +93,6 @@
           const loanWarning = document.getElementById("loan-warning-msg");
           const maxLoan = parseFloat("{{ total_teacher_loan.total_loan_amount|add:salary_id.loan_amount|default:0 }}") || 0;
 
-          // Prevent entering loan greater than available
           loanInput.addEventListener("input", function () {
             const value = parseFloat(loanInput.value) || 0;
             if (value > maxLoan) {
@@ -107,7 +104,6 @@
             updatePaidSalary();
           });
 
-          // Update paid salary automatically
           function updatePaidSalary() {
             const amount = parseFloat(amountInput.value) || 0;
             const loan = parseFloat(loanInput.value) || 0;
@@ -119,7 +115,7 @@
           amountInput.addEventListener("input", updatePaidSalary);
           updatePaidSalary();
         });
-      </script>
+      </script> -->
       <!-- ====== / Edit Teacher Salary Form ====== -->
     </div>
   </div>

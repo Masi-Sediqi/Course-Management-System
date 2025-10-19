@@ -931,7 +931,7 @@ def delete_student_buy_stationery(request, id):
                     record = StationeryRecord.objects.filter(buy_stationery=buy_book, stationery=book).first()
                     if record:
                         total_book = TotalStationery.objects.get(stationery=book)
-                        total_book.total_amount += record.number_of_stationery
+                        total_book.total_stationery += record.number_of_stationery
                         total_book.save()
                         record.delete()  # 4. delete BookRecord
                 except TotalBook.DoesNotExist:

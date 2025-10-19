@@ -156,6 +156,110 @@ def teacher_detail(request, id):
     {'teacher':teacher,'total_students':total_students,'total_students_count':total_students_count,'total_loan_amount':total_loan_amount,
             'get_total_remain_money':get_total_remain_money,'total_paid_amount_for_teacher':total_paid_amount_for_teacher})
 
+# def teacher_paid_salary(request, id):
+#     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+#     license_time = get_lisance_check_model.date
+#     # Get today's date in the same timezone
+#     today = timezone.localdate()
+
+#     if license_time.date() <= today:
+#         return redirect('management:hesabpay')
+#     else:
+#         print("❌ The license date is not today.")
+#     referer = request.META.get('HTTP_REFERER', '/')
+#     teacher = Teacher.objects.get(id=id)
+
+#     # Get remaining salary
+#     try:
+#         total_paid_amount_for_teacher = TeacherRemainMoney.objects.get(teacher=teacher)
+#         total_paid_amount_for_teacher_amount = total_paid_amount_for_teacher.total_amount
+#     except TeacherRemainMoney.DoesNotExist:
+#         total_paid_amount_for_teacher = None
+#         total_paid_amount_for_teacher_amount = 0
+
+#     # Get total loan
+#     try:
+#         total_teacher_loan = TeacherTotalLoan.objects.get(teacher=teacher)
+#         total_teacher_loan_amount = total_teacher_loan.total_loan_amount
+#     except TeacherTotalLoan.DoesNotExist:
+#         total_teacher_loan = None
+#         total_teacher_loan_amount = 0
+
+#     if request.method == "POST":
+#         form = TeacherPaidSalaryForm(request.POST)
+#         if form.is_valid():
+#             get_amount = form.cleaned_data.get('amount')
+#             get_paid_amount = form.cleaned_data.get('paid_salary')
+#             loan_deduction = form.cleaned_data.get('loan_amount') or 0
+
+#             # Validation: cannot pay more than salary
+#             if get_paid_amount > get_amount:
+#                 messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود')
+#                 return redirect(referer)
+
+#             # Validation: cannot deduct more loan than available
+#             if loan_deduction > total_teacher_loan_amount:
+#                 messages.warning(request, 'مقدار قرض بیشتر از قرض گرفته شده است')
+#                 return redirect(referer)
+
+#             # Subtract paid amount from salary
+#             sub_paid_with_amount = get_amount - get_paid_amount
+
+#             # Update total expenses
+#             try:
+#                 expenses_base = TotalExpenses.objects.get(pk=1)
+#             except TotalExpenses.DoesNotExist:
+#                 expenses_base = TotalExpenses.objects.create(total_amount=0)
+#             expenses_base.total_amount += get_paid_amount
+#             expenses_base.save()
+
+#             # Save salary payment
+#             instance = form.save(commit=False)
+#             instance.remain_salary = sub_paid_with_amount
+#             instance.teacher = teacher
+#             instance.save()
+
+#             # Update teacher remaining salary
+#             remain_obj, created = TeacherRemainMoney.objects.get_or_create(
+#                 teacher=teacher,
+#                 defaults={'total_amount': sub_paid_with_amount}
+#             )
+#             if not created:
+#                 remain_obj.total_amount += sub_paid_with_amount
+#                 remain_obj.save()
+
+#             # Update total paid amount for teacher
+#             total_paid, created = TotalPaidMoneyForTeacher.objects.get_or_create(
+#                 teacher=teacher,
+#                 defaults={'total_amount': get_paid_amount}
+#             )
+#             if not created:
+#                 total_paid.total_amount += get_paid_amount
+#                 total_paid.save()
+
+#             # Deduct loan
+#             if total_teacher_loan:
+#                 total_teacher_loan.total_loan_amount -= loan_deduction
+#                 if total_teacher_loan.total_loan_amount < 0:
+#                     total_teacher_loan.total_loan_amount = 0
+#                 total_teacher_loan.save()
+
+#     else:
+#         form = TeacherPaidSalaryForm(initial={'loan_amount': total_teacher_loan_amount})
+
+#     paid_records = TeacherPaidSalary.objects.filter(teacher=teacher)
+
+#     context = {
+#         'total_teacher_loan': total_teacher_loan,
+#         'total_paid_amount_for_teacher': total_paid_amount_for_teacher,
+#         'teacher': teacher,
+#         'form': form,
+#         'paid_records': paid_records,
+#     }
+#     return render(request, 'teachers/teacher-paid-salary.html', context)
+
+
+
 def teacher_paid_salary(request, id):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
     license_time = get_lisance_check_model.date
@@ -168,14 +272,6 @@ def teacher_paid_salary(request, id):
         print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     teacher = Teacher.objects.get(id=id)
-
-    # Get remaining salary
-    try:
-        total_paid_amount_for_teacher = TeacherRemainMoney.objects.get(teacher=teacher)
-        total_paid_amount_for_teacher_amount = total_paid_amount_for_teacher.total_amount
-    except TeacherRemainMoney.DoesNotExist:
-        total_paid_amount_for_teacher = None
-        total_paid_amount_for_teacher_amount = 0
 
     # Get total loan
     try:
@@ -191,22 +287,18 @@ def teacher_paid_salary(request, id):
             get_amount = form.cleaned_data.get('amount')
             get_paid_amount = form.cleaned_data.get('paid_salary')
             loan_deduction = form.cleaned_data.get('loan_amount') or 0
-            get_remain_amount = float(request.POST.get('remain_amount', 0))
 
             # Validation: cannot pay more than salary
             if get_paid_amount > get_amount:
                 messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود')
                 return redirect(referer)
-
-            # Validation: cannot deduct more loan than available
-            if loan_deduction > total_teacher_loan_amount:
-                messages.warning(request, 'مقدار قرض بیشتر از قرض گرفته شده است')
+            
+            if loan_deduction > total_teacher_loan.total_loan_amount:
+                messages.warning(request, 'مقدار قرض نباید بیشتر از تمام قرض باشد')
                 return redirect(referer)
 
-            # Subtract paid amount from salary
-            sub_paid_with_amount = get_amount - get_paid_amount
-
-            # Update total expenses
+            total_teacher_loan.total_loan_amount -= loan_deduction
+            total_teacher_loan.save()
             try:
                 expenses_base = TotalExpenses.objects.get(pk=1)
             except TotalExpenses.DoesNotExist:
@@ -214,19 +306,21 @@ def teacher_paid_salary(request, id):
             expenses_base.total_amount += get_paid_amount
             expenses_base.save()
 
-            # Save salary payment
+            find_sub = loan_deduction + get_paid_amount
+            get_sub = get_amount - find_sub
+
             instance = form.save(commit=False)
-            instance.remain_salary = sub_paid_with_amount
+            instance.remain_salary = get_sub
             instance.teacher = teacher
             instance.save()
 
             # Update teacher remaining salary
             remain_obj, created = TeacherRemainMoney.objects.get_or_create(
                 teacher=teacher,
-                defaults={'total_amount': sub_paid_with_amount}
+                defaults={'total_amount': get_sub}
             )
             if not created:
-                remain_obj.total_amount += sub_paid_with_amount
+                remain_obj.total_amount += get_sub
                 remain_obj.save()
 
             # Update total paid amount for teacher
@@ -237,14 +331,9 @@ def teacher_paid_salary(request, id):
             if not created:
                 total_paid.total_amount += get_paid_amount
                 total_paid.save()
-
-            # Deduct loan
-            if total_teacher_loan:
-                total_teacher_loan.total_loan_amount -= loan_deduction
-                if total_teacher_loan.total_loan_amount < 0:
-                    total_teacher_loan.total_loan_amount = 0
-                total_teacher_loan.save()
-
+            
+            messages.success(request, 'پرداخت ماش موفقانه صورت گرفت')
+            return redirect(referer)
     else:
         form = TeacherPaidSalaryForm(initial={'loan_amount': total_teacher_loan_amount})
 
@@ -252,13 +341,11 @@ def teacher_paid_salary(request, id):
 
     context = {
         'total_teacher_loan': total_teacher_loan,
-        'total_paid_amount_for_teacher': total_paid_amount_for_teacher,
         'teacher': teacher,
         'form': form,
         'paid_records': paid_records,
     }
     return render(request, 'teachers/teacher-paid-salary.html', context)
-
 
 
 def delete_teacher_salary_record(request, salary_id):
@@ -279,16 +366,19 @@ def delete_teacher_salary_record(request, salary_id):
         expenses_base = TotalExpenses.objects.create(
             total_amount=0
         )
-    expenses_base.total_amount -= salary_id.paid_salary
+    total_loan = TeacherTotalLoan.objects.get(teacher=salary_id.teacher)
+    total_paid_for_teacher = TotalPaidMoneyForTeacher.objects.get(teacher=salary_id.teacher)
+    total_paid = TeacherRemainMoney.objects.get(teacher=salary_id.teacher)
 
-    remain = TeacherRemainMoney.objects.get(teacher=salary_id.teacher)
-    remain.total_amount -= salary_id.remain_salary
-
-    total_paid = TotalPaidMoneyForTeacher.objects.get(teacher=salary_id.teacher)
-    total_paid.total_amount -= salary_id.paid_salary
+    total_loan.total_loan_amount += salary_id.loan_amount
+    amount_for_sub = salary_id.loan_amount + salary_id.paid_salary
+    expenses_base.total_amount -= amount_for_sub
+    total_paid_for_teacher.total_amount -= amount_for_sub
+    total_paid.total_amount -= salary_id.remain_salary
 
     expenses_base.save()
-    remain.save()
+    total_loan.save()
+    total_paid_for_teacher.save()
     total_paid.save()
     salary_id.delete()
 
@@ -307,7 +397,8 @@ def edit_teacher_salary_record(request, salary_id):
         print("❌ The license date is not today.")
     referer = request.META.get('HTTP_REFERER', '/')
     salary_instance = TeacherPaidSalary.objects.get(id=salary_id)
-
+    total_loan = TeacherTotalLoan.objects.get(teacher=salary_instance.teacher)
+    total_p_a_f_t = TotalPaidMoneyForTeacher.objects.get(teacher=salary_instance.teacher)
     past_remain = salary_instance.remain_salary
     past_paid = salary_instance.paid_salary
     past_loan_amount = salary_instance.loan_amount or 0
@@ -319,63 +410,64 @@ def edit_teacher_salary_record(request, salary_id):
             get_paid_amount = form.cleaned_data.get('paid_salary')
             new_loan_amount = float(request.POST.get('loan_amount', 0))
 
-            # Calculate new remain
-            new_remain = get_total_amount - get_paid_amount
-
+            # Validation: cannot pay more than salary
+            if get_paid_amount > get_total_amount:
+                messages.warning(request, 'مقدار پرداخت بیشتر از مقدار است که باید پرداخت شود')
+                return redirect(referer)
+        
             # Get TotalExpenses safely
             try:
                 expenses_base = TotalExpenses.objects.get(pk=1)
             except TotalExpenses.DoesNotExist:
                 expenses_base = TotalExpenses.objects.create(total_amount=0)
-
-            # Update expenses (remove old, add new)
             expenses_base.total_amount -= past_paid
-            expenses_base.total_amount += get_paid_amount
             expenses_base.save()
 
             # Update teacher remain money
             remain = TeacherRemainMoney.objects.get(teacher=salary_instance.teacher)
             remain.total_amount -= past_remain
-            remain.total_amount += new_remain
             remain.save()
 
-            # ✅ Loan difference logic
-            loan_diff = new_loan_amount - past_loan_amount  # can be + or -
-            total_teacher_loan, _ = TeacherTotalLoan.objects.get_or_create(
-                teacher=salary_instance.teacher, defaults={'total_loan_amount': 0}
-            )
+            total_loan.total_loan_amount += past_loan_amount
+            total_loan.save()
 
-            # Update total loan
-            total_teacher_loan.total_loan_amount -= loan_diff
-            if total_teacher_loan.total_loan_amount < 0:
-                total_teacher_loan.total_loan_amount = 0
-            total_teacher_loan.save()
+            total_p_a_f_t.total_amount -= past_paid
+            total_p_a_f_t.save()
 
-            # ✅ Update individual loan record(s)
-            teacher_loans = TeacherLoan.objects.filter(teacher=salary_instance.teacher).order_by('-id')
-            remaining_diff = loan_diff
+            total_loan.total_loan_amount -= new_loan_amount
+            total_loan.save()
+            try:
+                expenses_base = TotalExpenses.objects.get(pk=1)
+            except TotalExpenses.DoesNotExist:
+                expenses_base = TotalExpenses.objects.create(total_amount=0)
+            expenses_base.total_amount += get_paid_amount
+            expenses_base.save()
 
-            for loan_record in teacher_loans:
-                if remaining_diff == 0:
-                    break
+            find_sub = new_loan_amount + get_paid_amount
+            get_sub = get_total_amount - find_sub
 
-                if remaining_diff > 0:
-                    # Teacher took MORE loan (increase latest loan)
-                    loan_record.amount += remaining_diff
-                    remaining_diff = 0
-                else:
-                    # Teacher reduced loan (returned part)
-                    reducible = min(loan_record.amount, abs(remaining_diff))
-                    loan_record.amount -= reducible
-                    remaining_diff += reducible  # closer to zero
-
-                loan_record.save()
-
-            # Save updated salary record
             instance = form.save(commit=False)
-            instance.remain_salary = new_remain
-            instance.loan_amount = new_loan_amount
+            instance.remain_salary = get_sub
+            instance.teacher = salary_instance.teacher
             instance.save()
+
+            # Update teacher remaining salary
+            remain_obj, created = TeacherRemainMoney.objects.get_or_create(
+                teacher=salary_instance.teacher,
+                defaults={'total_amount': get_sub}
+            )
+            if not created:
+                remain_obj.total_amount += get_sub
+                remain_obj.save()
+
+            # Update total paid amount for teacher
+            total_paid, created = TotalPaidMoneyForTeacher.objects.get_or_create(
+                teacher=salary_instance.teacher,
+                defaults={'total_amount': get_paid_amount}
+            )
+            if not created:
+                total_paid.total_amount += get_paid_amount
+                total_paid.save()
 
             messages.success(request, 'ریکارد پرداخت معاش موفقانه ویرایش شد')
             return redirect('teachers:teacher_paid_salary', id=salary_instance.teacher.id)
@@ -544,8 +636,41 @@ def edit_loan_request(request, loan_id):
     }
     return render(request, 'teachers/edit-loan-page.html', context)
 
-def teacher_leave_day(request,id):
-    return render()
+def teacher_leave_day(request, id):
+    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
+    license_time = get_lisance_check_model.date
+    # Get today's date in the same timezone
+    today = timezone.localdate()
+
+    if license_time.date() <= today:
+        return redirect('management:hesabpay')
+    else:
+        print("❌ The license date is not today.")
+
+    teacher = get_object_or_404(Teacher, id=id)
+    referer = request.META.get('HTTP_REFERER', '/')
+
+    if request.method == 'POST':
+        form = AttendanceAndLeavesForm(request.POST)
+        if form.is_valid():
+            leave = form.save(commit=False)
+            leave.teacher = teacher
+            leave.save()
+            messages.success(request, 'درخواست رخصتی با موفقیت ثبت شد')
+            return redirect(referer)
+        else:
+            messages.error(request, 'فورم درست نیست، لطفاً دوباره تلاش کنید')
+            return redirect(referer)
+    else:
+        form = AttendanceAndLeavesForm()
+
+    records = AttendanceAndLeaves.objects.filter(teacher=teacher).order_by('-start_date')
+
+    return render(request, 'teachers/teacher-leave-day.html', {
+        'teacher': teacher,
+        'form': form,
+        'records': records,
+    })
 
 def teacher_paid_remain_money(request, id):
     get_lisance_check_model = Licsanse_check.objects.get(pk=1)
