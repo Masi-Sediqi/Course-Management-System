@@ -443,11 +443,64 @@
                                   {{ form.per_price_for_buy }}
                                 </div>
                   
+                              <!-- 🧮 مقدار باقیمانده (Shown only if total > paid) -->
+                              <div class="col-md-12 mt-4" id="remain_section_stationery" style="display: none;">
+                                <label class="form-label fw-bold text-success">مقدار باقیمانده</label>
+                                <input type="text" id="remain_amount_stationery" class="form-control bg-light fw-bold text-success text-center" readonly>
+                                💡 این مقدار به حساب تامین‌کننده اضافه می‌شود.
+                              </div>
                                
                                 <div class="col-md-12">
                                   <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
                                   {{ form.description }}
                                 </div>
+                              <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 🎯 Stationery-specific IDs (avoid conflict with book form)
+    const numberField = document.getElementById("{{ form.number_of_stationery.id_for_label }}");
+    const perPriceField = document.getElementById("{{ form.per_price_stationery.id_for_label }}");
+    const totalField = document.getElementById("{{ form.stationery_price.id_for_label }}");
+    const paidField = document.getElementById("{{ form.stationery_paid_price.id_for_label }}");
+    const remainField = document.getElementById("remain_amount_stationery");
+    const remainSection = document.getElementById("remain_section_stationery");
+
+    // 🧮 Calculate total price
+    function calculateTotal() {
+        let number = parseFloat(numberField.value) || 0;
+        let perPrice = parseFloat(perPriceField.value) || 0;
+        let total = number * perPrice;
+        totalField.value = total.toFixed(2);
+        calculateRemain();
+    }
+
+    // 💰 Calculate remaining amount (total - paid)
+    function calculateRemain() {
+        let total = parseFloat(totalField.value) || 0;
+        let paid = parseFloat(paidField.value) || 0;
+        let remain = total - paid;
+
+        if (remain > 0) {
+            remainField.value = remain.toFixed(2);
+            remainSection.style.display = "block";  // show remain field
+        } else {
+            remainField.value = "0.00";
+            remainSection.style.display = "none";   // hide remain field
+        }
+    }
+
+    // 🔄 Event listeners
+    numberField.addEventListener("input", calculateTotal);
+    perPriceField.addEventListener("input", calculateTotal);
+    totalField.addEventListener("input", calculateRemain);
+    paidField.addEventListener("input", calculateRemain);
+
+    // Initialize
+    calculateTotal();
+    calculateRemain();
+});
+</script>
+
+
                   
                               </div>
                             </div>
@@ -457,24 +510,7 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
                             <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
                           </div>
-                          <script>
-                            document.addEventListener("DOMContentLoaded", function() {
-                                const numberField = document.getElementById("{{ form.number_of_stationery.id_for_label }}");
-                                const perPriceField = document.getElementById("{{ form.per_price_stationery.id_for_label }}");
-                                const totalField = document.getElementById("{{ form.stationery_price.id_for_label }}");
-                            
-                                function calculateTotal() {
-                                    let number = parseFloat(numberField.value) || 0;
-                                    let perPrice = parseFloat(perPriceField.value) || 0;
-                                    let total = number * perPrice;
-                            
-                                    totalField.value = total.toFixed(2);  // 2 decimal places
-                                }
-                            
-                                numberField.addEventListener("input", calculateTotal);
-                                perPriceField.addEventListener("input", calculateTotal);
-                            });
-                            </script>                            
+                                           
                         </form>
 
                   
@@ -608,15 +644,8 @@
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
     <button type="submit" class="btn btn-success">ذخیره کتاب</button>
   </div>
-</form>
- <script>
-                                  document.addEventListener('DOMContentLoaded', function () {
-                                      $('#datepicker6').datepicker({
-                                  
-                                      });
-                                  });
-                              </script>
-                <script>
+                      </form>
+                       <script>
 document.addEventListener("DOMContentLoaded", function() {
     const numberBookField = document.getElementById("{{ book_form.number_of_book.id_for_label }}");
     const perPriceBookField = document.getElementById("{{ book_form.per_price.id_for_label }}");
@@ -658,7 +687,15 @@ document.addEventListener("DOMContentLoaded", function() {
     totalBookField.addEventListener("input", calculateRemain);
     paidBookField.addEventListener("input", calculateRemain);
 });
-</script>
+                </script>
+                              <script>
+                                  document.addEventListener('DOMContentLoaded', function () {
+                                      $('#datepicker6').datepicker({
+                                  
+                                      });
+                                  });
+                              </script>
+               
 
 
 

@@ -46,14 +46,7 @@ def library_view(request):
 
                 multiplication = get_number_of_book_field * get_per_book_price
                 find_remain = multiplication - get_paid_price_field
-                get_supplier_record, created = Remaining.objects.get_or_create(
-                    supplier=find_supplier_base,
-                    defaults={'total_amount': 0}
-                )
 
-                # ✅ Update the existing or newly created record
-                get_supplier_record.total_amount += find_remain
-                get_supplier_record.save()
 
                 with transaction.atomic():
                     # TotalExpenses
@@ -68,7 +61,9 @@ def library_view(request):
                     #     collect_loans.save()
 
                     # Save book
-                book = book_form.save()
+                book = book_form.save(commit=False)
+                book.remain_price = find_remain
+                book.save()
 
                 # Create or update related TotalBook
                 total_obj, created = TotalBook.objects.get_or_create(
@@ -99,9 +94,7 @@ def library_view(request):
                 stationery_paid_price = float(request.POST.get('stationery_paid_price') or 0)
 
                 multiplication = number_of_stationery * per_price_stationery
-                if stationery_paid_price < multiplication:
-                    messages.warning(request, 'مقدار پرداخت شده کمتر از مقدار است که باید پرداخت شود')
-                    return redirect(referer)
+                find_remain = multiplication - stationery_paid_price
                 # subtraction_paid_price_collection = multiplication - stationery_paid_price
 
                 with transaction.atomic():
@@ -109,8 +102,9 @@ def library_view(request):
                     find_expenses_pk, created = TotalExpenses.objects.get_or_create(pk=1, defaults={'total_amount': 0})
                     find_expenses_pk.total_amount += stationery_paid_price
                     find_expenses_pk.save()
-                stationery = form.save()
-
+                stationery = form.save(commit=False)
+                stationery.stationery_remain_price = find_remain
+                stationery.save()
                 # Create or update related TotalBook
                 total_obj, created = TotalStationery.objects.get_or_create(
                     stationery=stationery,

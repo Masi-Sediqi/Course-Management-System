@@ -18,6 +18,7 @@ class StationeryItem(models.Model):
     per_price_for_buy = models.IntegerField(blank=False)
     stationery_price = models.IntegerField(blank=False)
     stationery_paid_price = models.FloatField()
+    stationery_remain_price = models.IntegerField()
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -55,6 +56,7 @@ class Books(models.Model):
     per_book_price_for_buy = models.IntegerField(blank=False)
     price = models.IntegerField(blank=False)
     paid_price = models.IntegerField()
+    remain_price = models.IntegerField()
     description = models.TextField(blank=True)
     def __str__(self):
         return self.name
