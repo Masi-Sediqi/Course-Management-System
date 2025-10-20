@@ -28,8 +28,9 @@
                 <div class="col-md-12">
                     <div class="p-4" >
                         <div class="auth-logo text-center mb-4">
-                            <img src="{{ system_logo }}" alt="" style="border-radius: 6px;">
-                        </div>
+<img src="{% if system_logo %}{{ system_logo.url }}{% else %}{% static 'icon/system-1-logo-svg-vector.svg' %}{% endif %}" 
+     alt="System Logo" 
+     style="border-radius: 6px;">                        </div>
                         <h1 class="mb-3 text-18" style="float: right;">داخل شدن به سیستم</h1>
                     </br> </br>
                     <form method="post" action="{% url 'account:login' %}" accept-charset="UTF-8">

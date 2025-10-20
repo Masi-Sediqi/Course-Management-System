@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import *
 from .models import *
+from home.models import *
 from management.models import *
 from django.db import transaction
 from django.http import HttpResponse
@@ -40,12 +41,19 @@ def library_view(request):
                 get_per_book_price_for_buy = float(request.POST.get('per_book_price_for_buy') or 0)
                 get_price_field = float(request.POST.get('price') or 0)
                 get_paid_price_field = float(request.POST.get('paid_price') or 0)
+                get_supplier = book_form.cleaned_data.get('supplier')
+                find_supplier_base = suppliers.objects.get(id=get_supplier.id)
 
                 multiplication = get_number_of_book_field * get_per_book_price
-                if get_paid_price_field < multiplication:
-                    messages.warning(request, 'مقدار پرداخت شده کمتر از مقدار است که باید پرداخت شود')
-                    return redirect(referer)
-                # subtraction_paid_price_collection = multiplication - get_paid_price_field
+                find_remain = multiplication - get_paid_price_field
+                get_supplier_record, created = Remaining.objects.get_or_create(
+                    supplier=find_supplier_base,
+                    defaults={'total_amount': 0}
+                )
+
+                # ✅ Update the existing or newly created record
+                get_supplier_record.total_amount += find_remain
+                get_supplier_record.save()
 
                 with transaction.atomic():
                     # TotalExpenses

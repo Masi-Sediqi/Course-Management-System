@@ -18,10 +18,13 @@ class StationeryItemForm(forms.ModelForm):
 
     class Meta:
         model = StationeryItem
-        fields = ["name","category","stationery_price","description","number_of_stationery","stationery_paid_price","per_price_stationery","per_price_for_buy","date"]
+        fields = ["name","category","stationery_price","supplier","description","number_of_stationery","stationery_paid_price","per_price_stationery","per_price_for_buy","date"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["supplier"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["category"].widget.attrs.update(
@@ -51,13 +54,16 @@ class BuyStationeryAgainForm(forms.ModelForm):
 
     class Meta:
         model = BuyStationeryAgain
-        fields = ["stationery_price","description","number_of_stationery","stationery_paid_price","per_price_stationery","per_price_for_buy","date"]
+        fields = ["stationery_price","description","supplier","number_of_stationery","stationery_paid_price","per_price_stationery","per_price_for_buy","date"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["stationery_price"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["stationery_paid_price"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["supplier"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["number_of_stationery"].widget.attrs.update(
@@ -79,11 +85,14 @@ class BooksForm(forms.ModelForm):
 
     class Meta:
         model = Books
-        fields = ["name","price","description","number_of_book","paid_price","per_price","per_book_price_for_buy","date"]
+        fields = ["name","price","description","supplier","number_of_book","paid_price","per_price","per_book_price_for_buy","date"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["supplier"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["price"].widget.attrs.update(

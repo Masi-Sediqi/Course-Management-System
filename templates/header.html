@@ -56,12 +56,28 @@
                         </li>
                     </ul>
                 </li>
+
                 <li class="Ul_li--hover">
-                    <a href="{% url 'library:library_view' %}" class="d-flex align-items-center">
-                        <img src="{% static 'icon/icon-park-twotone--notebook-and-pen.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">قرطاسیه و کتابها</span>
+                    <a href="#" class="has-arrow">
+                        <img src="{% static 'icon/temaki--shopping-mall.svg' %}" alt="" style="margin-left: 8px;">
+                        <span class="item-name text-15 text-muted">قرطاسیه و تامین ..</span>
                     </a>
+                    <ul class="mm-collapse">
+                         <li class="Ul_li--hover">
+                            <a href="{% url 'library:library_view' %}" class="d-flex align-items-center">
+                                <img src="{% static 'icon/icon-park-twotone--notebook-and-pen.svg' %}" alt="" style="margin-left: 8px;">
+                                <span class="item-name text-15 text-muted">قرطاسیه و کتابها</span>
+                            </a>
+                        </li>
+                        <li class="item-name">
+                            <a href="{% url 'home:supplier' %}" class="d-flex align-items-center">
+                                <img src="{% static 'icon/cib--shopify.svg' %}" alt="" style="margin-left: 8px;">
+                                <span class="item-name text-15 text-muted">تامین کننده گان</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+              
                 <li class="Ul_li--hover">
                     <a href="{% url 'classes:main_classes' %}" class="d-flex align-items-center">
                         <img src="{% static 'icon/streamline-plump--class-lesson-solid.svg' %}" alt="" style="margin-left: 8px;">

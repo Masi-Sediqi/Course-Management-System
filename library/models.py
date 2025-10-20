@@ -1,5 +1,5 @@
 from django.db import models
-
+from home.models import suppliers
 # stationery
 
 class StationeryCategory(models.Model):
@@ -12,6 +12,7 @@ class StationeryItem(models.Model):
     date = models.CharField(max_length=13)
     name = models.CharField(max_length=100, blank=False)
     category = models.ForeignKey(StationeryCategory, on_delete=models.SET_NULL, null=True)
+    supplier = models.ForeignKey(suppliers, on_delete=models.CASCADE)
     number_of_stationery = models.IntegerField(blank=False)
     per_price_stationery = models.IntegerField(blank=False)
     per_price_for_buy = models.IntegerField(blank=False)
@@ -35,6 +36,7 @@ class BuyStationeryAgain(models.Model):
     date = models.CharField(max_length=13)
     number_of_stationery = models.IntegerField(blank=False)
     per_price_stationery = models.IntegerField(blank=False)
+    supplier = models.ForeignKey(suppliers, on_delete=models.CASCADE)
     per_price_for_buy = models.IntegerField(blank=False)
     stationery_price = models.IntegerField(blank=False)
     stationery_paid_price = models.FloatField()
@@ -48,6 +50,7 @@ class Books(models.Model):
     date = models.CharField(max_length=13)
     name = models.CharField(max_length=115, blank=False)
     number_of_book = models.IntegerField(blank=False)
+    supplier = models.ForeignKey(suppliers, on_delete=models.CASCADE)
     per_price = models.IntegerField(blank=False)
     per_book_price_for_buy = models.IntegerField(blank=False)
     price = models.IntegerField(blank=False)
@@ -66,6 +69,7 @@ class TotalBook(models.Model):
 class BuyBookAgain(models.Model):
     book = models.ForeignKey(Books, on_delete=models.CASCADE)
     date = models.CharField(max_length=13)
+    supplier = models.ForeignKey(suppliers, on_delete=models.CASCADE)
     number_of_book = models.IntegerField(blank=False)
     per_price = models.IntegerField(blank=False)
     per_book_price_for_buy = models.IntegerField(blank=False)

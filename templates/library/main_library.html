@@ -412,6 +412,10 @@
                                   {{ form.name }}
                                 </div>
                                 <div class="col-md-3">
+                                  <label for="{{ form.supplier.id_for_label }}" class="form-label">تامین کننده<span class="text-danger">*</span></label>
+                                  {{ form.supplier }}
+                                </div>
+                                <div class="col-md-3">
                                   <label for="{{ form.number_of_stationery.id_for_label }}" class="form-label">تعداد<span class="text-danger">*</span></label>
                                   {{ form.number_of_stationery }}
                                 </div>
@@ -521,112 +525,143 @@
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                   
-                        <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate>
-                          {% csrf_token %}
-                          <input type="hidden" name="form_type" value="book">
-                  
-                          <div class="modal-body">
-                            <div class="container-fluid">
-                              <div class="row g-3">
-                  
-                                <div class="col-md-4">
-                                  <label for="{{ book_form.date.id_for_label }}" class="form-label">
-                                    تاریخ <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.date }}
-                                </div>
+                      <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="form_type" value="book">
 
-                                <script>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <div class="row g-3">
+
+        <!-- 🗓️ تاریخ -->
+        <div class="col-md-3">
+          <label for="{{ book_form.date.id_for_label }}" class="form-label">تاریخ <span class="text-danger">*</span></label>
+          {{ book_form.date }}
+        </div>
+
+        <!-- 📖 نام کتاب -->
+        <div class="col-md-3">
+          <label for="{{ book_form.name.id_for_label }}" class="form-label">نام کتاب <span class="text-danger">*</span></label>
+          {{ book_form.name }}
+        </div>
+
+        <!-- 🧾 تامین کننده -->
+        <div class="col-md-3">
+          <label for="{{ book_form.supplier.id_for_label }}" class="form-label">تامین کننده<span class="text-danger">*</span></label>
+          {{ book_form.supplier }}
+        </div>
+
+        <!-- 📦 تعداد -->
+        <div class="col-md-3">
+          <label for="{{ book_form.number_of_book.id_for_label }}" class="form-label">تعداد <span class="text-danger">*</span></label>
+          {{ book_form.number_of_book }}
+        </div>
+
+        <!-- 💵 مقدار فی -->
+        <div class="col-md-3">
+          <label for="{{ book_form.per_price.id_for_label }}" class="form-label">مقدار فی <span class="text-danger">*</span></label>
+          {{ book_form.per_price }}
+        </div>
+
+        <!-- 💰 قیمت کل -->
+        <div class="col-md-3">
+          <label for="{{ book_form.price.id_for_label }}" class="form-label">قیمت کل <span class="text-danger">*</span></label>
+          {{ book_form.price }}
+        </div>
+
+        <!-- 💳 مقدار پرداخت شده -->
+        <div class="col-md-3">
+          <label for="{{ book_form.paid_price.id_for_label }}" class="form-label">مقدار پرداخت شده <span class="text-danger">*</span></label>
+          {{ book_form.paid_price }}
+        </div>
+
+        <!-- 💹 مقدار فی برای فروش -->
+        <div class="col-md-3">
+          <label for="{{ book_form.per_book_price_for_buy.id_for_label }}" class="form-label">
+            مقدار فی برای فروش <span class="text-danger">*</span>
+          </label>
+          {{ book_form.per_book_price_for_buy }}
+        </div>
+
+       <!-- 🧮 مقدار باقیمانده (Placed at the END) -->
+<div class="col-md-12 mt-4" id="remain_section" style="display: none;">
+  <label class="form-label fw-bold text-success">مقدار باقیمانده</label>
+  <input type="text" id="remain_amount" class="form-control bg-light fw-bold text-success text-center" readonly>
+  <small class="text-muted d-block mt-1">
+    💡 این مقدار به حساب تامین‌کننده اضافه می‌شود.
+  </small>
+</div>
+
+
+
+        <!-- 📝 توضیحات -->
+        <div class="col-md-12">
+          <label for="{{ book_form.description.id_for_label }}" class="form-label">توضیحات</label>
+          {{ book_form.description }}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+    <button type="submit" class="btn btn-success">ذخیره کتاب</button>
+  </div>
+</form>
+ <script>
                                   document.addEventListener('DOMContentLoaded', function () {
                                       $('#datepicker6').datepicker({
                                   
                                       });
                                   });
                               </script>
+                <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const numberBookField = document.getElementById("{{ book_form.number_of_book.id_for_label }}");
+    const perPriceBookField = document.getElementById("{{ book_form.per_price.id_for_label }}");
+    const totalBookField = document.getElementById("{{ book_form.price.id_for_label }}");
+    const paidBookField = document.getElementById("{{ book_form.paid_price.id_for_label }}");
+    const remainField = document.getElementById("remain_amount");
+    const remainSection = document.getElementById("remain_section");
 
-                                <div class="col-md-4">
-                                  <label for="{{ book_form.name.id_for_label }}" class="form-label">
-                                    نام کتاب <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.name }}
-                                </div>
-                  
-                                <div class="col-md-4">
-                                  <label for="{{ book_form.number_of_book.id_for_label }}" class="form-label">
-                                    تعداد <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.number_of_book }}
-                                </div>
-                  
-                                <div class="col-md-3">
-                                  <label for="{{ book_form.per_price.id_for_label }}" class="form-label">
-                                    مقدار فی <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.per_price }}
-                                </div>
-                  
-                                <div class="col-md-3">
-                                  <label for="{{ book_form.price.id_for_label }}" class="form-label">
-                                    قیمت <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.price }}
-                                </div>
-                                <div class="col-md-3">
-                                  <label for="{{ book_form.paid_price.id_for_label }}" class="form-label">
-                                    مقدار پرداخت شده <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.paid_price }}
-                                </div>
-                  
-                                <div class="col-md-3">
-                                  <label for="{{ book_form.per_book_price_for_buy.id_for_label }}" class="form-label"  data-bs-toggle="tooltip" 
-                                  data-bs-placement="top" 
-                                  title="*">
-                                    مقدار فی برای فروش <span class="text-danger">*</span>
-                                  </label>
-                                  {{ book_form.per_book_price_for_buy }}
-                                </div>
-                  
-                                <script>
-                                  document.addEventListener("DOMContentLoaded", function() {
-                                      const numberBookField = document.getElementById("{{ book_form.number_of_book.id_for_label }}");
-                                      const perPriceBookField = document.getElementById("{{ book_form.per_price.id_for_label }}");
-                                      const totalBookField = document.getElementById("{{ book_form.price.id_for_label }}");
-                                  
-                                      function calculateBookTotal() {
-                                          let number = parseFloat(numberBookField.value) || 0;
-                                          let perPrice = parseFloat(perPriceBookField.value) || 0;
-                                          let total = number * perPrice;
-                                  
-                                          totalBookField.value = total.toFixed(2); // 2 decimals
-                                      }
-                                  
-                                      numberBookField.addEventListener("input", calculateBookTotal);
-                                      perPriceBookField.addEventListener("input", calculateBookTotal);
-                                  });
-                                  </script>
-                                  
-                               
-                  
-                                <div class="col-md-12">
-                                  <label for="{{ book_form.description.id_for_label }}" class="form-label">
-                                    توضیحات
-                                  </label>
-                                  {{ book_form.description }}
-                                </div>
-                  
-                              </div>
-                            </div>
-                          </div>
-                  
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-                            <button type="submit" class="btn btn-success">ذخیره کتاب</button>
-                          </div>
-                        </form>
-                  
-                        
-                  
+    // 🧮 Calculate total price
+    function calculateBookTotal() {
+        let number = parseFloat(numberBookField.value) || 0;
+        let perPrice = parseFloat(perPriceBookField.value) || 0;
+        let total = number * perPrice;
+        totalBookField.value = total.toFixed(2);
+        calculateRemain();
+    }
+
+    // 💰 Calculate remaining amount & show/hide field
+    function calculateRemain() {
+        let total = parseFloat(totalBookField.value) || 0;
+        let paid = parseFloat(paidBookField.value) || 0;
+        let remain = total - paid;
+
+        if (remain > 0) {
+            remainField.value = remain.toFixed(2);
+            remainSection.style.display = "block";  // show remain field
+        } else {
+            remainField.value = "0.00";
+            remainSection.style.display = "none";   // hide remain field
+        }
+    }
+
+    // Initial calculation
+    calculateRemain();
+
+    // 🔄 Event listeners
+    numberBookField.addEventListener("input", calculateBookTotal);
+    perPriceBookField.addEventListener("input", calculateBookTotal);
+    totalBookField.addEventListener("input", calculateRemain);
+    paidBookField.addEventListener("input", calculateRemain);
+});
+</script>
+
+
+
                       </div>
                     </div>
                   </div>
