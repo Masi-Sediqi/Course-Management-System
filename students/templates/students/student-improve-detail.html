@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            جزئیات ارتقاع شاگرد: {{ student.first_name }} {{ student.last_name }}
+        </div>
+        <div class="card-body">
+            <p><strong>تاریخ ثبت:</strong> {{ record.created_at|date:"Y-m-d" }}</p>
+            <p><strong>توضیحات:</strong> {{ record.description|default:"بدون توضیح" }}</p>
+
+            {% if record.file %}
+                <p><strong>فایل ضمیمه:</strong>
+                    <a href="{{ record.file.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                        دانلود فایل
+                    </a>
+                </p>
+            {% else %}
+                <p><strong>فایل ضمیمه:</strong> ندارد</p>
+            {% endif %}
+
+            <hr>
+
+            <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-secondary">
+                بازگشت به لیست ارتقاعات
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
