@@ -66,7 +66,7 @@
                             {% for i in records %}
                               <tr>
                                 <th scope="row">{{ i.id }}</th>
-                             <td>   <a href="">{{ i.name }} {{ i.last_name }}</a></td>
+                             <td>   <a href="{% url 'home:supplier_detail' i.id %}">{{ i.name }}</a></td>
                         
                                 <td>{{ i.date }}</td>
                               
@@ -78,7 +78,7 @@
                                       <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ i.id }}" style="max-height: 150px; overflow-y: auto;">
-                                      <a class="dropdown-item text-info" href="">معلومات کامل</a>
+                                      <a class="dropdown-item text-info" href="{% url 'home:supplier_detail' i.id %}">معلومات کامل</a>
                                       <a class="dropdown-item text-info" href="{% url 'home:edit_supplier' i.id %}">تغیرات</a>
                                       <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
                                         حذف

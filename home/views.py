@@ -4,6 +4,7 @@ from students.models import *
 from account.models import *
 from django.utils import timezone
 from .forms import *
+from django.db.models import Sum
 from django.contrib import messages
 # Create your views here.
 
@@ -76,7 +77,24 @@ def edit_supplier(request, id):
 
 def supplier_detail(request, id):
     supplier = suppliers.objects.get(id=id)
+    supplier_books = Books.objects.filter(supplier=supplier)
+    # 💰 Collect total paid amount for this supplier
+    total_book_paid = supplier_books.aggregate(total_paid=Sum('paid_price'))['total_paid'] or 0
+    total_book_remain = supplier_books.aggregate(total_remain=Sum('remain_price'))['total_remain'] or 0
+
+    supplier_Stationery = StationeryItem.objects.filter(supplier=supplier)
+    # 💰 Collect total paid amount for this supplier
+    total_paid = supplier_Stationery.aggregate(total_paid=Sum('stationery_paid_price'))['total_paid'] or 0
+    total_remain = supplier_Stationery.aggregate(total_remain=Sum('stationery_remain_price'))['total_remain'] or 0
+
+    total_book_stationary_paid = total_book_paid + total_paid
+    total_book_stationary_remain = total_book_remain + total_remain
+
     context = {
         'supplier':supplier,
+        'supplier_Stationery':supplier_Stationery,
+        'supplier_books':supplier_books,
+        'total_book_stationary_paid':total_book_stationary_paid,
+        'total_book_stationary_remain':total_book_stationary_remain,
     }
     return render(request, 'home/detail-supplier.html', context)
