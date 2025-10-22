@@ -119,12 +119,15 @@ class BuyBookAgainForm(forms.ModelForm):
 
     class Meta:
         model = BuyBookAgain
-        fields = ["price","description","number_of_book","paid_price","per_price","per_book_price_for_buy","date"]
+        fields = ["price","description","number_of_book","supplier","paid_price","per_price","per_book_price_for_buy","date"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         self.fields["price"].widget.attrs.update(
+        {"class": "form-control", "placeholder": ""}
+        )
+        self.fields["supplier"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["description"].widget.attrs.update(

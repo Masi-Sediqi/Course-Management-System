@@ -312,8 +312,6 @@
                                                             <tr>
                                                                 <th scope="col">#</th>
                                                                 <th scope="col">نام دوره</th>
-                                                                <th scope="col">مدت</th>
-                                                                <th scope="col">قیمت</th>
                                                                 <th scope="col">وضعیت</th>
                                                                 <th scope="col">توضیحات</th>
                                                                 <th scope="col">عملیات</th>
@@ -324,8 +322,8 @@
                                                             <tr>
                                                                 <th scope="row">{{forloop.counter}}</th>
                                                                 <td>{{i.name}}</td>
-                                                                <td> هفته {{i.duration_weeks}}</td>
-                                                                <td>{{i.price}}</td>
+                                                               
+                                                               
                                                                 <td><span class="badge badge-success">
                                                                     {% if i.active == True %}فعال
                                                                 {% else %}غیر فعال
@@ -333,10 +331,14 @@
                                                                 </span></td>
                                                                 <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
                                                                 <td>
-                                                                        <a href="#" class="btn btn-success">
-                                                                            <i class="nav-icon i-Pen-2"></i>
-                                                                        </a>
-                                                                    <button class="btn btn-danger" type="button"><i class="nav-icon i-Close-Window"></i></button>
+                                                                    <a href="{% url 'classes:edit_main_class' i.id %}" class="btn btn-success">
+                                                                        <i class="nav-icon i-Pen-2"></i>
+                                                                    </a>
+                                                                    <a href="{% url 'classes:delete_main_class' i.id %}"
+                                                                        class="btn btn-danger"
+                                                                        onclick="return confirm('آیا مطمئن هستید که می‌خواهید این دوره را حذف کنید؟');">
+                                                                        <i class="nav-icon i-Close-Window"></i>
+                                                                    </a>
                                                                 </td>
                                                             </tr>
                                                             {% endfor %}

@@ -83,6 +83,14 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = "Employee"
+        verbose_name_plural = "Employees"
+        default_permissions = ()  # disable default English ones
+        permissions = [
+            ("view_employee", "can view Employee records"),
+        ]
 
 class Licsanse_check(models.Model):
     password = models.CharField(max_length=1200)

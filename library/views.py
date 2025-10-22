@@ -390,12 +390,12 @@ def buy_book_again(request, id):
             get_per_book_price = form.cleaned_data.get('per_book_price_for_buy')
 
             multiply = get_number_of_book_field * form.cleaned_data.get('per_price')
-            if form.cleaned_data.get('paid_price') > multiply or form.cleaned_data.get('paid_price') < multiply:
-                messages.warning(request, 'مقدار پرداخت نباید کوچکتر یا بزرگتر از مقدار پرداخت باشد')
-                return redirect(referer)
+            
+            find_remain = multiply - form.cleaned_data.get('paid_price')
             
             instance = form.save(commit=False)
             instance.book = book
+            instance.remain_price = find_remain
             instance.save()
 
             total_obj, created = TotalBook.objects.get_or_create(
@@ -560,8 +560,12 @@ def buy_stationery_again(request, id):
             number_of_stationery = form.cleaned_data.get('number_of_stationery')
             per_price_for_buy = form.cleaned_data.get('per_price_for_buy')
 
+            multiply = number_of_stationery * form.cleaned_data.get('per_price_stationery')
+            remain = multiply - form.cleaned_data.get('stationery_paid_price')
+
             instance = form.save(commit=False)
             instance.stationery = stationery
+            instance.stationery_remain_price = remain
             instance.save()
 
             total_obj, created = TotalStationery.objects.get_or_create(

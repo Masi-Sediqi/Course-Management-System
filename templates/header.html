@@ -7,7 +7,7 @@
 
 
 <a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
-  <img class="system-logo" src="{{ system_logo }}" alt="System Logo" />
+  <img class="system-logo" src="{% if system_logo %}{{ system_logo.url }}{% else %}{% static 'icon/system-1-logo-svg-vector.svg' %}{% endif %}" alt="System Logo" />
 </a>
 
 <style>.system-logo {

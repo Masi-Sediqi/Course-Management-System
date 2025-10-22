@@ -96,7 +96,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for i in supplier_Stationery %}
+                  {% for i in combined_stationery %}
                   <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ i.date }}</td>
@@ -135,7 +135,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for e in supplier_books %}
+                  {% for e in combined_books %}
                   <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ e.date }}</td>

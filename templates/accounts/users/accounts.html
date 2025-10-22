@@ -31,8 +31,8 @@
     {% endfor %}
     {% endif %}
   </script>
-
-  <div class="main-content pt-4">
+          {% if perms.account.view_employee %}
+        <div class="main-content pt-4">
                 <div class="breadcrumb">
                     <h1>بخش ساختن اکونت ها</h1>
                     <ul>
@@ -293,7 +293,8 @@
                         </div>
                     </div>
                 </section><!-- end of main-content -->
-            </div>
+        </div>
+        {% endif %}
         <!-- container-fluid -->
     </div>
 </div>
