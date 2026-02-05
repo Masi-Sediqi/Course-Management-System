@@ -11,28 +11,12 @@ from itertools import chain
 
 @login_required
 def dashboard(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
 
     return render(request, 'dashboard.html')
 
 def colculator(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
     return render(request, 'colculator.html')
 
 def supplier(request):

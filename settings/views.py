@@ -11,15 +11,7 @@ from django.utils import timezone
 # Create your views here.
 
 def settings(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
     setting_instance = Setting.objects.first()  # Get the single existing record (if any)
 
     if request.method == "POST":
@@ -49,15 +41,7 @@ def settings(request):
 
 
 def delete_database(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
     delete_all_student = Student.objects.all().delete()
     delete_all_teacher = Teacher.objects.all().delete()
     delete_all_book = Books.objects.all().delete()

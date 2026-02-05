@@ -1,13 +1,15 @@
 {% load static %}
 {% block content %}
 
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 
 <div class="app-admin-wrap layout-sidebar-vertical sidebar-full">
-<div class="sidebar-panel bg-white" style="font-family: XW_Zar_Bd_0;">
+<div class="sidebar-panel bg-white" style="font-family: 'Vazirmatn', sans-serif;">
 
 
 <a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
-  <img class="system-logo" src="{% if system_logo %}{{ system_logo.url }}{% else %}{% static 'icon/system-1-logo-svg-vector.svg' %}{% endif %}" alt="System Logo" />
+  <img class="system-logo" src="{% if system_logo %}{{ system_logo }}{% else %}{% static 'icon/system-1-logo-svg-vector.svg' %}{% endif %}" alt="System Logo" />
 </a>
 
 <style>.system-logo {
@@ -32,7 +34,7 @@
                 <li class="Ul_li--hover">
                     <a href="/" class="d-flex align-items-center">
                         <img src="{% static 'icon/line-md--home-twotone.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">داشبورد</span>
+                        <span class="item-name text-15 text-muted" style="font-family: 'Vazirmatn', sans-serif;">داشبورد</span>
                     </a>
                 </li>
 

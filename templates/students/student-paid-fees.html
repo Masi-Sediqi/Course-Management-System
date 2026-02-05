@@ -2,256 +2,201 @@
 {% load static %}
 {% block content%}
 
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    .form-control {
+        border-radius: 0.35rem;
+        border: 1px solid #d1d3e2;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+    
+    .position-relative {
+        position: relative;
+    }
+</style>
 
-<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
-
-
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
     <h4 class="py-3 mb-4">
         <span class="text-muted fw-light">داشبورد / </span>پرداخت فیس صنف "{{ stu_class.name }}"
     </h4>
+    
     <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
     <script src="{% static 'js/sweet.js' %}"></script>
 
-        <script>
-            {% if messages %}
-                {% for message in messages %}
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                        title: "{{ message|escapejs }}",
-                        showConfirmButton: false,
-                        timer: 4000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- Main Form Card -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">ثبت پرداخت فیس جدید</h5>
+                <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-right ml-2"></i>بازگشت
+                </a>
+            </div>
+            
+            <!-- Payment Form -->
+            <form class="row g-3 needs-validation" novalidate method="post" 
+                  action="{% url 'students:student_paid_fees' stu_id=student.id cla_id=stu_class.id %}">
+                {% csrf_token %}
+                
+                <!-- تاریخ -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تاریخ<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        {{ form.date }}
+                    </div>
+                </div>
+                <!-- تاریخ -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تاریخ ختم<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        {{ form.end_date }}
+                    </div>
+                </div>
+                
+                <!-- فیس اصلی -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">
+                        فیس اصلی <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="number" id="total_fees" value="{{ stu_class.fees }}" name="orginal_fees"
+                            class="form-control" readonly>
+                    </div>
+                </div>
+
+                <!-- پرداخت -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">
+                        پرداخت <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="number" name="paid_fees" id="paid_amount"
+                            class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- باقی مانده -->
+                <div class="col-md-12 d-flex align-items-center mb-2">
+                    <label class="col-sm-4 col-form-label">
+                        باقی مانده
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="number" name="remaining" id="remaining_amount"
+                            class="form-control" readonly>
+                    </div>
+                </div>
+
+                <!-- بخشیدن باقی مانده -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <div class="col-sm-4"></div>
+                    <div class="col-sm-8 form-check">
+                        <input class="form-check-input" type="checkbox"
+                            id="waive_remaining" name="waive_remaining">
+                        <label class="form-check-label" for="waive_remaining" style="padding-right: 22px;">
+                            باقی مانده بخشیده شود
+                        </label>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                    $('#datepicker3').datepicker({});
+                    });
+                </script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                    $('#datepicker4').datepicker({});
+                    });
+                </script>
+
+                <script>
+                    const totalFees = document.getElementById('total_fees');
+                    const paidAmount = document.getElementById('paid_amount');
+                    const remainingAmount = document.getElementById('remaining_amount');
+                    const waiveCheckbox = document.getElementById('waive_remaining');
+
+                    function calculateRemaining() {
+                        let total = parseFloat(totalFees.value) || 0;
+                        let paid = parseFloat(paidAmount.value) || 0;
+
+                        let remaining = total - paid;
+                        if (remaining < 0) remaining = 0;
+
+                        remainingAmount.value = remaining;
+                    }
+
+                    paidAmount.addEventListener('input', function () {
+                        waiveCheckbox.checked = false;
+                        remainingAmount.readOnly = true;
+                        calculateRemaining();
+                    });
+
+                    waiveCheckbox.addEventListener('change', function () {
+                        if (this.checked) {
+                            remainingAmount.value = 0;
+                        } else {
+                            calculateRemaining();
                         }
                     });
-                {% endfor %}
-            {% endif %}
-        </script>
-    <div class="row">
-        <div class="col-md-12 mb-3">
-            <div class="card text-left">
-                <div class="card-body">
-                    <div class="col-lg-12 text-right">
-                        
-                   
-       
-
-                        <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal" data-target=".bd-example-modal-lg">
-                            پرداخت جدید
-                        </button>
-                         <!-- Right-side back button -->
-                        <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-secondary btn-lg m-1">
-                          بازگشت
-                        </a>
-
-                    <br>
-                    <!-- <p>ستا سو ثبت سوی اسعار</p> -->
-                    <div class="table-responsive">
-                   
-                        <table class="table table-striped table-hover align-middle" id="studentsTable">
-                          <thead class="table-dark">
-                            <tr>
-                              <th scope="col">#</th>
-                              <th scope="col">تاریخ</th>
-                              <th scope="col">ماه</th>
-                              <th scope="col">تاریخ ختم</th>
-                              <th scope="col">مقدار برای پرداخت</th>
-                              <th scope="col">مقدار پرداخت شده</th>
-                              <th scope="col">مقدار باقی مانده</th>
-                              <th scope="col" style="min-width: 140px;">عملیات</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {% for i in records %}
-                            <tr>
-                              <th scope="row">{{ i.id }}</th>
-           
-                              <td>{{ i.date|default:"ندارد" }}</td>
-                              <td>{{ i.month|default:"ندارد" }}</td>
-                              <td>{{ i.end_date }}</td>
-                              <td>{{ i.orginal_fees }}</td>
-                              <td>
-                               {{i.give_fees}}                             
-                              </td>
-                              <td>
-                               {{i.remain_fees}}                             
-                              </td>
-
-                              <td>
-                                <div class="dropdown">
-                                  <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                  </button>
-                                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
-                          
-                                    <a href="{% url 'students:edit_paid_fees' i.id %}" class="dropdown-item text-info">
-                                      تغییرات
-                                      </a>   
-                                    <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                        حذف
-                                      </a>   
-
-                                </div>
-                                </div>
-                              </td>
-                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                  <div class="modal-content text-center">
-                                    <div class="modal-header">
-                                      <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                      </button>
-                                    </div>
-                                    <div class="modal-body">
-                                      <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                      <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                      <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                        <a href="{% url 'students:delete_paid_fess' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                              <td colspan="8" class="text-center py-3">هیچ دانش‌آموزی یافت نشد</td>
-                            </tr>
-                            {% endfor %}
-                          </tbody>
-                        </table>
-                        <script>
-                          document.getElementById('studentSearch').addEventListener('keyup', function () {
-                            let searchValue = this.value.toLowerCase();
-                            let tableRows = document.querySelectorAll('#studentsTable tbody tr');
-                        
-                            tableRows.forEach(function (row) {
-                              let rowText = row.innerText.toLowerCase();
-                              if (rowText.includes(searchValue)) {
-                                row.style.display = '';
-                              } else {
-                                row.style.display = 'none';
-                              }
-                            });
-                          });
-                        </script>                        
-                      </div>
-                      
+                </script>
+                
+                <!-- توضیحات -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">توضیحات</label>
+                    <div class="col-sm-8">
+                        {{ form.description }}
+                    </div>
                 </div>
-            </div>
-        </div>
-        </div>
-        <!-- end of col-->
-        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-            <form method="POST" action="{% url 'students:student_paid_fees' stu_id=student.id cla_id=stu_class.id %}">
-              {% csrf_token %}
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content p-3">
-                  <div class="card-title h5 mb-3">اضافه کردن فیس</div>
-                  <div>
-                    <div class="row">
-                      <div class="col-md-4 form-group mb-3">
-                        <label for="{{ form.date.id_for_label }}">تاریخ</label>
-                        {{ form.date }}
-                      </div>
-                      <div class="col-md-4 form-group mb-3">
-                        <label for="{{ form.orginal_fees.id_for_label }}">فیس اصلی</label>
-                        {{ form.orginal_fees }}
-                      </div>
-                      <div class="col-md-4 form-group mb-3 position-relative">
-                        <label for="{{ form.give_fees.id_for_label }}">مقدار فیس داده شده <span class="text-danger">*</span></label>
-                        {{ form.give_fees }}
-                        <div id="warning-msg" class="text-danger mt-1" style="display: none;">
-                          مقدار فیس داده شده نباید بزرگتر از مقدار اصلی فیس باشد!
-                        </div>
-                        <div id="overlay" style="
-                          display: none;
-                          position: absolute;
-                          top: 38px; /* adjust this if needed */
-                          left: 0;
-                          right: 0;
-                          height: 38px;
-                          background: rgba(255, 255, 255, 0.6);
-                          z-index: 10;
-                          pointer-events: none;
-                          border-radius: 4px;
-                        "></div>
-                      </div>
-                    </div>
-          
-                    <div class="col-md-12 form-group mb-3">
-                      <label for="{{ form.description.id_for_label }}">توضیحات</label>
-                      {{ form.description }}
-                    </div>
-          
-                    <div class="text-end">
-                      <input type="hidden" name="form_type" value="givefees">
-                      
-                      <!-- Dismiss button -->
-                      <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
-                        بستن
-                      </button>
-                    
-                      <!-- Submit button -->
-                      <button class="btn btn-primary mt-2" type="submit">
-                        ذخیره کردن
-                      </button>
-                    </div>
-                    
-                  </div>
+                
+                <!-- Submit Buttons -->
+                <div class="col-12 d-flex justify-content-end mt-3">
+                    <input type="hidden" name="form_type" value="givefees">
+                    <button type="button" class="btn btn-secondary ml-2" onclick="window.history.back()">
+                        منصرف
+                    </button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-save ml-2"></i>ثبت پرداخت
+                    </button>
                 </div>
-              </div>
             </form>
-          </div>
-          
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const orginalFeesInput = document.getElementById('id_orginal_fees');
-              const giveFeesInput = document.getElementById('id_give_fees');
-              const warningMsg = document.getElementById('warning-msg');
-              const overlay = document.getElementById('overlay');
-          
-              function validateFees() {
-                const orginalValue = parseFloat(orginalFeesInput.value);
-                const giveValue = parseFloat(giveFeesInput.value);
-          
-                if (!isNaN(orginalValue) && !isNaN(giveValue)) {
-                  if (giveValue > orginalValue) {
-                    warningMsg.style.display = 'block';
-                    overlay.style.display = 'block';
-                    giveFeesInput.style.borderColor = 'red';
-                  } else {
-                    warningMsg.style.display = 'none';
-                    overlay.style.display = 'none';
-                    giveFeesInput.style.borderColor = '';
-                  }
-                } else {
-                  warningMsg.style.display = 'none';
-                  overlay.style.display = 'none';
-                  giveFeesInput.style.borderColor = '';
-                }
-              }
-          
-              orginalFeesInput.addEventListener('input', validateFees);
-              giveFeesInput.addEventListener('input', validateFees);
-            });
-          </script>
-          
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          $('#datepicker3').datepicker({});
-        });
-        </script>
-        
-        <!-- end of col-->
+        </div>
     </div>
+</div>
 
 
-    {% endblock %}
+{% endblock %}

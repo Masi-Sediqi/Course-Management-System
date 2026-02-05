@@ -1,247 +1,501 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
     <h4 class="py-3 mb-4">
         <span class="text-muted fw-light">داشبورد / </span> معلومات کامل شاگرد
     </h4>
-    
+
+    <style>
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .student-header {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            border-radius: 0.75rem 0.75rem 0 0;
+            padding: 1.5rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #4e73df;
+            border-top: none;
+            border-bottom: 2px solid #e3e6f0;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .badge {
+            font-size: 0.85em;
+            padding: 0.35em 0.65em;
+        }
+
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .payment-paid {
+            color: #1cc88a;
+            font-weight: bold;
+        }
+
+        .payment-remain {
+            color: #e74a3b;
+            font-weight: bold;
+        }
+
+        .payment-complete {
+            background-color: rgba(28, 200, 138, 0.1);
+        }
+
+        .summary-card {
+            transition: transform 0.2s;
+            border-left: 4px solid;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
+
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
+        {% endif %}
+    </script>
 
     <div class="card shadow-sm border rounded-3">
         <div class="card-body text-center">
 
-            <div class="row">
-                <!-- ICON BG-->
-                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Add-User"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0">خرید </p>
-                                <p class="text-primary text-24 line-height-1 mb-2">205</p>
+            <!-- Student Header -->
+            <div class="card mb-4">
+                <div class="student-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            {% if student.image %}
+                            <img src="{{ student.image.url }}" alt="{{ student.first_name }}"
+                                class="rounded-circle border border-4 border-white" width="120" height="120">
+                            {% else %}
+                            <div class="rounded-circle border border-4 border-white d-inline-flex align-items-center justify-content-center"
+                                style="width: 120px; height: 120px; background-color: white; color: #4e73df; font-size: 48px; font-weight: bold;">
+                                {{ student.first_name|first }}
                             </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9 text-right">
+                            <h3 class="mb-2">{{ student.first_name }} {{ student.last_name }}</h3>
+                            <p class="mb-1">
+                                <i class="fas fa-user ml-2"></i>
+                                نام پدر: {{ student.father_name|default:"ثبت نشده" }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-phone ml-2"></i>
+                                شماره تماس: {{ student.phone|default:"ثبت نشده" }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-venus-mars ml-2"></i>
+                                جنسیت:
+                                {% if student.gender == 'Male' %}
+                                <span class="badge badge-primary">مرد</span>
+                                {% else %}
+                                <span class="badge badge-pink">زن</span>
+                                {% endif %}
+                            </p>
+                            <span class="text-white">
+                                <i class="far fa-calendar-alt me-1"></i>
+                                {{ student.registered_at|date:"Y-m-d" }}
+                            </span>
+                            &nbsp;|&nbsp;
+                            <span class="text-white">
+                                <i class="far fa-clock me-1"></i>
+                                {{ student.registered_at|date:"H:i" }}
+                            </span>
                         </div>
                     </div>
-                </div> -->
-                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Financial"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0">فیس</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">$4021</p>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0">قرض</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">{{ remain_amount.amount|default:"0" }}                                </p>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <!-- Total Paid -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card summary-card border-left-success h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-success font-weight-bold text-uppercase mb-1">مجموع پرداخت‌شده
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ student_balance.paid }}
+                                    </div>
+                                </div>
+                                <div class="bg-success text-white rounded-circle p-3">
+                                    <i class="fas fa-money-check-alt fa-2x"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Money-2"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0">Expense</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">$1200</p>
+
+                <!-- Total Remaining -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card summary-card border-left-warning h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-warning font-weight-bold text-uppercase mb-1">باقیمانده کورس بالای شاگرد
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ student_balance.remain }}
+                                    </div>
+                                </div>
+                                <div class="bg-warning text-white rounded-circle p-3">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div> -->
-            </div>
-            <!-- ✅ Student Image -->
-            {% if student.image %}
-            <img 
-                src="{{ student.image.url }}" 
-                alt="عکس شاگرد" 
-                class="rounded-circle mb-3" 
-                width="120" 
-                height="120"
-                style="object-fit: cover; border: 3px solid #ccc;"
-            >
-            {% else %}
-            <img 
-                src="{% static 'images/student/people-face-avatar-icon-cartoon-character-png.png' %}" 
-                alt="عکس شاگرد" 
-                class="rounded-circle mb-3" 
-                width="120" 
-                height="120"
-                style="object-fit: cover; border: 3px solid #ccc;"
-            >
-            {% endif %}
-
-            <h5 class="card-title mb-4 text-primary border-bottom pb-2">مشخصات شاگرد</h5>
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <tbody>
-                        <tr>
-                            <th>نام مکمل</th>
-                            <td>{{ student.first_name }} {{ student.last_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>نام پدر</th>
-                            <td>{{ student.father_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>شماره تماس</th>
-                            <td>{{ student.phone|default:"ندارد" }}</td>
-                        </tr>
-                        <tr>
-                            <th>ایمیل</th>
-                            <td>{{ student.email|default:"ندارد" }}</td>
-                        </tr>
-                        <!-- <tr>
-                            <th>مضمون</th>
-                            <td>
-                                {% for n in student.classs.all %}
-                                    {% for subj in n.subjects.all %}
-                                        <span class="badge bg-primary">{{ subj.name }}</span>{% if not forloop.last %} , {% endif %}
-                                    {% empty %}
-                                        <span>-</span>
-                                    {% endfor %}
-                                    {% if not forloop.last %} + {% endif %}
-                                {% empty %}
-                                    -
-                                {% endfor %}
-                            </td>
-                        </tr> -->
-                        <tr>
-                            <th>صنوف</th>
-                            <td>
-                                {% for t in student.classs.all %}
-                                    <a href="" class="badge bg-info class-badge">
-                                        {{ t.name }}
-                                    </a>{% if not forloop.last %} + {% endif %}
-                                {% empty %}
-                                    -
-                                {% endfor %}
-                            </td>
-                        </tr>
-                                            
-                        
-                        <tr>
-                            <th>وقت درسی</th>
-                            <td>
-                                {% for t in student.classs.all %}
-                                    <span class="badge bg-primary">{{ t.time }}</span>{% if not forloop.last %} + {% endif %}
-                                {% empty %}
-                                    -
-                                {% endfor %}
-                            </td>
-                        </tr>
-                        
-                       
-                        
-                        <tr>
-                            <th>تاریخ ثبت</th>
-                            <td>{{ student.date_of_registration }}</td>
-                        </tr>
-                        <tr>
-                            <th>تاریخ ثبت سیستمی</th>
-                            <td>{{ student.registered_at|date:"Y-m-d H:i" }}</td>
-                        </tr>
-                        <tr>
-                            <th>جنسیت</th>
-                            <td>
-                                {% if student.gender == 'Male' %}
-                                <span class="badge badge-pill badge-warning" style="font-size: 1rem;">مرد</span>
-
-                                {% else %}
-                                <span class="badge badge-pill badge-warning" style="font-size: 1rem;">مرد</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>جنسیت</th>
-                            <td>
-                                {% if student.is_active == False %}
-                                <span class="badge badge-pill badge-danger" style="font-size: 1rem;">غیر فعال</span>
-
-                                {% else %}
-                                <span class="badge badge-pill badge-success" style="font-size: 1rem;">فعال</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                      
-                      
-                    </tbody>
-                </table>
+                </div>
             </div>
 
-            <div class="text-end mt-4">
-                <a href="{% url 'students:students_registration' %}" class="btn btn-back">بازگشت</a>
-                {% if student.is_active == False %}
-                <a href="{% url 'students:student_activate_on' student.id %}" class="btn btn-activate">فعال</a>
-                {% else %}
-                <a href="{% url 'students:student_activate' student.id %}" class="btn btn-activate">غیر فعال</a>
-                {% endif %}
 
-                <a href="{% url 'students:edit_students' student.id %}" class="btn btn-edit">تغیرات</a>
-                <a href="{% url 'students:delete_students' student.id %}" class="btn btn-delete"
-                   onclick="return confirm('آیا مطمئن هستید که می‌خواهید این شاگرد را حذف کنید؟')">حذف</a>
-                <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-fees">
-                    <i class="fas fa-money-bill-wave"></i> فیس
-                </a>
-                {% if remain_amount.amount > 0 %}
-                <a href="{% url 'students:student_paid_Remain_money' student.id %}" class="btn btn-remain">
-                    <i class="fas fa-coins"></i> پول باقی مانده
-                </a>
-                {% endif %}
-                <a href="{% url 'students:buy_book' student.id %}" class="btn btn-book">خرید قرطاسیه & کتاب</a>
-                <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote">
-                    <span class="text">ارتقاع شاگرد</span>
-                    <span class="icon">⬆️</span>
-                </a>
+
+            <div class="text-center mt-4">
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'students:students_registration' %}" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right me-1"></i> بازگشت
+                    </a>
+
+                    {% if student.is_active == False %}
+                    <a href="{% url 'students:student_activate_on' student.id %}" class="btn btn-activate btn-gradient">
+                        <i class="fas fa-toggle-off me-1"></i> فعال
+                    </a>
+                    {% else %}
+                    <a href="{% url 'students:student_activate' student.id %}" class="btn btn-activate btn-gradient">
+                        <i class="fas fa-toggle-on me-1"></i> غیر فعال
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'students:edit_students' student.id %}" class="btn btn-edit btn-gradient">
+                        <i class="fas fa-edit me-1"></i> تغییرات
+                    </a>
+
+                    <button class="btn btn-delete btn-gradient" data-toggle="modal" data-target="#deleteStudentModal">
+                        <i class="fas fa-trash ml-2"></i> حذف شاگرد
+                    </button>
+
+                    <div class="modal fade" id="deleteStudentModal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title">تأیید حذف شاگرد</h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="بستن">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="text-center mb-4">
+                                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                                        <h5>آیا مطمئن هستید که می‌خواهید این شاگرد را حذف کنید؟</h5>
+                                    </div>
+                                    
+                                    <div class="alert alert-warning">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">توجه:</strong>
+                                                <ul class="mb-0 pl-3">
+                                                    <li>تمام اطلاعات شاگرد شامل پرداخت‌ها، ... و سایر دیتاها حذف خواهد شد</li>
+                                                    <li>این عملیات قابل بازگشت نیست</li>
+                                                    <li>توصیه می‌شود ابتدا شاگرد را غیرفعال کنید</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                        <i class="fas fa-times ml-2"></i>انصراف
+                                    </button>
+                                    <a href="{% url 'students:delete_students' student.id %}" class="btn btn-danger">
+                                        <i class="fas fa-trash ml-2"></i>حذف شاگرد
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-fees btn-gradient">
+                        <i class="fas fa-money-bill-wave me-1"></i> ثبت نام
+                    </a>
+
+                    {% if remain_amount.amount > 0 %}
+                    <a href="{% url 'students:student_paid_Remain_money' student.id %}"
+                        class="btn btn-remain btn-gradient">
+                        <i class="fas fa-coins me-1"></i> پرداخت باقیمانده
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'students:buy_book' student.id %}" class="btn btn-book btn-gradient">
+                        <i class="fas fa-shopping-cart me-1"></i> خرید کتاب
+                    </a>
+
+                    <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote btn-gradient">
+                        <i class="fas fa-level-up-alt me-1"></i> ارتقا شاگرد
+                    </a>
+
+                    <!-- Balance Button -->
+                    <a href="#" class="btn btn-balance btn-gradient" data-toggle="modal" data-target="#balanceModal">
+                        <i class="fas fa-chart-line ml-2"></i> آخرین بیلانس
+                    </a>
+
+                    <!-- Balance Modal -->
+                    <div class="modal fade" id="balanceModal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">آخرین بیلانس {{ student.first_name }}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="row g-3 needs-validation" novalidate method="post">
+                                        {% csrf_token %}
+                                        <div class="col-12">
+                                            <h6 class="text-primary mb-3">معلومات بیلانس</h6>
+                                        </div>
+
+                                        <!-- Total Paid -->
+                                        <div class="col-md-12 d-flex align-items-center mb-3">
+                                            <label class="col-sm-4 col-form-label">مجموع پرداخت شده</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control" name="paid_amount" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Remaining Balance -->
+                                        <div class="col-md-12 d-flex align-items-center mb-3">
+                                            <label class="col-sm-4 col-form-label">مقدار باقی‌مانده کورس بالای
+                                                شاگرد</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control" name="remain_amount" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit Buttons -->
+                                        <div class="col-12 d-flex justify-content-end mt-3">
+                                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                                                بستن
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-submit ml-2"></i>ارسال
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <style>
+                        .btn-balance {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            border: none;
+                            color: white;
+                            font-weight: 500;
+                            padding: 0.5rem 1.5rem;
+                        }
+
+                        .btn-balance:hover {
+                            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+                            color: white;
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                        }
+
+                        .modal-header {
+                            background-color: #4e73df;
+                            color: white;
+                            border-radius: 0.75rem 0.75rem 0 0;
+                        }
+
+                        .modal-content {
+                            border-radius: 0.75rem;
+                            border: none;
+                        }
+
+                        .form-control:read-only {
+                            background-color: #f8f9fc;
+                            border-color: #e3e6f0;
+                        }
+                    </style>
+
+                </div>
             </div>
-            
-            <!-- Style -->
             <style>
-                .text-end .btn {
+                /* Button styling with gradient hover effects */
+                .btn-gradient {
+                    position: relative;
+                    overflow: hidden;
+                    transition: all 0.3s ease;
                     border: none;
-                    border-radius: 8px;
-                    padding: 8px 16px;
-                    font-size: 0.95rem;
+                    color: white;
                     font-weight: 500;
-                    margin: 4px;
-                    transition: all 0.3s ease-in-out;
-                    color: #fff !important;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-                }
-            
-                /* Colors for each button */
-                .btn-back       { background: #6c757d; }   /* Gray */
-                .btn-activate   { background: #17a2b8; }   /* Teal/Info */
-                .btn-edit       { background: #ffc107; color:#000 !important;} /* Yellow */
-                .btn-delete     { background: #dc3545; }   /* Red */
-                .btn-fees       { background: #28a745; }   /* Green */
-                .btn-remain     { background: #343a40; }   /* Dark */
-                .btn-book       { background: #007bff; }   /* Blue */
-                .btn-promote    { background: #bc12f0; }   /* Purple */
-            
-                /* Hover effects */
-                .btn:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-                    opacity: 0.9;
-                    color: #000 !important;   /* text turns black */
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    min-width: 140px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 }
 
-                /* Special case for promote button */
-                .btn-promote:hover { 
-                    background: #218838; 
-                    color: #000 !important;   /* also black text */
+                .btn-gradient::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                    transition: left 0.5s ease;
                 }
 
+                .btn-gradient:hover::before {
+                    left: 100%;
+                }
+
+                .btn-gradient:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+                }
+
+                .btn-gradient:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                /* Specific button colors with gradients */
+                .btn-back {
+                    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+                }
+
+                .btn-back:hover {
+                    background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+                }
+
+                .btn-activate {
+                    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+                }
+
+                .btn-activate:hover {
+                    background: linear-gradient(135deg, #218838 0%, #155724 100%);
+                }
+
+                .btn-edit {
+                    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+                }
+
+                .btn-edit:hover {
+                    background: linear-gradient(135deg, #138496 0%, #0c525d 100%);
+                }
+
+                .btn-delete {
+                    background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+                }
+
+                .btn-delete:hover {
+                    background: linear-gradient(135deg, #c82333 0%, #9e1b23 100%);
+                }
+
+                .btn-fees {
+                    background: linear-gradient(135deg, #20c997 0%, #179b77 100%);
+                }
+
+                .btn-fees:hover {
+                    background: linear-gradient(135deg, #1ca87e 0%, #13795d 100%);
+                }
+
+                .btn-remain {
+                    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+                    color: #212529 !important;
+                }
+
+                .btn-remain:hover {
+                    background: linear-gradient(135deg, #e0a800 0%, #c69500 100%);
+                    color: #212529 !important;
+                }
+
+                .btn-book {
+                    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+                }
+
+                .btn-book:hover {
+                    background: linear-gradient(135deg, #5a32a3 0%, #4a2b89 100%);
+                }
+
+                .btn-promote {
+                    background: linear-gradient(135deg, #fd7e14 0%, #e96b00 100%);
+                }
+
+                .btn-promote:hover {
+                    background: linear-gradient(135deg, #e96b00 0%, #d45e00 100%);
+                }
+
+                /* New balance button color */
+                .btn-balance {
+                    background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+                }
+
+                .btn-balance:hover {
+                    background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%);
+                }
+
+                /* Responsive adjustments */
+                @media (max-width: 768px) {
+                    .btn-gradient {
+                        min-width: 120px;
+                        padding: 8px 16px;
+                        font-size: 0.9rem;
+                    }
+
+                    .d-flex.gap-3 {
+                        gap: 10px !important;
+                    }
+                }
+
+                /* Icon animation on hover */
+                .btn-gradient i {
+                    transition: transform 0.3s ease;
+                }
+
+                .btn-gradient:hover i {
+                    transform: scale(1.1);
+                }
             </style>
-            
+
         </div>
     </div>
 </div>

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .student-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #4e73df;
+        border-top: none;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+    
+    .payment-paid {
+        color: #1cc88a;
+        font-weight: bold;
+    }
+    
+    .payment-remain {
+        color: #e74a3b;
+        font-weight: bold;
+    }
+    
+    .payment-complete {
+        background-color: rgba(28, 200, 138, 0.1);
+    }
+    
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / </span> پرداخت‌های شاگرد
+    </h4>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- Payments Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">لیست پرداخت‌های فیس</h5>
+                <a href="{% url 'students:student_detail' student.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-right ml-2"></i>بازگشت به پروفایل
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" width="50">#</th>
+                            <th scope="col">صنف</th>
+                            <th scope="col">تاریخ پرداخت</th>
+                            <th scope="col">ماه</th>
+                            <th scope="col">فیس اصلی</th>
+                            <th scope="col">پرداخت شده</th>
+                            <th scope="col">باقی‌مانده</th>
+                            <th scope="col">وضعیت</th>
+                            <th scope="col">تاریخ ختم</th>
+                            <th scope="col">توضیحات</th>
+                            <th scope="col" width="100">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr class="{% if payment.not_remain %}payment-complete{% endif %}">
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>
+                                {% if payment.st_class %}
+                                <span class="badge badge-info">{{ payment.st_class.name }}</span>
+                                {% else %}
+                                <span class="badge badge-secondary">بدون صنف</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ payment.date }}</td>
+                            <td>{{ payment.month }}</td>
+                            <td class="font-weight-bold">{{ payment.orginal_fees }}</td>
+                            <td class="payment-paid">{{ payment.give_fees }}</td>
+                            <td class="payment-remain">{{ payment.remain_fees|default:0 }}</td>
+                            <td>
+                                {% if payment.not_remain %}
+                                <span class="badge badge-success">بخشیده شده</span>
+                                {% elif payment.remain_fees > 0 %}
+                                <span class="badge badge-warning">باقی مانده</span>
+                                {% else %}
+                                <span class="badge badge-secondary">مکمل پرداخت</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ payment.end_date|truncatechars:20|default:"-" }}</td>
+                            <td>{{ payment.description|truncatechars:20|default:"-" }}</td>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" 
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{% url 'students:edit_paid_fees' payment.id %}">
+                                            <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" data-toggle="modal"
+                                           data-target="#deletePaymentModal{{ payment.id }}">
+                                            <i class="fas fa-trash ml-2"></i>حذف
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Delete Payment Modal -->
+                        <div class="modal fade" id="deletePaymentModal{{ payment.id }}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">تأیید حذف پرداخت</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>آیا مطمئن هستید که می‌خواهید این پرداخت را حذف کنید؟</p>
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle ml-2"></i>
+                                            <strong>توجه:</strong> این عملیات قابل بازگشت نیست.
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+                                        <a href="{% url 'students:delete_paid_fess' payment.id %}" class="btn btn-danger">
+                                            حذف پرداخت
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-money-check-alt fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-muted">هیچ پرداختی یافت نشد</h6>
+                                    <p class="text-muted small">برای این شاگرد هنوز پرداختی ثبت نشده است</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Optional: Add search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // You can add search functionality here if needed
+    });
+</script>
+
+{% endblock %}

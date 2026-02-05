@@ -3,93 +3,108 @@
 {% load static %}
 
 
-<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
-    <div class="row">
-        <div class="col-md-12">
+<div class="main-content pt-4" style="font-family: 'Vazirmatn', sans-serif;">
+    <div class="row d-flex justify-content-center"> 
+        <div class="col-md-8">
             <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
             </ul>
             <div class="card">
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
-                        <!-- ====== Edit Station Form ====== -->
-                        <form method="POST" action="{% url 'classes:edit_sub_class' pk=instance.id %}">
+                 
+                        <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'classes:edit_sub_class' pk=instance.id %}">
                             {% csrf_token %}
-                            <div class="modal-dialog modal-lg">
-                              <div class="modal-content p-3">
-                                <div class="card-title h5 mb-3">ایدیت صنف "{{ instance.name }}"</div>
-                                <div>
-                                    <div class="row">
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="firstName1"> دوره<span style="color: red;">*</span></label>
-                                            {{ form.main_class }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="lastName1">نام صنف<span style="color: red;">*</span></label>
-                                            {{ form.name }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="email">تاریخ آغاز </label>
-                                            {{ form.start_date }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="email">تاریخ ختم </label>
-                                            {{ form.end_date }}
-                                        </div>
-                                        <div class="col-md-6 form-group mb-3">
-                                            <label for="orginal_fees">اساتید<span style="color: red;">*</span></label>
-                                            {{ form.teacher }}
-                                        </div>
-                                        <div class="col-md-6 form-group mb-3">
-                                            <label for="orginal_fees">کتابها<span style="color: red;">*</span></label>
-                                            {{ form.books }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="email">تایم </label>
-                                            {{ form.time }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="orginal_fees">ضرفیت صنف<span style="color: red;">*</span></label>
-                                            {{ form.capacity }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="orginal_fees">مقدار فیس<span style="color: red;">*</span></label>
-                                            {{ form.fees }}
-                                        </div>
-                                        <div class="col-md-3 form-group mb-3">
-                                            <label for="orginal_fees">صنف<span style="color: red;">*</span></label>
-                                            {{ form.room }}
-                                        </div>
-                                        <div class="col-md-12 form-group mb-3">
-                                            <label for="orginal_fees">تقسیم اوقات<span style="color: red;">*</span></label>
-                                            {{ form.schedule }}
-                                        </div>
-                                      </div>
-                        
-                                  <div class="text-end">
-                                    
-                                    <!-- Dismiss button -->
-                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
-                                      بستن
-                                    </button>
-                                  
-                                    <!-- Submit button -->
-                                    <button class="btn btn-primary mt-2" type="submit">
-                                      ذخیره کردن
-                                    </button>
-                                  </div>
-                                  
-                                </div>
-                              </div>
+                            <div class="col-12">
+                                <h5>معلومات صنف جدید</h5>
                             </div>
-                          </form>
+                            
+                            <!-- نام صنف -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">نام صنف<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.name }}
+                                </div>
+                            </div>
+                            
+                            <!-- تاریخ آغاز -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">تاریخ آغاز</label>
+                                <div class="col-sm-8">
+                                    {{ form.start_date }}
+                                </div>
+                            </div>
+                            
+                            <!-- اساتید -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">اساتید<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.teacher }}
+                                </div>
+                            </div>
+                            
+                            <!-- کتابها -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">کتابها<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.books }}
+                                </div>
+                            </div>
+                            
+                            <!-- تایم -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">تایم</label>
+                                <div class="col-sm-8">
+                                    {{ form.time }}
+                                </div>
+                            </div>
+                            
+                            <!-- ضرفیت صنف -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">ضرفیت صنف<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.capacity }}
+                                </div>
+                            </div>
+                            
+                            <!-- مقدار فیس -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">مقدار فیس<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.fees }}
+                                </div>
+                            </div>
+                            
+                            <!-- صنف -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">صنف<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.room }}
+                                </div>
+                            </div>
+                            
+                            <!-- تقسیم اوقات -->
+                            <div class="col-md-12 d-flex align-items-center mb-3">
+                                <label class="col-sm-4 col-form-label">تقسیم اوقات<span class="text-danger">*</span></label>
+                                <div class="col-sm-8">
+                                    {{ form.schedule }}
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Buttons -->
+                            <div class="col-12 d-flex justify-content-end mt-3">
+                                <input type="hidden" name="form_type" value="class">
+                                <button type="button" class="btn btn-secondary ml-2" onclick="window.history.back()">برگشت</button>
+                                <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                            </div>
+                        </form>
                                
     
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          $('#datepicker3').datepicker({});
-        });
-        </script>
-        
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                        $('#datepicker3').datepicker({});
+                        });
+                        </script>
+                        
                         <!-- ====== / Edit Station Form ====== -->
                       </div>
                       

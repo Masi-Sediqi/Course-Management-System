@@ -11,17 +11,16 @@ class Teacher(models.Model):
         ('F', 'زن'),
     ]
     name = models.CharField(max_length=100, blank=False)
-    last_name = models.CharField(max_length=100, blank=True)
-    date = models.CharField(max_length=12, blank=False)
     phone = models.CharField(max_length=10, blank=True)
     gender = models.CharField(max_length=120, choices=GENDER_CHOICES)
     percentage = models.FloatField(blank=False)
-    file = models.FileField(upload_to="teacher/", blank=True)
+    image = models.ImageField(upload_to="teacher/", blank=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     def __str__(self):
-        return f'{self.name} {self.last_name}'
+        return f'{self.name}'
 
 @receiver(post_save, sender=Teacher)
 def create_req_approve(sender, instance, created, **kwargs):

@@ -5,7 +5,7 @@ import jdatetime
 class suppliers(models.Model):
     date = models.CharField(max_length=15)
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
         if not self.date:

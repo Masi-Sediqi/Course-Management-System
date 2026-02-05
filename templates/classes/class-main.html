@@ -2,7 +2,7 @@
 {% block content %}
 {% load static %}
 
-<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+<div class="main-content pt-4" style="font-family: 'Vazirmatn', sans-serif;">
     <div class="breadcrumb">
         <h1>دوره صنوف جدید</h1>
         <ul>
@@ -13,352 +13,551 @@
     <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
     <script src="{% static 'js/sweet.js' %}"></script>
 
-        <script>
-            {% if messages %}
-                {% for message in messages %}
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                        title: "{{ message|escapejs }}",
-                        showConfirmButton: false,
-                        timer: 4000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
-                    });
-                {% endfor %}
-            {% endif %}
-        </script>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+    
     <div class="separator-breadcrumb border-top"></div>
-    <!-- content goes here-->
-    <section class="ul-todo-list-content">
-        <div class="ul-todo-sidebar">
+    
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="pr-3 pb-3">
-                        <i class="todo-sidebar-close i-Close pb-3 text-right" data-sidebar-toggle="main"></i>
-
-                        <!-- Buttons side by side -->
-                        <div class="d-flex mb-4">
-                            <button class="btn btn-primary btn-sm mr-2" type="button" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
-                                صنف جدید
-                            </button>
-                            <button class="btn btn-secondary btn-sm" type="button" data-toggle="modal"
-                                data-target="#exampleModalgood">
-                                دوره جدید
-                            </button>
-                        </div>
-
+                    <!-- Header with Buttons -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">لیست صنوف</h5>
                         <div>
-                            <p class="text-muted mb-2">فیلتر</p>
-                            <ul class="list-group">
-                                {% for i in main_records %}
-                                <li class="list-group-item border-0">
-                                    <a href=""><i class="icon-regular i-Find-User mr-2"></i> {{i.name}}</a>
-                                </li>
-                                {% endfor %}
-                            </ul>
+                            <button class="btn btn-info" type="button" data-toggle="modal" data-target="#exampleModal">
+                                <i class="fas fa-plus ml-2"></i>صنف جدید
+                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-            aria-hidden="true">
-            <form class="needs-validation" novalidate="novalidate" action="{% url 'classes:main_classes' %}" method="post">
-                {% csrf_token %}
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content p-3">                       
-                            <div class="row">
-                                <div class="col-12">
-                                   
-                                    <h5>معلومات صنف جدید</h5>
-                                </div>
-                                <!-- Personal Info -->
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="firstName1"> دوره<span style="color: red;">*</span></label>
-                                    {{ sub_form.main_class }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="lastName1">نام صنف<span style="color: red;">*</span></label>
-                                    {{ sub_form.name }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="email">تاریخ آغاز </label>
-                                    {{ sub_form.start_date }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="email">تاریخ ختم </label>
-                                    {{ sub_form.end_date }}
-                                </div>
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="orginal_fees">اساتید<span style="color: red;">*</span></label>
-                                    {{ sub_form.teacher }}
-                                </div>
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="orginal_fees">کتابها<span style="color: red;">*</span></label>
-                                    {{ sub_form.books }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="email">تایم </label>
-                                    {{ sub_form.time }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="orginal_fees">ضرفیت صنف<span style="color: red;">*</span></label>
-                                    {{ sub_form.capacity }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="orginal_fees">مقدار فیس<span style="color: red;">*</span></label>
-                                    {{ sub_form.fees }}
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label for="orginal_fees">صنف<span style="color: red;">*</span></label>
-                                    {{ sub_form.room }}
-                                </div>
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="orginal_fees">تقسیم اوقات<span style="color: red;">*</span></label>
-                                    {{ sub_form.schedule }}
-                                </div>
-                             
-                        
-                                <!-- Submit Buttons -->
-                                <div class="col-12 modal-footer">
-                                    <input type="hidden" name="form_type" value="class">
-                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
-                                    <button class="btn btn-primary " type="submit">ذخیره کردن</button>
-                                </div>
-                            </div>
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    $('#datepicker3').datepicker({
-                                
-                                    });
-                                });
-                            </script>
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    $('#datepicker4').datepicker({
-                                
-                                    });
-                                });
-                            </script>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal fade bd-example-modal-lg" id="exampleModalgood" tabindex="-1" role="dialog"
-            aria-labelledby="myLargeModalLabel" aria-hidden="true">
-            <form class="needs-validation" novalidate="novalidate" action="{% url 'classes:main_classes' %}" method="post">
-                {% csrf_token %}
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content p-3">                       
-                            <div class="row">
-                                <div class="col-12">
-                                   
-                                    <h5>معلومات دوره جدید</h5>
-                                </div>
-                                <!-- Personal Info -->
-                                <div class="col-md-4 form-group mb-3">
-                                    <label for="firstName1">نام دوره<span style="color: red;">*</span></label>
-                                    {{ main_form.name }}
-                                </div>
-                        
-                                <!-- Fee Fields -->
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="orginal_fees">توضیحات<span style="color: red;">*</span></label>
-                                    {{ main_form.description }}
-                                </div>
-                             
-                        
-                                <!-- Submit Buttons -->
-                                <div class="col-12 modal-footer">
-                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
-                                    <button class="btn btn-primary " type="submit">ذخیره کردن</button>
-                                </div>
-                            </div>
-                   
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="ul-todo-content-right">
-            <div class="row">
-                <div class="col-md-12">
-
-
-                    <div class="card mt-2 mb-4">
-                        <div class="card-body">
-                            <nav>
-                                <div class="nav nav-tabs" id="nav-tab" role="tablist"><a class="nav-item nav-link active show"
-                                        id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
-                                        aria-controls="nav-home" aria-selected="true">صنوف</a>
-                                        <a
-                                        class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab"
-                                        href="#nav-profile" role="tab" aria-controls="nav-profile"
-                                        aria-selected="false">دوره ها</a></div>
-                            </nav>
-                            <div class="tab-content ul-tab__content" id="nav-tabContent">
-                                <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-                                    <div class="col-md-12 mb-3">
-                                       
-                                            <div class="card-body">
-                                                <h4 class="card-title mb-3"> بخش صنوف</h4>
-                                                <!-- <p>Similar to tables and dark tables, use the modifier classes <code>.thead-dark</code> to make <code>thead</code> appear Dark</p> -->
-                                                <div class="table-responsive">
-                                                    <table class="table">
-                                                        <thead class="thead-dark">
-                                                            <tr>
-                                                                <th scope="col">#</th>
-                                                                <th scope="col">نام صنف</th>
-                                                                <th scope="col">تاریخ آغاز</th>
-                                                                <th scope="col">اساتید</th>
-                                                                <th scope="col">مضامین</th>
-                                                                <th scope="col">ضرفیت صنف</th>
-                                                                <th scope="col">صنف</th>
-                                                                <th scope="col">وضعیت</th>
-                                                                <th scope="col">عملیات</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {% for i in sub_records %}
-                                                            <tr>
-                                                                <th scope="row">{{ forloop.counter }}</th>
-                                                                <td>{{i.name}}</td>
-                                                                <td>{{i.start_date}}</td>
-                                                                <td>
-                                                                    {% for t in i.teacher.all %}
-                                                                    <span class="badge bg-primary">{{ t.name }}</span>{% if not forloop.last %} + {% endif %}
-                                                                    {% empty %}
-                                                                      -
-                                                                    {% endfor %}
-                                                                  </td> 
-                                                                  <td>
-                                                                    {% for t in i.books.all %}
-                                                                    <span class="badge bg-primary">{{ t.name }}</span>{% if not forloop.last %} + {% endif %}
-                                                                    {% empty %}
-                                                                      -
-                                                                    {% endfor %}
-                                                                  </td>                                                                  
-                                                                <td> {{i.capacity}} </td>
-                                                                <td> {{i.room}} </td>
-                                                                <td><span class="badge badge-success">
-                                                                    {% if i.active == True %}فعال
-                                                                {% else %}غیر فعال
-                                                                {% endif %}
-                                                                </span></td>    
-                                                                <td>
-                                                                <div class="dropdown">
-                                                                    <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-                                                                    aria-haspopup="true" aria-expanded="false">
-                                                                    <i class="fas fa-ellipsis-v"></i>
-                                                                    </button>
-                                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
-                                                                    <a class="dropdown-item text-info" href="{% url 'classes:edit_sub_class' i.pk %}">تغیرات</a>
-                                                                    {% if i.active == False %}
-                                                                    <a class="dropdown-item text-info" href="{% url 'classes:active_sub_class' i.pk %}"> فعال</a>
-                                                                    {% else %}
-                                                                    <a class="dropdown-item text-info" href="{% url 'classes:deactive_sub_class' i.pk %}">غیر فعال</a>
-                                                                    {% endif %}
-                                                                    <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                                                        حذف
-                                                                        </a>                                      
-                                                                </div>
-                                                                </div>
-                                                                </td>
-                                                                </tr>
-                                                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                                                    <div class="modal-dialog modal-lg" role="document">
-                                                                      <div class="modal-content text-center">
-                                                                        <div class="modal-header">
-                                                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                          </button>
-                                                                        </div>
-                                                                        <div class="modal-body">
-                                                                          <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                                                          <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                                                          <div class="d-flex justify-content-center gap-2">
-                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                                                            <a href="{% url 'classes:delete_sub_class' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                                                          </div>
-                                                                        </div>
-                                                                      </div>
-                                                                    </div>
-                                                                  </div>
-                                                            {% endfor %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                    
+                    <!-- Table -->
+                    <div class="row" id="classesGrid">
+                        {% for i in sub_records %}
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                            <div class="card class-card border-hover h-100">
+                                <div class="card-body position-relative p-3">
+                                    <!-- Actions Dropdown - Moved to left -->
+                                    <div class="position-absolute top-0 start-0 mt-2 ms-2">
+                                        <div class="dropdown">
+                                            <button class="btn btn-xs btn-light btn-icon rounded-circle p-0" type="button" 
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v fa-sm"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-start">
+                                                <a class="dropdown-item" href="{% url 'classes:edit_sub_class' i.pk %}">
+                                                    <i class="fas fa-edit ml-2 text-warning fa-xs"></i>ویرایش
+                                                </a>
+                                                {% if i.active == False %}
+                                                <a class="dropdown-item" href="{% url 'classes:active_sub_class' i.pk %}">
+                                                    <i class="fas fa-check ml-2 text-success fa-xs"></i>فعال سازی
+                                                </a>
+                                                {% else %}
+                                                <a class="dropdown-item" href="{% url 'classes:deactive_sub_class' i.pk %}">
+                                                    <i class="fas fa-ban ml-2 text-danger fa-xs"></i>غیر فعال
+                                                </a>
+                                                {% endif %}
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item text-danger" data-toggle="modal" 
+                                                data-target="#deleteConfirmModal{{ i.id }}">
+                                                    <i class="fas fa-trash ml-2 fa-xs"></i>حذف
+                                                </a>
                                             </div>
-
+                                        </div>
                                     </div>
-
-                                </div>
-                                <div class="tab-pane fade" id="nav-profile" role="tabpanel"
-                                    aria-labelledby="nav-profile-tab">
-                                    <div class="col-md-12 mb-3">
-                                      
-                                            <div class="card-body">
-                                                <h4 class="card-title mb-3"> یخش دوره ها</h4>
-                                                <!-- <p>invert the colors—with light text on dark backgrounds—with <code>.table-dark</code>.</p> -->
-                                                <div class="table-responsive">
-                                                    <table class="table table-dark">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">#</th>
-                                                                <th scope="col">نام دوره</th>
-                                                                <th scope="col">وضعیت</th>
-                                                                <th scope="col">توضیحات</th>
-                                                                <th scope="col">عملیات</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {% for i in main_records %}
-                                                            <tr>
-                                                                <th scope="row">{{forloop.counter}}</th>
-                                                                <td>{{i.name}}</td>
-                                                               
-                                                               
-                                                                <td><span class="badge badge-success">
-                                                                    {% if i.active == True %}فعال
-                                                                {% else %}غیر فعال
-                                                                {% endif %}
-                                                                </span></td>
-                                                                <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
-                                                                <td>
-                                                                    <a href="{% url 'classes:edit_main_class' i.id %}" class="btn btn-success">
-                                                                        <i class="nav-icon i-Pen-2"></i>
-                                                                    </a>
-                                                                    <a href="{% url 'classes:delete_main_class' i.id %}"
-                                                                        class="btn btn-danger"
-                                                                        onclick="return confirm('آیا مطمئن هستید که می‌خواهید این دوره را حذف کنید؟');">
-                                                                        <i class="nav-icon i-Close-Window"></i>
-                                                                    </a>
-                                                                </td>
-                                                            </tr>
-                                                            {% endfor %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                    
+                                    
+                                    <!-- Class Name - Compact -->
+                                    <div class="mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="class-icon bg-primary bg-opacity-10 text-primary rounded-circle p-1 me-2">
+                                                <i class="fas fa-chalkboard-teacher fa-sm"></i>
                                             </div>
+                                            <div class="flex-grow-1" style="min-width: 0;">
+                                                <h6 class="card-title mb-0 text-truncate">{{ i.name }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Class Details - Compact -->
+                                    <div class="class-details">
+                                        <!-- Start Date -->
+                                        <div class="d-flex align-items-center mb-1">
+                                            <div class="detail-icon bg-info bg-opacity-10 text-info rounded-circle p-1 me-1">
+                                                <i class="fas fa-calendar-alt fa-xs"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <small class="text-muted d-block">تاریخ آغاز</small>
+                                                <span class="small font-weight-medium text-truncate d-block">{{ i.start_date|default:"-" }}</span>
+                                            </div>
+                                        </div>
                                         
+                                        <!-- Teachers - Compact -->
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block mb-1">اساتید</small>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for t in i.teacher.all %}
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-1">
+                                                        <small>{{ t.name|truncatechars:8 }}</small>
+                                                    </span>
+                                                {% empty %}
+                                                    <span class="text-muted small">تعیین نشده</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Books - Compact -->
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block mb-1">کتابها</small>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for t in i.books.all %}
+                                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 p-1">
+                                                        <small>{{ t.name|truncatechars:8 }}</small>
+                                                    </span>
+                                                {% empty %}
+                                                    <span class="text-muted small">تعیین نشده</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Capacity & Room - Compact -->
+                                        <div class="row mt-2 g-1">
+                                            <div class="col-6">
+                                                <div class="text-center p-1 bg-light rounded">
+                                                    <small class="text-muted d-block">ظرفیت</small>
+                                                    <span class="font-weight-bold text-primary d-block">{{ i.capacity }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center p-1 bg-light rounded">
+                                                    <small class="text-muted d-block">صنف</small>
+                                                    <span class="font-weight-bold text-success d-block">{{ i.room|default:"-" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                               
+                                
+                                <!-- Footer - Compact -->
+                                <div class="card-footer bg-transparent border-top py-2 px-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                          {% if i.active == True %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 p-1">
+                                                <i class="fas fa-circle fa-xs ml-1"></i> فعال
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 p-1">
+                                                <i class="fas fa-circle fa-xs ml-1"></i> غیرفعال
+                                            </span>
+                                        {% endif %}
+                                        <a href="{% url 'classes:edit_sub_class' i.pk %}" class="btn btn-xs btn-outline-primary py-1 px-2">
+                                            <i class="fas fa-eye fa-xs ml-1"></i> جزئیات
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-light py-2">
+                                        <h6 class="modal-title mb-0">
+                                            <i class="fas fa-exclamation-triangle text-danger ml-1 fa-sm"></i>
+                                            تأیید حذف
+                                        </h6>
+                                        <button type="button" class="close py-1 px-2" data-dismiss="modal" aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center p-3">
+                                        <div class="mb-2">
+                                            <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-2" 
+                                                style="width: 40px; height: 40px;">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                            </div>
+                                            <p class="small mb-1"><strong>"{{ i.name|truncatechars:20 }}"</strong></p>
+                                            <p class="text-muted small mb-2">دوره: {{ i.main_class.name|default:"بدون دوره"|truncatechars:15 }}</p>
+                                        </div>
+                                        <div class="alert alert-warning alert-dismissible fade show py-1 px-2 mb-0" role="alert">
+                                            <i class="fas fa-exclamation-circle ml-1 fa-xs"></i>
+                                            <small>این عملیات قابل بازگشت نیست.</small>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer py-2">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
+                                            <i class="fas fa-times ml-1 fa-xs"></i> انصراف
+                                        </button>
+                                        <a href="{% url 'classes:delete_sub_class' i.id %}" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash ml-1 fa-xs"></i> حذف
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="card border-0">
+                                <div class="card-body text-center py-5">
+                                    <div class="empty-state">
+                                        <div class="icon-circle bg-light text-muted mx-auto mb-3" 
+                                            style="width: 60px; height: 60px;">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                        </div>
+                                        <h6 class="text-muted mb-2">هیچ صنفی یافت نشد</h6>
+                                        <p class="text-muted small mb-0">برای افزودن صنف جدید روی دکمه "صنف جدید" کلیک کنید</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
 
+                    <style>
+                        /* Class Card Styling - Compact */
+                        .class-card {
+                            transition: all 0.2s ease;
+                            border: 1px solid #e9ecef;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            font-size: 0.85rem;
+                        }
+                        
+                        .class-card:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+                            border-color: #4dabf7;
+                        }
+                        
+                        /* Icon Styling */
+                        .class-icon {
+                            width: 30px;
+                            height: 30px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 0.9rem;
+                        }
+                        
+                        .detail-icon {
+                            width: 28px;
+                            height: 28px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                            font-size: 0.8rem;
+                        }
+                        
+                        /* Badge Styling */
+                        .class-card .badge {
+                            font-weight: 500;
+                            font-size: 0.7rem;
+                        }
+                        
+                        /* Button Styling */
+                        .btn-icon {
+                            width: 24px;
+                            height: 24px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 0.8rem;
+                        }
+                        
+                        /* Card Title */
+                        .class-card .card-title {
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            color: #2c3e50;
+                            margin-bottom: 0.1rem;
+                        }
+                        
+                        /* Dropdown Styling */
+                        .dropdown-menu {
+                            font-size: 0.85rem;
+                            min-width: 120px;
+                        }
+                        
+                        .dropdown-item {
+                            padding: 0.3rem 0.8rem;
+                        }
+                        
+                        .dropdown-item i {
+                            font-size: 0.8rem;
+                        }
+                        
+                        /* Text Truncation */
+                        .text-truncate {
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+                        
+                        /* Gap utility for flexbox */
+                        .gap-1 {
+                            gap: 0.25rem;
+                        }
+                        
+                        /* Empty State */
+                        .empty-state {
+                            opacity: 0.7;
+                            transition: opacity 0.3s ease;
+                        }
+                        
+                        .empty-state:hover {
+                            opacity: 1;
+                        }
+                        
+                        .icon-circle {
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        
+                        /* Responsive Grid */
+                        @media (max-width: 1200px) {
+                            .col-xl-3 {
+                                padding: 0 6px;
+                            }
+                        }
+                        
+                        @media (max-width: 992px) {
+                            .col-lg-4 {
+                                padding: 0 6px;
+                            }
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .col-md-6 {
+                                padding: 0 6px;
+                            }
+                            
+                            .class-card .card-body {
+                                padding: 0.75rem;
+                            }
+                        }
+                        
+                        @media (max-width: 576px) {
+                            .col-md-6 {
+                                max-width: 100%;
+                                flex: 0 0 100%;
+                            }
+                        }
+                    </style>
+
+                    <script>
+                        // Add hover effect to cards
+                        $(document).ready(function() {
+                            $('.class-card').hover(
+                                function() {
+                                    $(this).addClass('shadow-sm');
+                                },
+                                function() {
+                                    $(this).removeClass('shadow-sm');
+                                }
+                            );
+                        });
+                    </script>
                 </div>
             </div>
         </div>
-    </section><!-- end of main-content -->
+    </div>
+    <!-- Add Class Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ثبت صنف جدید</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'classes:main_classes' %}">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <h5>معلومات صنف جدید</h5>
+                        </div>
+                        
+                        <!-- نام صنف -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">نام صنف<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.name }}
+                            </div>
+                        </div>
+                        
+                        <!-- تاریخ آغاز -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تاریخ آغاز</label>
+                            <div class="col-sm-8">
+                                {{ sub_form.start_date }}
+                            </div>
+                        </div>
+                        
+                        <!-- اساتید -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">اساتید<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.teacher }}
+                            </div>
+                        </div>
+                        
+                        <!-- کتابها -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">کتابها<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.books }}
+                            </div>
+                        </div>
+                        
+                        <!-- تایم -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تایم</label>
+                            <div class="col-sm-8">
+                                {{ sub_form.time }}
+                            </div>
+                        </div>
+                        
+                        <!-- ضرفیت صنف -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">ضرفیت صنف<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.capacity }}
+                            </div>
+                        </div>
+                        
+                        <!-- مقدار فیس -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">مقدار فیس<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.fees }}
+                            </div>
+                        </div>
+                        
+                        <!-- صنف -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">صنف<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.room }}
+                            </div>
+                        </div>
+                        
+                        <!-- تقسیم اوقات -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تقسیم اوقات<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.schedule }}
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <input type="hidden" name="form_type" value="class">
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">انصراف</button>
+                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+
+
+<style>
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .dropdown-menu {
+        min-width: 150px;
+        border-radius: 8px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .dropdown-item i {
+        width: 20px;
+    }
+    
+    .empty-state {
+        padding: 3rem 1rem;
+    }
+    
+    .table th {
+        font-weight: 600;
+        border-top: none;
+        color: #4e73df;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
+    
+    .badge-primary {
+        background-color: #4e73df;
+    }
+    
+    .badge-info {
+        background-color: #36b9cc;
+    }
+    
+    .badge-success {
+        background-color: #1cc88a;
+    }
+    
+    .badge-danger {
+        background-color: #e74a3b;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 0.35rem;
+        border: 1px solid #d1d3e2;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+     
+        // Date pickers
+        $('#datepicker3').datepicker({});
+        $('#datepicker4').datepicker({});
+    });
+</script>
 
 {% endblock %}

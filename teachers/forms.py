@@ -5,31 +5,25 @@ from jalali_date.widgets import AdminJalaliDateWidget
 
 
 class TeacherForm(forms.ModelForm):
-    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
 
     class Meta:
         model = Teacher
-        fields = ["name","last_name","phone","file","description","percentage","gender","date"]
+        fields = ["name","phone","image","description","percentage","gender"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
-        self.fields["last_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-
         self.fields["phone"].widget.attrs.update(
         {"class": "form-control", "placeholder": "در صورت نداشتن فیلد حالی گذاشته شود"}
         )
-        self.fields["file"].widget.attrs.update(
+        self.fields["image"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
-
         self.fields["percentage"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )

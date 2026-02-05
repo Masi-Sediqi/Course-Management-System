@@ -3,351 +3,421 @@
 
 {% block content %}
 
-<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-<script src="{% static 'js/sweet.js' %}"></script>
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-card {
+        transition: transform 0.2s;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #4e73df;
+        border-bottom: 3px solid #4e73df;
+        background-color: transparent;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #4e73df;
+        border-top: none;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .form-control {
+        border-radius: 0.35rem;
+        border: 1px solid #d1d3e2;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .modal-header {
+        background-color: #4e73df;
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .modal-content {
+        border-radius: 0.75rem;
+        border: none;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+        text-align: center;
+    }
+
+    .dropdown-menu {
+        min-width: 150px;
+        border-radius: 8px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .dropdown-item i {
+        width: 20px;
+    }
+
+    .income-bg {
+        background-color: #1cc88a !important;
+        color: white;
+    }
+
+    .expense-bg {
+        background-color: #e74a3b !important;
+        color: white;
+    }
+
+    .loan-bg {
+        background-color: #f6c23e !important;
+        color: white;
+    }
+
+    .other-bg {
+        background-color: #36b9cc !important;
+        color: white;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد /</span> مدیریت عواید و مصارف
+    </h4>
+
+    <!-- SweetAlert2 -->
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <script src="{% static 'js/sweet.js' %}"></script>
 
     <script>
         {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{{ message|escapejs }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            {% endfor %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
         {% endif %}
     </script>
 
-<div class="container-xxl flex-grow-1 container-p-y" style="font-family: XW_Zar_Bd_0;">
-    <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش عواید 
-    </h4>
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <!-- Income Summary -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-success font-weight-bold text-uppercase mb-1">کل عواید</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_income|default:"0" }}</div>
+                        </div>
+                        <div class="income-bg rounded-circle p-3">
+                            <i class="fas fa-arrow-up fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Expense Summary -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-danger h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-danger font-weight-bold text-uppercase mb-1">کل مصارف</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_expenses|default:"0" }}</div>
+                        </div>
+                        <div class="expense-bg rounded-circle p-3">
+                            <i class="fas fa-arrow-down fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="row">
-        <!-- ICON BG-->
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Add-User"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">عواید</p>
-                        {% if perms.management.view_totalIncome %}
-                        <p class="lead text-success text-24 mb-2">{{get_total_income.total_amount}}</p>
-                        {% endif %}
+        <!-- Loan Summary -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-warning font-weight-bold text-uppercase mb-1">کل قرض</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_receivable|default:"0" }}</div>
+                        </div>
+                        <div class="loan-bg rounded-circle p-3">
+                            <i class="fas fa-hand-holding-usd fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Financial"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">مصارف</p>
-                         {% if perms.management.view_totalexpenses %}
-                        <p class="lead text-danger text-24 mb-2">{{get_total_expenses.total_amount}}</p>
-                         {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">قرض</p>
-                        <p class="lead text-primary text-24 mb-2">{{get_total_stationery.total_amount}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Money-2"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">Expense</p>
-                        <p class="lead text-primary text-24 mb-2">120</p>
+
+        <!-- Balance Summary -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-info font-weight-bold text-uppercase mb-1">مانده</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_payable|default:"0" }}</div>
+                        </div>
+                        <div class="other-bg rounded-circle p-3">
+                            <i class="fas fa-balance-scale fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-
+    <!-- Main Content Card -->
     <div class="card">
         <div class="card-body">
-            <div class="col-lg-12 text-right">
-                        
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal">
-                    عاید جدید
-                </button>
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal1">
-                    مصرف جدید
-                </button>
-        
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">رکوردهای مالی</h5>
+                <div>
+                    <button class="btn btn-finance ml-2" type="button" data-toggle="modal" data-target="#financeModal">
+                        <i class="fas fa-plus ml-2"></i>
+                        عواید و مصارف
+                    </button>
+                    <style>
+                        .btn-finance {
+                            background: linear-gradient(135deg, #198754, #dc3545);
+                            color: #fff;
+                            border: none;
+                            border-radius: 14px;
+                            padding: 12px 26px;
+                            font-weight: 600;
+                            letter-spacing: 0.3px;
+                            transition: all 0.4s ease;
+                            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        /* nice shine effect */
+                        .btn-finance::before {
+                            content: "";
+                            position: absolute;
+                            top: 0;
+                            left: -100%;
+                            width: 100%;
+                            height: 100%;
+                            background: linear-gradient(120deg,
+                                    transparent,
+                                    rgba(255, 255, 255, 0.4),
+                                    transparent);
+                            transition: all 0.6s ease;
+                        }
+
+                        .btn-finance:hover::before {
+                            left: 100%;
+                        }
+
+                        .btn-finance:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+                        }
+
+                        .btn-finance:active {
+                            transform: scale(0.96);
+                        }
+                    </style>
+                </div>
             </div>
-            <!-- Tabs Header -->
-            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">عواید</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">مصارف</a>
-                </li>
-               
-            </ul>
-    
-            <!-- Tabs Content -->
-            <div class="tab-content mt-4" id="incomeTabsContent">
-                <!-- Tab 1: Income Table -->
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="financialTabsContent">
                 <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
-                    {% if perms.management.view_otherincome %}
                     <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
+                        <table class="table table-hover">
+                            <thead class="thead-light">
                                 <tr>
-                                    <th>#</th>
-                                    <th>تاریخ</th>
-                                    <th>مقدار</th>
-                                    <th>توضیحات</th>
-                                    <th>عملیات</th>
+                                    <th scope="col" width="50">#</th>
+                                    <th scope="col">تاریخ</th>
+                                    <th scope="col">مقدار</th>
+                                    <th scope="col">حالت</th>
+                                    <th scope="col">توضیحات</th>
+                                    <th scope="col" width="100">عملیات</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-body">
-                                {% for i in get_total_otherinceom %}
+                            <tbody>
+                                {% for item in incomes_and_expenses %}
                                 <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>{{ i.date }}</td>
-                                    <td>{{ i.amount }}</td>
-                                    <td>{{ i.description }}</td>
-                                    <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="{% url 'management:edit_income' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
-                                        <a class="btn btn-sm btn-danger" data-toggle="modal"
-                                        data-target="#deleteConfirmModal{{ i.id }}">حذف</a>
-                                    </td>
-                                </tr>
-                                   <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog"
-                                    aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content text-center">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ item.date }}</td>
+                                    <td class="text-success font-weight-bold">{{ item.amount }}</td>
+                                    <td class="text-dark font-weight-bold">{{ item.get_type_display }}</td>
+                                    <td>{{ item.description|truncatechars:30|default:"-" }}</td>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
                                             </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                            <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                            <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                            <a href="{% url 'management:delete_income' i.id %}" class="btn btn-danger">بلی، حذف
-                                                کن</a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item"
+                                                    href="{% url 'management:edit_record' item.id %}">
+                                                    <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
+                                                </a>
+                                                <a class="dropdown-item text-danger" data-toggle="modal"
+                                                    data-target="#deleteConfirmModal{{ item.id }}">
+                                                    <i class="fas fa-trash ml-2"></i>حذف
+                                                </a>
                                             </div>
                                         </div>
-                                        </div>
-                                    </div>
-                                    </div>
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
-                    </div>
-                    {% endif %}
-                </div>
-    
-                <!-- Tab 2: Extra Content -->
-                <div class="tab-pane fade" id="extra" role="tabpanel">
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی مصارف قابل مشاهده است.</p>
-    
-                    <!-- your full code... -->
-                    {% if perms.management.view_expenses %}
-                    <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>تاریخ</th>
-                                    <th>مقدار</th>
-                                    <th>توضیحات</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                {% for i in get_total_expens %}
-                                <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>{{ i.date }}</td>
-                                    <td>{{ i.amount }}</td>
-                                    <td>{{ i.description }}</td>
-                                    <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="{% url 'management:edit_expense' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
-                                         <a class="btn btn-sm btn-danger" data-toggle="modal"
-                                        data-target="#deleteeConfirmModal{{ i.id }}">حذف</a>
                                     </td>
                                 </tr>
-                                   <div class="modal fade" id="deleteeConfirmModal{{ i.id }}" tabindex="-1" role="dialog"
-                                    aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content text-center">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                            <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                            <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                            <a href="{% url 'management:delete_expense' i.id %}" class="btn btn-danger">بلی، حذف
-                                                کن</a>
+
+                                <!-- Delete Income Modal -->
+                                <div class="modal fade" id="deleteConfirmModal{{ item.id }}" tabindex="-1"
+                                    role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">تأیید حذف</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="بستن">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>آیا مطمئن هستید که می‌خواهید این عاید را حذف کنید؟</p>
+                                                <p class="text-muted small">این عملیات قابل بازگشت نیست.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">انصراف</button>
+                                                <a href="{% url 'management:delete_record' item.id %}"
+                                                    class="btn btn-danger">
+                                                    حذف
+                                                </a>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                            <h6 class="text-muted">هیچ عاید یا مصرف یافت نشد</h6>
                                         </div>
-                                    </div>
-                                    </div>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
-                            
                         </table>
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    
- 
-    
-</div>
+    <!-- Income Modal -->
+    <div class="modal fade" id="financeModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ثبت عاید جدید</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="row g-3 needs-validation" novalidate method="post"
+                        action="{% url 'management:Total_income' %}">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <h5>معلومات عاید و مصرف</h5>
+                        </div>
 
-<!--  Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت عواید</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
-            </div>
-            <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'management:Total_income' %}" method="POST">
-                    {% csrf_token %}
-                    <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom01">تاریخ</label>
-                            {{ form.date }}
-                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
-                            <div class="valid-feedback">
-
+                        <!-- تاریخ -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تاریخ<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ form.date }}
                             </div>
                         </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker3').datepicker({
-                            
-                                });
-                            });
-                        </script>
-                       
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom02">مقدار</label>
-                            {{ form.amount }}
-                            <div class="valid-feedback">
 
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">حالت<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ form.type }}
                             </div>
                         </div>
-                    </div>
-                
-                    <div class="form-row">
-        
-                        <div class="col-md-12 mb-3">
-                            <label for="validationCustom03">تفصیل</label>
-                            {{ form.description }}
-                            <div class="invalid-feedback">
 
+                        <!-- مقدار -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">مقدار<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ form.amount }}
                             </div>
                         </div>
-                    </div>
-                    <input type="hidden" name="form_type" value="income">
-                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!--  Modal -->
-<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true" style="font-family: XW_Zar_Bd_0;">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مصارف</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
-            </div>
-            <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'management:Total_income' %}" method="POST">
-                    {% csrf_token %}
-                    <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom01">تاریخ</label>
-                            {{ x_form.date }}
-                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
-                            <div class="valid-feedback">
-
+                        <!-- توضیحات -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">توضیحات</label>
+                            <div class="col-sm-8">
+                                {{ form.description }}
                             </div>
                         </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker12').datepicker({
-                            
-                                });
-                            });
-                        </script>
-                       
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom02">مقدار</label>
-                            {{ x_form.amount }}
-                            <div class="valid-feedback">
 
-                            </div>
+                        <!-- Submit Buttons -->
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <input type="hidden" name="form_type" value="income">
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">انصراف</button>
+                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
                         </div>
-                    </div>
-                
-                    <div class="form-row">
-        
-                        <div class="col-md-12 mb-3">
-                            <label for="validationCustom03">تفصیل</label>
-                            {{ x_form.description }}
-                            <div class="invalid-feedback">
-
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="form_type" value="expense">
-                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Date Picker Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker3').datepicker({});
+        $('#datepicker12').datepicker({});
+    });
+</script>
 
 {% endblock %}

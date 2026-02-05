@@ -3,7 +3,7 @@
 {% load static %}
 
 
-<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+<div class="main-content pt-4" style="font-family: 'Vazirmatn', sans-serif;">
     <div class="row">
         <div class="col-md-12">
             <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
@@ -16,7 +16,6 @@
                             {% csrf_token %}
                             <div class="modal-dialog modal-lg">
                               <div class="modal-content p-3">
-                                <div class="card-title h5 mb-3">ایدیت صنف "{{ instance.name }}"</div>
                                 <div>
                                       <div class="form-row">
                         <div class="col-md-6 mb-3">
@@ -58,9 +57,9 @@
                                   <div class="text-end">
                                     
                                     <!-- Dismiss button -->
-                                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
-                                      بستن
-                                    </button>
+                                    <a href="{% url 'management:Total_income' %}" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
+                                      برگشت
+                                    </a>
                                   
                                     <!-- Submit button -->
                                     <button class="btn btn-primary mt-2" type="submit">

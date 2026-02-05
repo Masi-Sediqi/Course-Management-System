@@ -6,50 +6,77 @@
     .gradient-purple-indigo {
         background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
         border-radius: 0.5rem 0.5rem 0 0;
-        padding: 30px;
+        padding: 25px;
         color: white;
-    }
-
-    .search-input {
-        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-        border-radius: 25px;
-        padding-left: 20px;
     }
 
     .card {
         border: none;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
     }
 
-    .list-group-item {
-        transition: background-color 0.2s ease-in-out;
-    }
-
-    .list-group-item:hover {
-        background-color: #f1f1f1;
-    }
-
-    .dropdown-menu a {
-        display: flex;
-        align-items: center;
-    }
-
-    .dropdown-menu a i {
-        margin-right: 8px;
-    }
-
-    .modal-header, .modal-footer {
+    .nav-tabs .nav-link {
         border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #4e73df;
+        border-bottom: 3px solid #4e73df;
+        background-color: transparent;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #4e73df;
+        border-top: none;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 0.35rem;
+        border: 1px solid #d1d3e2;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .modal-header {
+        background-color: #4e73df;
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
     }
 
     .modal-content {
         border-radius: 0.75rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
     }
 </style>
 
-<div class="main-content pt-4" style="font-family: XW_Zar_Bd_0;">
+<div class="main-content pt-4" style="font-family: 'Vazirmatn', sans-serif;">
     <div class="breadcrumb">
         <h1>بخش خریداری قرطاسیه و کتابها</h1>
         <ul>
@@ -60,657 +87,397 @@
 
     <div class="separator-breadcrumb border-top"></div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card text-left">
-                <!-- Header with gradient -->
-                <div class="gradient-purple-indigo">
-                    <div class="row align-items-center">
-                       <!-- SweetAlert2 CDN -->
-                       <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
-
-                            <script>
-                                {% if messages %}
-                                    {% for message in messages %}
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                                            title: "{{ message|escapejs }}",
-                                            showConfirmButton: false,
-                                            timer: 4000,
-                                            timerProgressBar: true,
-                                            didOpen: (toast) => {
-                                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                            }
-                                        });
-                                    {% endfor %}
-                                {% endif %}
-                            </script>
-                        
-                        <div class="col-md-4 mt-3 mt-md-0">
-                          <div class="p-3 border rounded bg-light text-end">
-                            <button class="btn btn-success me-2" data-toggle="modal" data-target="#exampleModal">
-                              <i class="bi bi-plus-circle me-1"></i> قرطاسیه جدید
-                            </button>
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal1">
-                              <i class="bi bi-tags-fill me-1"></i> کتگوری جدید
-                            </button>
-                            <button class="btn btn-info" data-toggle="modal" data-target="#bookModal">
-                              <i class="bi bi-tags-fill me-1"></i> کتاب جدید
-                            </button>
-                          </div>
-                        </div>
-                        
-                        
-                  
-                    </div>
+    <!-- Header Card -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">مدیریت قرطاسیه و کتابها</h5>
+                <div>
+                    <button class="btn btn-primary ml-2" data-toggle="modal" data-target="#exampleModal">
+                        <i class="fas fa-plus ml-2"></i> قرطاسیه جدید
+                    </button>
                 </div>
+            </div>
 
-                <!-- Body -->
-                <div class="card-body">
-                    <div class="row">
+            <!-- SweetAlert2 -->
+            <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
 
-                             <!-- Tabs Header -->
-            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">قرطاسیه ها</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="extra-tab" data-toggle="tab" href="#extra" role="tab">کتگوری</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="book-tab" data-toggle="tab" href="#book" role="tab">کتابها</a>
-                </li>
-               
-            </ul>
-    
-            <!-- Tabs Content -->
-            <div class="tab-content mt-4" id="incomeTabsContent">
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
-    
-                    <!-- your full code... -->
+            <script>
+                {% if messages %}
+                {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+                {% endfor %}
+                {% endif %}
+            </script>
+
+            <!-- Search Input -->
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="جستجو بر اساس نام آیتم...">
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="items" role="tabpanel">
                     <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
+                        <table class="table table-hover align-middle" id="itemsTable">
+                            <thead class="thead-light">
                                 <tr>
-                                    <th>#</th>
-                                    <th>تاریخ</th>
-                                    <th>نام</th>
-                                    <th>کتگوری</th>
-                                    <th>تعداد</th>
-                                    <th>مقدار فی</th>
-                                    <th>مقدار کُل</th>
-                                    <th>مقدار پرداخت شده</th>
-                                    <th>مقدار برای فروش</th>
-                                    <th>توضیحات</th>
-                                    <th>عملیات</th>
+                                    <th scope="col" width="50" class="text-center">#</th>
+                                    <th scope="col">📝 نام</th>
+                                    <th scope="col">📅 تاریخ</th>
+                                    <th scope="col">🏷️ نوعیت</th>
+                                    <th scope="col">📋 توضیحات</th>
+                                    <th scope="col" width="120" class="text-center">⚙️ عملیات</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-body">
-                                {% for i in stationeries %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{ i.date }}</td>
+                            <tbody>
+                                {% for item in items %}
+                                <tr class="border-bottom">
+                                    <th scope="row" class="text-center">
+                                        <span class="badge bg-light text-dark border rounded-circle p-2">
+                                            {{ forloop.counter }}
+                                        </span>
+                                    </th>
                                     <td>
-                                      <a href="{% url 'library:buy_stationery_again' i.id %}">
-                                        {{ i.name }}
-                                      </a>
+                                        <a href="{% url 'library:item_info' item.id %}" 
+                                        class="text-decoration-none text-primary d-flex align-items-center">
+                                            <div class="icon-circle bg-primary-light text-primary mr-2">
+                                                <i class="fas fa-box"></i>
+                                            </div>
+                                            <div>
+                                                <strong>{{ item.name }}</strong>
+                                                <small class="d-block text-muted">کد: #ST{{ item.id|stringformat:"04d" }}</small>
+                                            </div>
+                                        </a>
                                     </td>
-                                    <td>{{ i.category }}</td>
-                                    <td>{{ i.number_of_stationery }}</td>
-                                    <td>{{ i.per_price_stationery }}</td>
-                                    <td>{{ i.stationery_paid_price }}</td>
-                                    <td>{{ i.stationery_price }}</td>
-                                    <td>{{ i.per_price_for_buy }}</td>
-                                    <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
+                                          <td>
+                                        <span class="badge bg-light text-dark border px-3 py-1 rounded-pill">
+                                            <i class="fas fa-calendar-alt ml-1"></i>
+                                            {{ item.date }}
+                                        </span>
+                                    </td>
                                     <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="{% url 'library:edit_station' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
-                                        <button class="btn btn-sm btn-danger"
-                                        data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                            حذف
-                                        </button> 
+                                        {% if item.item_type == "stationery" %}
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-1 rounded-pill">
+                                                <i class="fas fa-pen ml-1"></i> لوازم تحریر
+                                            </span>
+                                        {% elif item.item_type == "office" %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-pill">
+                                                <i class="fas fa-briefcase ml-1"></i> دفتری
+                                            </span>
+                                        {% elif item.item_type == "other" %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-1 rounded-pill">
+                                                <i class="fas fa-cube ml-1"></i> سایر
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1 rounded-pill">
+                                                <i class="fas fa-question ml-1"></i> {{ item.get_item_type_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.description %}
+                                                <div class="text-truncate" style="max-width: 180px;" 
+                                                    title="{{ item.description }}">
+                                                    {{ item.description }}
+                                                </div>
+                                                {% if item.description|length > 20 %}
+                                                    <span class="badge bg-light text-muted border ms-1" 
+                                                        data-toggle="tooltip" 
+                                                        title="{{ item.description }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted fst-italic">بدون توضیح</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'library:edit_item' item.id %}" 
+                                            class="btn btn-sm btn-outline-warning border-warning"
+                                            data-toggle="tooltip" title="ویرایش">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger border-danger"
+                                                    data-toggle="modal"
+                                                    data-target="#deleteConfirmModal{{ item.id }}"
+                                                    data-toggle="tooltip" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <a href="" 
+                                            class="btn btn-sm btn-outline-primary border-primary"
+                                            data-toggle="tooltip" title="خرید مجدد">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
-                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                      <div class="modal-content text-center">
-                                        <div class="modal-header">
-                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
-                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                          </button>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteConfirmModal{{ item.id }}" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-light">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-exclamation-triangle text-danger ml-2"></i>
+                                                    تأیید حذف
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body text-center">
+                                                <div class="mb-3">
+                                                    <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-3" 
+                                                        style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-trash fa-2x"></i>
+                                                    </div>
+                                                    <h6 class="mb-2">آیا از حذف این آیتم مطمئن هستید؟</h6>
+                                                    <p class="mb-1"><strong>"{{ item.name }}"</strong></p>
+                                                    <p class="text-muted small mb-0">نوع: {{ item.get_item_type_display }}</p>
+                                                </div>
+                                                <div class="alert alert-warning alert-dismissible fade show py-2 mb-0" role="alert">
+                                                    <i class="fas fa-exclamation-circle ml-1"></i>
+                                                    <small>این عملیات قابل بازگشت نمی‌باشد.</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                                    <i class="fas fa-times ml-1"></i> انصراف
+                                                </button>
+                                                <a href="{% url 'library:delete_item' item.id %}" class="btn btn-danger">
+                                                    <i class="fas fa-trash ml-1"></i> حذف نهایی
+                                                </a>
+                                            </div>
                                         </div>
-                                        <div class="modal-body">
-                                          <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                          <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                            <a href="{% url 'library:delete_station' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                          </div>
-                                        </div>
-                                      </div>
                                     </div>
-                                  </div>
+                                </div>
+
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <div class="icon-circle bg-light text-muted mx-auto mb-3" 
+                                                style="width: 80px; height: 80px;">
+                                                <i class="fas fa-pen-fancy fa-2x"></i>
+                                            </div>
+                                            <h6 class="text-muted mb-2">هیچ آیتمی یافت نشد</h6>
+                                            <p class="text-muted small mb-0">برای اضافه کردن آیتم جدید روی دکمه "افزودن" کلیک کنید.</p>
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
-                            
                         </table>
                     </div>
                 </div>
-    
-                <!-- Tab 2: Extra Content -->
-                <div class="tab-pane fade" id="extra" role="tabpanel">
-                    <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>تام کتگوری</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                {% for i in categories %}
-                                <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>
-                                      <a href="{% url 'library:find_category_item' i.id %}">{{ i.name }}</a></td>
-                                    
-                                  
-                                    <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="#" data-toggle="modal" data-target="#editModal{{ i.id }}" class="btn btn-sm btn-primary">تغییرات</a>
-                                        <!-- Delete Button (opens modal) -->
-                                        <button class="btn btn-sm btn-danger"
-                                        data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                            حذف
-                                        </button> 
-                                    </td>
-                                </tr>
-                              
-
-
-                                <div class="modal fade" id="editModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ i.id }}" aria-hidden="true">
-                                  <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content text-center">
-                                      <form method="POST" action="{% url 'library:edit_category' i.id %}" class="needs-validation" novalidate>
-                                        {% csrf_token %}
-                                        <div class="modal-header">
-                                          <h5 class="modal-title w-100" id="editModalLabel{{ i.id }}">تغییرات دسته‌بندی</h5>
-                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                          </button>
-                                        </div>
-                                
-                                        <div class="modal-body py-2">
-                                          <div class="form-group mb-2">
-                                            <label class="form-label" style="font-size: 0.9rem;">نام دسته‌بندی <span style="color: red;">*</span></label>
-                                            <input type="text" name="name" class="form-control" value="{{ i.name }}" required>
-                                          </div>
-                                        </div>
-                                
-                                        <div class="modal-footer py-2">
-                                          <input type="hidden" name="form_type" value="edit_category">
-                                          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">بستن</button>
-                                          <button type="submit" class="btn btn-sm btn-primary">ذخیره</button>
-                                        </div>
-                                      </form>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                    <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg" role="document">
-                                          <div class="modal-content text-center">
-                                            <div class="modal-header">
-                                              <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
-                                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                              </button>
-                                            </div>
-                                            <div class="modal-body">
-                                              <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                              <div class="d-flex justify-content-center gap-2">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                                <a href="{% url 'library:delete_category' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                </div>
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
-                    </div>
-
-             
             </div>
-            <div class="tab-pane fade" id="book" role="tabpanel">
-              <p>در بخش پایین، معلومات کامل در مورد تمامی عواید قابل مشاهده است.</p>
 
-              <!-- your full code... -->
-              <div class="table-responsive">
-                  <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                      <thead class="thead-dark">
-                          <tr>
-                              <th>#</th>
-                              <th>تاریخ</th>
-                              <th>تام کتاب</th>
-                              <th>تعداد</th>
-                              <th>مقدار فی</th>
-                              <th>مقدار کُل</th>
-                              <th>مقدار پرداخت شده</th>
-                              <th>مقدار برای فروش</th>
-                              <th>توضیحات</th>
-                              <th>عملیات</th>
-                          </tr>
-                      </thead>
-                      <tbody id="table-body">
-                          {% for i in books %}
-                          <tr>
-                              <td>{{ forloop.counter }}</td>
-                              <td>{{ i.date }}</td>
-                              <td><a href="{% url 'library:buy_book_again' i.id %}">
-                                {{ i.name }}</td>
-                              <td>{{ i.number_of_book }}</td>
-                              <td>{{ i.per_price }}</td>
-                              <td>{{ i.price }}</td>
-                              <td>{{ i.paid_price }}</td>
-                              <td>{{ i.per_book_price_for_buy }}</td>
-                              <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
-                            
-                              <td>
-                                  <!-- Actions like edit/delete buttons go here -->
-                                  <a href="{% url 'library:edit_book' i.id %}" class="btn btn-sm btn-primary">تغییرات</a>
-                                  <!-- Delete Button (opens modal) -->
-                                  <button class="btn btn-sm btn-danger"
-                                  data-toggle="modal" data-target="#deletebookConfirmModal{{ i.id }}">
-                                      حذف
-                                  </button> 
-                              </td>
-                          </tr>
-                        
+            <style>
+                /* Custom styling for the table */
+                .icon-circle {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                .bg-primary-light {
+                    background-color: rgba(13, 110, 253, 0.1) !important;
+                }
+                
+                .table-hover tbody tr:hover {
+                    background-color: rgba(13, 110, 253, 0.03);
+                    transform: translateY(-1px);
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                }
+                
+                .table-hover tbody tr {
+                    transition: all 0.2s ease;
+                }
+                
+                .badge {
+                    font-weight: 500;
+                }
+                
+                .border-bottom {
+                    border-bottom: 1px solid #f0f0f0 !important;
+                }
+                
+                .btn-group .btn {
+                    padding: 0.25rem 0.5rem;
+                    margin: 0 2px;
+                }
+                
+                .btn-group .btn:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                }
+                
+                /* Custom scrollbar for table */
+                .table-responsive::-webkit-scrollbar {
+                    height: 6px;
+                }
+                
+                .table-responsive::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 3px;
+                }
+                
+                .table-responsive::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 3px;
+                }
+                
+                .table-responsive::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                }
+                
+                /* Tooltip styling */
+                [data-toggle="tooltip"] {
+                    cursor: pointer;
+                }
+                
+                /* Empty state styling */
+                .empty-state {
+                    opacity: 0.7;
+                    transition: opacity 0.3s ease;
+                }
+                
+                .empty-state:hover {
+                    opacity: 1;
+                }
+            </style>
 
+            <script>
+                // Initialize tooltips
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
+                
+                // Add hover effect to rows
+                $(document).ready(function() {
+                    $('#itemsTable tbody tr').hover(
+                        function() {
+                            $(this).addClass('shadow-sm');
+                        },
+                        function() {
+                            $(this).removeClass('shadow-sm');
+                        }
+                    );
+                });
+            </script>
 
-                      
-                          
-                              <div class="modal fade" id="deletebookConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                  <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content text-center">
-                                      <div class="modal-header">
-                                        <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                          <span aria-hidden="true">&times;</span>
-                                        </button>
-                                      </div>
-                                      <div class="modal-body">
-                                        <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                        <div class="d-flex justify-content-center gap-2">
-                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                          <a href="{% url 'library:delete_book' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                          {% endfor %}
-                      </tbody>
-                      
-                  </table>
-              </div>
-            </div>
-                    </div>
+            <!-- JS Search -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const searchInput = document.getElementById("searchInput");
+                    searchInput.addEventListener("keyup", function () {
+                        const filter = searchInput.value.toLowerCase();
+                        const rows = document.querySelectorAll("#itemsTable tbody tr");
+
+                        rows.forEach(row => {
+                            const nameCell = row.querySelector("td:nth-child(3)");
+                            if (nameCell) {
+                                const text = nameCell.textContent.toLowerCase();
+                                if (text.includes(filter)) {
+                                    row.style.display = "";
+                                } else {
+                                    row.style.display = "none";
+                                }
+                            }
+                        });
+                    });
+                });
+            </script>
+
+        </div>
+    </div>
+    <!-- Stationery Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ثبت قرطاسیه جدید</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-
-                <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                      <div class="modal-content">
-                  
-                        <div class="modal-header bg-primary text-white">
-                          <h5 class="modal-title" id="exampleModalLabel">قرطاسیه جدید</h5>
-                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-body">
+                    <form class="row g-3 needs-validation" novalidate method="post"
+                        action="{% url 'library:library_view' %}">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <h5>معلومات قرطاسیه</h5>
                         </div>
-                  
-                        <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate="novalidate">
-                          {% csrf_token %}
-                          <div class="modal-body">
-                            <div class="container-fluid">
-                              <div class="row g-3">
-                                <div class="col-md-3">
-                                  <label for="{{ form.date.id_for_label }}" class="form-label">
-                                    تاریخ <span class="text-danger">*</span>
-                                  </label>
-                                  {{ form.date }}
-                                </div>
-
-                                <script>
-                                  document.addEventListener('DOMContentLoaded', function () {
-                                      $('#datepicker7').datepicker({
-                                  
-                                      });
-                                  });
-                              </script>
-                                   <div class="col-md-3">
-                                  <label for="{{ form.category.id_for_label }}" class="form-label">دسته‌بندی<span class="text-danger">*</span></label>
-                                  {{ form.category }}
-                                </div>
-
-                                <div class="col-md-3">
-                                  <label for="{{ form.name.id_for_label }}" class="form-label">نام قرطاسیه<span class="text-danger">*</span></label>
-                                  {{ form.name }}
-                                </div>
-                                <div class="col-md-3">
-                                  <label for="{{ form.supplier.id_for_label }}" class="form-label">تامین کننده<span class="text-danger">*</span></label>
-                                  {{ form.supplier }}
-                                </div>
-                                <div class="col-md-3">
-                                  <label for="{{ form.number_of_stationery.id_for_label }}" class="form-label">تعداد<span class="text-danger">*</span></label>
-                                  {{ form.number_of_stationery }}
-                                </div>
-                  
-                                <div class="col-md-3">
-                                  <label for="{{ form.per_price_stationery.id_for_label }}" class="form-label">مقدار فی <span class="text-danger">*</span></label>
-                                  {{ form.per_price_stationery }}
-                                </div>
-
-                                
-                                <div class="col-md-3">
-                                  <label for="{{ form.stationery_price.id_for_label }}" class="form-label">قیمت<span class="text-danger">*</span></label>
-                                  {{ form.stationery_price }}
-                                </div>
-                  
-
-                                <div class="col-md-3">
-                                  <label for="{{ form.stationery_paid_price.id_for_label }}" class="form-label">مقدار برای پرداخت<span class="text-danger">*</span></label>
-                                  {{ form.stationery_paid_price }}
-                                </div>
-                  
-
-                                <div class="col-md-3">
-                                  <label for="{{ form.per_price_for_buy.id_for_label }}" class="form-label">مقدار فی برای فروش <span class="text-danger">*</span></label>
-                                  {{ form.per_price_for_buy }}
-                                </div>
-                  
-                              <!-- 🧮 مقدار باقیمانده (Shown only if total > paid) -->
-                              <div class="col-md-12 mt-4" id="remain_section_stationery" style="display: none;">
-                                <label class="form-label fw-bold text-success">مقدار باقیمانده</label>
-                                <input type="text" id="remain_amount_stationery" class="form-control bg-light fw-bold text-success text-center" readonly>
-                                💡 این مقدار به حساب تامین‌کننده اضافه می‌شود.
-                              </div>
-                               
-                                <div class="col-md-12">
-                                  <label for="{{ form.description.id_for_label }}" class="form-label">توضیحات</label>
-                                  {{ form.description }}
-                                </div>
-                              <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // 🎯 Stationery-specific IDs (avoid conflict with book form)
-    const numberField = document.getElementById("{{ form.number_of_stationery.id_for_label }}");
-    const perPriceField = document.getElementById("{{ form.per_price_stationery.id_for_label }}");
-    const totalField = document.getElementById("{{ form.stationery_price.id_for_label }}");
-    const paidField = document.getElementById("{{ form.stationery_paid_price.id_for_label }}");
-    const remainField = document.getElementById("remain_amount_stationery");
-    const remainSection = document.getElementById("remain_section_stationery");
-
-    // 🧮 Calculate total price
-    function calculateTotal() {
-        let number = parseFloat(numberField.value) || 0;
-        let perPrice = parseFloat(perPriceField.value) || 0;
-        let total = number * perPrice;
-        totalField.value = total.toFixed(2);
-        calculateRemain();
-    }
-
-    // 💰 Calculate remaining amount (total - paid)
-    function calculateRemain() {
-        let total = parseFloat(totalField.value) || 0;
-        let paid = parseFloat(paidField.value) || 0;
-        let remain = total - paid;
-
-        if (remain > 0) {
-            remainField.value = remain.toFixed(2);
-            remainSection.style.display = "block";  // show remain field
-        } else {
-            remainField.value = "0.00";
-            remainSection.style.display = "none";   // hide remain field
-        }
-    }
-
-    // 🔄 Event listeners
-    numberField.addEventListener("input", calculateTotal);
-    perPriceField.addEventListener("input", calculateTotal);
-    totalField.addEventListener("input", calculateRemain);
-    paidField.addEventListener("input", calculateRemain);
-
-    // Initialize
-    calculateTotal();
-    calculateRemain();
-});
-</script>
 
 
-                  
-                              </div>
+                        <!-- نام قرطاسیه -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">نوعیت<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ form.item_type }}
                             </div>
-                          </div>
-                  
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-                            <button type="submit" class="btn btn-success">ذخیره قرطاسیه</button>
-                          </div>
-                                           
-                        </form>
-
-                  
-                      </div>
-                    </div>
-                  </div>
-                  
-
-                  
-                <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-sm">  <!-- Changed from modal-lg to modal-sm -->
-                      <div class="modal-content">
-                  
-                        <div class="modal-header py-2"> <!-- Reduced vertical padding -->
-                          <h6 class="modal-title">دسته‌بندی جدید</h6> <!-- Smaller heading -->
-                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                  
-                        <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate="novalidate">
-                          {% csrf_token %}
-                          <div class="modal-body py-2">
-                  
-                            <div class="form-group mb-2">
-                              <label class="form-label" style="font-size: 0.9rem;">نام دسته‌بندی <span style="color: red;">*</span></label>
-                              {{ category_form.name }}
+
+                        <!-- نام قرطاسیه -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">نام قرطاسیه<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ form.name }}
                             </div>
-                  
-                          </div>
-                  
-                          <div class="modal-footer py-2">
-                              <input type="hidden" name="form_type" id="" value="category">
-                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">بستن</button>
-                            <button type="submit" class="btn btn-sm btn-primary">ذخیره</button>
-                          </div>
-                        </form>
-                  
-                      </div>
-                    </div>
-                  </div>
-                  
-
-                  <div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                      <div class="modal-content">
-                  
-                        <div class="modal-header bg-primary text-white">
-                          <h5 class="modal-title" id="exampleModalLabel">کتاب جدید</h5>
-                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                  
-                      <form method="POST" action="{% url 'library:library_view' %}" class="needs-validation" novalidate>
-  {% csrf_token %}
-  <input type="hidden" name="form_type" value="book">
 
-  <div class="modal-body">
-    <div class="container-fluid">
-      <div class="row g-3">
+                        <!-- توضیحات -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">توضیحات</label>
+                            <div class="col-sm-8">
+                                {{ form.description }}
+                            </div>
+                        </div>
 
-        <!-- 🗓️ تاریخ -->
-        <div class="col-md-3">
-          <label for="{{ book_form.date.id_for_label }}" class="form-label">تاریخ <span class="text-danger">*</span></label>
-          {{ book_form.date }}
-        </div>
-
-        <!-- 📖 نام کتاب -->
-        <div class="col-md-3">
-          <label for="{{ book_form.name.id_for_label }}" class="form-label">نام کتاب <span class="text-danger">*</span></label>
-          {{ book_form.name }}
-        </div>
-
-        <!-- 🧾 تامین کننده -->
-        <div class="col-md-3">
-          <label for="{{ book_form.supplier.id_for_label }}" class="form-label">تامین کننده<span class="text-danger">*</span></label>
-          {{ book_form.supplier }}
-        </div>
-
-        <!-- 📦 تعداد -->
-        <div class="col-md-3">
-          <label for="{{ book_form.number_of_book.id_for_label }}" class="form-label">تعداد <span class="text-danger">*</span></label>
-          {{ book_form.number_of_book }}
-        </div>
-
-        <!-- 💵 مقدار فی -->
-        <div class="col-md-3">
-          <label for="{{ book_form.per_price.id_for_label }}" class="form-label">مقدار فی <span class="text-danger">*</span></label>
-          {{ book_form.per_price }}
-        </div>
-
-        <!-- 💰 قیمت کل -->
-        <div class="col-md-3">
-          <label for="{{ book_form.price.id_for_label }}" class="form-label">قیمت کل <span class="text-danger">*</span></label>
-          {{ book_form.price }}
-        </div>
-
-        <!-- 💳 مقدار پرداخت شده -->
-        <div class="col-md-3">
-          <label for="{{ book_form.paid_price.id_for_label }}" class="form-label">مقدار پرداخت شده <span class="text-danger">*</span></label>
-          {{ book_form.paid_price }}
-        </div>
-
-        <!-- 💹 مقدار فی برای فروش -->
-        <div class="col-md-3">
-          <label for="{{ book_form.per_book_price_for_buy.id_for_label }}" class="form-label">
-            مقدار فی برای فروش <span class="text-danger">*</span>
-          </label>
-          {{ book_form.per_book_price_for_buy }}
-        </div>
-
-       <!-- 🧮 مقدار باقیمانده (Placed at the END) -->
-<div class="col-md-12 mt-4" id="remain_section" style="display: none;">
-  <label class="form-label fw-bold text-success">مقدار باقیمانده</label>
-  <input type="text" id="remain_amount" class="form-control bg-light fw-bold text-success text-center" readonly>
-  <small class="text-muted d-block mt-1">
-    💡 این مقدار به حساب تامین‌کننده اضافه می‌شود.
-  </small>
-</div>
-
-
-
-        <!-- 📝 توضیحات -->
-        <div class="col-md-12">
-          <label for="{{ book_form.description.id_for_label }}" class="form-label">توضیحات</label>
-          {{ book_form.description }}
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-    <button type="submit" class="btn btn-success">ذخیره کتاب</button>
-  </div>
-                      </form>
-                       <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const numberBookField = document.getElementById("{{ book_form.number_of_book.id_for_label }}");
-    const perPriceBookField = document.getElementById("{{ book_form.per_price.id_for_label }}");
-    const totalBookField = document.getElementById("{{ book_form.price.id_for_label }}");
-    const paidBookField = document.getElementById("{{ book_form.paid_price.id_for_label }}");
-    const remainField = document.getElementById("remain_amount");
-    const remainSection = document.getElementById("remain_section");
-
-    // 🧮 Calculate total price
-    function calculateBookTotal() {
-        let number = parseFloat(numberBookField.value) || 0;
-        let perPrice = parseFloat(perPriceBookField.value) || 0;
-        let total = number * perPrice;
-        totalBookField.value = total.toFixed(2);
-        calculateRemain();
-    }
-
-    // 💰 Calculate remaining amount & show/hide field
-    function calculateRemain() {
-        let total = parseFloat(totalBookField.value) || 0;
-        let paid = parseFloat(paidBookField.value) || 0;
-        let remain = total - paid;
-
-        if (remain > 0) {
-            remainField.value = remain.toFixed(2);
-            remainSection.style.display = "block";  // show remain field
-        } else {
-            remainField.value = "0.00";
-            remainSection.style.display = "none";   // hide remain field
-        }
-    }
-
-    // Initial calculation
-    calculateRemain();
-
-    // 🔄 Event listeners
-    numberBookField.addEventListener("input", calculateBookTotal);
-    perPriceBookField.addEventListener("input", calculateBookTotal);
-    totalBookField.addEventListener("input", calculateRemain);
-    paidBookField.addEventListener("input", calculateRemain);
-});
-                </script>
-                              <script>
-                                  document.addEventListener('DOMContentLoaded', function () {
-                                      $('#datepicker6').datepicker({
-                                  
-                                      });
-                                  });
-                              </script>
-               
-
-
-
-                      </div>
-                    </div>
-                  </div>
-                  
-                  
-
+                        <!-- Submit Buttons -->
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">انصراف</button>
+                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- JavaScript for calculations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Date pickers
+            $('#datepicker6').datepicker({});
+            $('#datepicker7').datepicker({});
+
+            // Add your calculation scripts here
+            // They should work with the new form structure
+        });
+    </script>
 </div>
-
-
-
 
 {% endblock %}

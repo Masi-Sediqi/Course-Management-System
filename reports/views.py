@@ -12,25 +12,12 @@ from django.utils import timezone
 # Create your views here.
 
 def statndart(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    # Get today's date in the same timezone
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
-    else:
-        print("❌ The license date is not today.")
     return render(request, "reports/standart.html")
 
 
 def students_reports(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
 
     form = StudentFilterForm(request.GET or None)
     students = Student.objects.filter(is_active=True)
@@ -135,12 +122,7 @@ def students_reports(request):
 
 
 def teachers_reports(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
 
     form = StudentFilterForm(request.GET or None)
     teachers = Teacher.objects.filter(is_active=True)
@@ -209,12 +191,7 @@ def teachers_reports(request):
     return render(request, "reports/teachers_reports.html", context)
 
 def books_reports(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
 
     books = Books.objects.all()
 
@@ -265,12 +242,7 @@ def books_reports(request):
 
 
 def income_expenses(request):
-    get_lisance_check_model = Licsanse_check.objects.get(pk=1)
-    license_time = get_lisance_check_model.date
-    today = timezone.localdate()
 
-    if license_time.date() <= today:
-        return redirect('management:hesabpay')
 
     title = "در حال حاضر تمام عایدات و مصارفات نمایش داده می‌شوند"
     form = StudentFilterForm(request.GET or None)

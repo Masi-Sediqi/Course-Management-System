@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .item-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #4e73df;
+        border-top: none;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .badge-book {
+        background-color: #36b9cc;
+        color: white;
+    }
+    
+    .badge-stationery {
+        background-color: #1cc88a;
+        color: white;
+    }
+    
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #d53929 0%, #a91f12 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 74, 59, 0.3);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #3e63cf 0%, #1a3aae 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .price-paid {
+        color: #1cc88a;
+        font-weight: bold;
+    }
+    
+    .price-remain {
+        color: #e74a3b;
+        font-weight: bold;
+    }
+    
+    .item-image-placeholder {
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 60px;
+        font-weight: bold;
+        margin: 0 auto;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">کتابخانه / </span> معلومات آیتم
+    </h4>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+    
+    <!-- Item Header -->
+    <div class="card mb-4">
+        <div class="item-header">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="item-image-placeholder">
+                        {{ item.name|slice:":1" }}
+                    </div>
+                </div>
+                <div class="col-md-9 text-right">
+                    <h3 class="mb-2">{{ item.name }}</h3>
+                    <p class="mb-1">
+                        <i class="fas fa-tag ml-2"></i>
+                        نوع: 
+                        {% if item.item_type == 'book' %}
+                            <span class="badge badge-book">کتاب</span>
+                        {% else %}
+                            <span class="badge badge-stationery">قرطاسیه</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-1">
+                        <i class="fas fa-calendar ml-2"></i>
+                        تاریخ ثبت: {{ item.date }}
+                    </p>
+                    {% if item.description %}
+                    <p class="mb-0">
+                        <i class="fas fa-align-right ml-2"></i>
+                        توضیحات: {{ item.description|truncatechars:100 }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <!-- Total Items -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-info font-weight-bold text-uppercase mb-1">مجموع آیتم‌ها</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_item.total_item|default:"0" }}
+                            </div>
+                        </div>
+                        <div class="bg-info text-white rounded-circle p-3">
+                            <i class="fas fa-boxes fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remaining Items -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-warning font-weight-bold text-uppercase mb-1">موجودی باقی‌مانده</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_item.remain_item|default:"0" }}
+                            </div>
+                        </div>
+                        <div class="bg-warning text-white rounded-circle p-3">
+                            <i class="fas fa-box fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price per Item -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-success font-weight-bold text-uppercase mb-1">قیمت فی</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_item.per_price|default:"0" }}
+                            </div>
+                        </div>
+                        <div class="bg-success text-white rounded-circle p-3">
+                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Value -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card summary-card border-left-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-primary font-weight-bold text-uppercase mb-1">ارزش موجودی</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ item_price|default:"0" }} افغانی
+                            </div>
+                        </div>
+                        <div class="bg-primary text-white rounded-circle p-3">
+                            <i class="fas fa-calculator fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center gap-3">
+                <!-- Edit Button -->
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-edit ml-2"></i>ویرایش
+                </a>
+                
+                <!-- Delete Button with Modal -->
+                <button class="btn btn-danger" data-toggle="modal" data-target="#deleteItemModal">
+                    <i class="fas fa-trash ml-2"></i>حذف
+                </button>
+                
+                <!-- New Purchase Button -->
+                <a href="#" class="btn btn-success">
+                    <i class="fas fa-plus ml-2"></i>خرید جدید
+                </a>
+                
+                <!-- Back Button -->
+                <a href="{% url 'library:library_view' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right ml-2"></i>بازگشت
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase History Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">سوابق خرید</h5>
+                <span class="badge badge-primary">
+                    تعداد: {{ purchages.count|default:"0" }}
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" width="50">#</th>
+                            <th scope="col">تاریخ خرید</th>
+                            <th scope="col">تعداد</th>
+                            <th scope="col">قیمت فی</th>
+                            <th scope="col">قیمت کل</th>
+                            <th scope="col">پرداخت شده</th>
+                            <th scope="col">باقی‌مانده</th>
+                            <th scope="col">تامین کننده</th>
+                            <th scope="col">توضیحات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for purchase in purchages %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ purchase.date }}</td>
+                            <td>{{ purchase.number }}</td>
+                            <td>{{ purchase.per_price }}</td>
+                            <td class="font-weight-bold">{{ purchase.total_price }}</td>
+                            <td class="price-paid">{{ purchase.paid_price }}</td>
+                            <td class="price-remain">{{ purchase.remain_price }}</td>
+                            <td>
+                                <span class="badge badge-info">{{ purchase.supplier.name|default:"-" }}</span>
+                            </td>
+                            <td>{{ purchase.description|truncatechars:20|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-muted">هیچ خریدی یافت نشد</h6>
+                                    <p class="text-muted small">برای این آیتم هنوز خریدی ثبت نشده است</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Item Modal -->
+<div class="modal fade" id="deleteItemModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">تأیید حذف آیتم</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h5>آیا مطمئن هستید که می‌خواهید این آیتم را حذف کنید؟</h5>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                        <div>
+                            <strong class="d-block mb-1">توجه:</strong>
+                            <ul class="mb-0 pl-3">
+                                <li>تمام اطلاعات آیتم شامل سوابق خرید حذف خواهد شد</li>
+                                <li>این عملیات قابل بازگشت نیست</li>
+                                <li>اگر موجودی دارید ابتدا موجودی را صفر کنید</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-danger mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title text-danger">معلومات آیتم:</h6>
+                        <p class="mb-1"><strong>نام:</strong> {{ item.name }}</p>
+                        <p class="mb-1"><strong>نوع:</strong> {{ item.get_item_type_display }}</p>
+                        <p class="mb-0"><strong>موجودی:</strong> {{ total_item.remain_item|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times ml-2"></i>انصراف
+                </button>
+                <a href="#" class="btn btn-danger">
+                    <i class="fas fa-trash ml-2"></i>حذف آیتم
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

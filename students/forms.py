@@ -4,101 +4,45 @@ from jalali_date.widgets import AdminJalaliDateWidget
 
 
 class StudentForm(forms.ModelForm):
-    date_of_registration = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
 
     class Meta:
         model = Student
-        fields = ["first_name","last_name","father_name","phone","date_of_registration","gender","image","classs"]
-
-        # In forms.py
-        widgets = {
-            'classs': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
-        }
-
+        fields = ["first_name","father_name","phone","gender","image"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["first_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["last_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
+        {"class": "form-control ", "placeholder": ""}
         )
         self.fields["father_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
+        {"class": "form-control ", "placeholder": ""}
         )
         self.fields["phone"].widget.attrs.update(
-        {"class": "form-control", "placeholder": "در صورت نداشتن فیلد حالی گذاشته شود"}
+        {"class": "form-control ", "placeholder": "در صورت نداشتن فیلد حالی گذاشته شود"}
         )
         self.fields["gender"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
+        {"class": "form-control ", "placeholder": ""}
         )
         self.fields["image"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-
-class StudentWithoutClassForm(forms.ModelForm):
-    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker5",'class': 'form-control' }))
-    # date_for_notification = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker4",'class': 'form-control' }))
-
-    class Meta:
-        model = StudentWithoutClass
-        fields = ["first_name","last_name","father_name","phone","date","gender"]
-
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["first_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["last_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["father_name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["phone"].widget.attrs.update(
-        {"class": "form-control", "placeholder": "در صورت نداشتن فیلد حالی گذاشته شود"}
-        )
-        self.fields["gender"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
+        {"class": "form-control ", "placeholder": ""}
         )
 
 
 class Student_fess_infoForm(forms.ModelForm):
     date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker3",'class': 'form-control' }))
+    end_date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker4",'class': 'form-control' }))
 
     class Meta:
         model = Student_fess_info
-        fields = ["orginal_fees","give_fees","description","date"]
+        fields = ["description","date","end_date"]
 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["orginal_fees"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["give_fees"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
+
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
 
-
-class StudentGiveRemainMoneyForm(forms.ModelForm):
-    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker21",'class': 'form-control' }))
-
-    class Meta:
-        model = StudentGiveRemainMoney
-        fields = ["amount","description","date"]
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["amount"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["description"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
 
 class StudentImporvmentForm(forms.ModelForm):
     date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker21",'class': 'form-control' }))
