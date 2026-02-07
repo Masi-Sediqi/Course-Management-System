@@ -6,14 +6,11 @@ from jalali_date.widgets import AdminJalaliDateWidget
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ["name", "item_type","description"]
+        fields = ["name", "description"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields["name"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["item_type"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
         self.fields["description"].widget.attrs.update(

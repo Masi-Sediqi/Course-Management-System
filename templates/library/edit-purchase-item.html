@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+<div class="main-content pt-4" style="font-family: 'Vazirmatn', sans-serif;">
+  <div class="row">
+    <div class="col-md-12">
+      <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
+      </ul>
+      <div class="card">
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+
+            <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'library:edit_purchase_item' id=purchase.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="purchase">
+    
+                <!-- تاریخ -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تاریخ<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        {{ form.date }}
+                    </div>
+                </div>
+                
+                <!-- تامین کننده -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تامین کننده<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        {{ form.supplier }}
+                    </div>
+                </div>
+                
+                <!-- تعداد (Static Input) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تعداد<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="number" name="number" required value="{{ purchase.number }}">
+                    </div>
+                </div>
+                
+                <!-- قیمت فی (Static Input) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">قیمت فی<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="per_price" name="per_price" required min="0" step="0.01" value="{{ purchase.per_price }}">
+                    </div>
+                </div>
+                
+                <!-- قیمت کل (Calculated Automatically) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">قیمت کل</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control amount-field" id="total_price" name="total_price" readonly value="{{ purchase.total_price }}">
+                    </div>
+                </div>
+                
+                <!-- مقدار پرداخت شده (Static Input) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">مقدار پرداخت شده<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="paid_price" name="paid_price" required min="0" step="0.01" value="{{ purchase.paid_price }}">
+                    </div>
+                </div>
+                
+                <!-- مقدار باقی‌مانده (Calculated Automatically) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">مقدار باقی‌مانده</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control amount-field" id="remain_price" name="remain_price" readonly value="{{ purchase.remain_price }}">
+                    </div>
+                </div>
+                
+                <!-- توضیحات -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">توضیحات</label>
+                    <div class="col-sm-8">
+                        {{ form.description }}
+                    </div>
+                </div>
+                
+                <!-- Calculation Summary -->
+                <div class="col-12 calculation-result mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>تعداد:</strong> <span id="summary_number">0</span></p>
+                            <p class="mb-2"><strong>قیمت فی:</strong> <span id="summary_per_price">0</span></p>
+                            <p class="mb-0"><strong>قیمت کل:</strong> <span id="summary_total_price" class="text-success">0</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>پرداخت شده:</strong> <span id="summary_paid_price" class="text-primary">0</span></p>
+                            <p class="mb-0"><strong>باقی‌مانده:</strong> <span id="summary_remain_price" class="text-danger">0</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Warning Alert for Negative Remain -->
+                <div class="col-12">
+                    <div id="warning_alert" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle ml-2"></i>
+                        مقدار پرداخت شده بیشتر از قیمت کل است!
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="col-12 d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-secondary ml-2" onclick="window.history.back()">
+                        انصراف
+                    </button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-save ml-2"></i>ثبت خرید
+                    </button>
+                </div>
+            </form>
+
+            <!-- Date Picker Script -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    $('#datepicker3').datepicker({});
+                    
+                    // Get input elements
+                    const numberInput = document.getElementById('number');
+                    const perPriceInput = document.getElementById('per_price');
+                    const totalPriceInput = document.getElementById('total_price');
+                    const paidPriceInput = document.getElementById('paid_price');
+                    const remainPriceInput = document.getElementById('remain_price');
+                    const warningAlert = document.getElementById('warning_alert');
+                    
+                    // Get summary elements
+                    const summaryNumber = document.getElementById('summary_number');
+                    const summaryPerPrice = document.getElementById('summary_per_price');
+                    const summaryTotalPrice = document.getElementById('summary_total_price');
+                    const summaryPaidPrice = document.getElementById('summary_paid_price');
+                    const summaryRemainPrice = document.getElementById('summary_remain_price');
+                    
+                    // Format number function
+                    function formatNumber(num) {
+                        return new Intl.NumberFormat('fa-IR').format(num);
+                    }
+                    
+                    // Calculate total price function
+                    function calculateTotalPrice() {
+                        const number = parseFloat(numberInput.value) || 0;
+                        const perPrice = parseFloat(perPriceInput.value) || 0;
+                        const total = number * perPrice;
+                        
+                        totalPriceInput.value = total.toFixed(2);
+                        updateSummary();
+                        calculateRemainPrice();
+                    }
+                    
+                    // Calculate remaining price function
+                    function calculateRemainPrice() {
+                        const totalPrice = parseFloat(totalPriceInput.value) || 0;
+                        const paidPrice = parseFloat(paidPriceInput.value) || 0;
+                        const remain = totalPrice - paidPrice;
+                        
+                        remainPriceInput.value = remain.toFixed(2);
+                        
+                        // Show/hide warning
+                        if (remain < 0) {
+                            warningAlert.style.display = 'block';
+                            remainPriceInput.classList.add('is-invalid');
+                        } else {
+                            warningAlert.style.display = 'none';
+                            remainPriceInput.classList.remove('is-invalid');
+                        }
+                        
+                        updateSummary();
+                    }
+                    
+                    // Update summary function
+                    function updateSummary() {
+                        const number = parseFloat(numberInput.value) || 0;
+                        const perPrice = parseFloat(perPriceInput.value) || 0;
+                        const totalPrice = parseFloat(totalPriceInput.value) || 0;
+                        const paidPrice = parseFloat(paidPriceInput.value) || 0;
+                        const remainPrice = parseFloat(remainPriceInput.value) || 0;
+                        
+                        summaryNumber.textContent = formatNumber(number);
+                        summaryPerPrice.textContent = formatNumber(perPrice) + ' افغانی';
+                        summaryTotalPrice.textContent = formatNumber(totalPrice) + ' افغانی';
+                        summaryPaidPrice.textContent = formatNumber(paidPrice) + ' افغانی';
+                        summaryRemainPrice.textContent = formatNumber(remainPrice) + ' افغانی';
+                        
+                        // Color code remain price
+                        if (remainPrice > 0) {
+                            summaryRemainPrice.classList.add('text-danger');
+                            summaryRemainPrice.classList.remove('text-success');
+                        } else if (remainPrice < 0) {
+                            summaryRemainPrice.classList.add('text-danger');
+                            summaryRemainPrice.classList.remove('text-success');
+                        } else {
+                            summaryRemainPrice.classList.add('text-success');
+                            summaryRemainPrice.classList.remove('text-danger');
+                        }
+                    }
+                    
+                    // Add event listeners
+                    numberInput.addEventListener('input', calculateTotalPrice);
+                    perPriceInput.addEventListener('input', calculateTotalPrice);
+                    paidPriceInput.addEventListener('input', calculateRemainPrice);
+                    
+                    // Initialize calculations
+                    calculateTotalPrice();
+                    calculateRemainPrice();
+                });
+            </script>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div><!-- end of main-content -->
+</div>
+
+{% endblock %}

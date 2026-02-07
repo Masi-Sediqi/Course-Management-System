@@ -10,273 +10,830 @@
             <li>ارتقاع شاگرد</li>
         </ul>
     </div>
-      <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-  <script src="{% static 'js/sweet.js' %}"></script>
+    
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <script src="{% static 'js/sweet.js' %}"></script>
 
-  <script>
-    {% if messages %}
-    {% for message in messages %}
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-      title: "{{ message|escapejs }}",
-      showConfirmButton: false,
-      timer: 4000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
-    });
-    {% endfor %}
-    {% endif %}
-  </script>
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
+        {% endif %}
+    </script>
+    
     <div class="separator-breadcrumb border-top"></div>
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="card-title">
-                        <button id="pwa-install-btn" data-toggle="modal"
-                        data-target="#exampleModal">ارتقاع جدید {{ student.first_name }}</button>
-                          <a href="{% url 'students:student_detail' student.id %}" class="btn btn-secondary btn-lg m-1">
-    بازگشت
-  </a>
+                    <div class="card-title d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">سابقه ارتقاعات: {{ student.first_name }} {{ student.last_name }}</h5>
+                        <button id="pwa-install-btn" data-toggle="modal" data-target="#exampleModal" class="btn-add-improvement">
+                            <i class="bi bi-arrow-up-circle me-2"></i>ارتقاع جدید
+                        </button>
                     </div>
                 </div>
-
-                <div class="col-md-12 mb-4">
-                    <div class="card text-left">
-                        <div class="card-body">
-                            
-                            <div class="table-responsive">
-                                <div id="complex_header_table_wrapper"
-                                    class="dataTables_wrapper container-fluid dt-bootstrap4">
-                                 
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                          <div class="table-responsive">
-    <table class="display table table-striped table-bordered dataTable"
-           id="complex_header_table" style="width: 100%;">
-        <thead>
-            <tr>
-                <th>تاریخ ارتقاع</th>
-                <th>کتاب گذشته</th>
-                <th>کتاب جدید</th>
-                <th>تقدیر تامه</th>
-                <th>توضیحات</th>
-                <th>عملیات</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for record in records %}
-            <tr class="{% cycle 'odd' 'even' %}">
-                <td>{{ record.date }}</td>
-                <td>{{ record.past_class.name }}</td>
-                <td>{{ record.after_class.name }}</td>
-                <td>
-                    {% if record.file %}
-                        <a href="{{ record.file.url }}" target="_blank">Download</a>
-                    {% else %}
-                        No file
-                    {% endif %}
-                </td>
-                <td>{{ record.description|default:"-" }}</td>
-              <td>
-                      <div class="dropdown">
-                        <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton"
-                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
-                          style="max-height: 150px; overflow-y: auto;">
-                     
-                          <a class="dropdown-item text-info" href="{% url 'students:edit_student_improvement' record.id %}">تغیرات</a>
-                          
-
-                          <a class="dropdown-item text-info" data-toggle="modal"
-                          data-target="#deletedConfirmModal{{ record.id }}">حذف</a>
-                        </div>
-                      </div>
-                    </td>
-                  <!-- Delete Confirmation Modal -->
-                    <div class="modal fade" id="deletedConfirmModal{{ record.id }}" tabindex="-1"
-                         aria-labelledby="deleteModalLabel{{ record.id }}" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content text-center">
-                                <div class="modal-header">
-                                    <h5 class="modal-title w-100" id="deleteModalLabel{{ record.id }}">حذف کردن</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
+            </div>
+                        
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up-arrow me-2"></i>
+                            نقشه ارتقاعات: {{ student.first_name }} {{ student.last_name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if records %}
+                        <!-- Timeline/Improvement Map -->
+                        <div class="improvement-timeline">
+                            {% for record in records %}
+                            <div class="timeline-item {% cycle '' 'timeline-inverted' %}">
+                                <!-- Timeline Point -->
+                                <div class="timeline-point">
+                                    <div class="point-circle">
+                                        <i class="bi bi-arrow-up-circle"></i>
+                                    </div>
+                                    <div class="point-date">{{ record.date }}</div>
                                 </div>
-                                <div class="modal-body">
-                                    <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                    <div class="text-danger fw-bold mb-3">در حال حذف ...</div>
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">نخیر</button>
-                                        <a href="{% url 'students:delete_student_improvment' record.id %}" class="btn btn-danger">بلی، حذف کن</a>
+                                
+                                <!-- Timeline Content -->
+                                <div class="timeline-content">
+                                    <div class="timeline-card">
+                                        <!-- Header with Classes -->
+                                        <div class="card-header bg-transparent border-bottom">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="class-info">
+                                                    <span class="badge bg-info fs-6">
+                                                        <i class="bi bi-book me-1"></i>{{ record.past_class.name }}
+                                                    </span>
+                                                    <i class="bi bi-arrow-left mx-3 text-primary"></i>
+                                                    <span class="badge bg-success fs-6">
+                                                        <i class="bi bi-book-half me-1"></i>{{ record.after_class.name }}
+                                                    </span>
+                                                </div>
+                                                <div class="score-display">
+                                                    <span class="score-badge">
+                                                        <i class="bi bi-award me-1"></i>{{ record.number }}
+                                                        <small>/100</small>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Card Body -->
+                                        <div class="card-body">
+                                            <!-- File Section -->
+                                            {% if record.file %}
+                                            <div class="file-section mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-file-earmark-text text-primary fs-5 me-2"></i>
+                                                    <div>
+                                                        <a href="{{ record.file.url }}" target="_blank" class="text-decoration-none">
+                                                            <strong>تقدیرنامه</strong>
+                                                            <small class="text-muted ms-2">(برای دانلود کلیک کنید)</small>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Description -->
+                                            {% if record.description %}
+                                            <div class="description-section">
+                                                <h6 class="text-muted mb-2">
+                                                    <i class="bi bi-chat-left-text me-2"></i>توضیحات:
+                                                </h6>
+                                                <p class="mb-0 text-justify">{{ record.description }}</p>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Card Footer with Actions -->
+                                        <div class="card-footer bg-transparent border-top">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                               <div class="timeline-meta">
+                                                    <small class="text-muted d-flex align-items-center">
+                                                        <i class="bi bi-clock-history me-1"></i>
+                                                        <span>
+                                                            {{ record.created_at|date:"Y/m/d" }}
+                                                            <span class="mx-1">-</span>
+                                                            {{ record.created_at|date:"H:i" }}
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                                <div class="timeline-actions">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a href="{% url 'students:edit_student_improvement' record.id %}" 
+                                                        class="btn btn-outline-primary" title="ویرایش">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger" 
+                                                                data-toggle="modal" data-target="#deletedConfirmModal{{ record.id }}" 
+                                                                title="حذف">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Connecting Line -->
+                                {% if not forloop.last %}
+                                <div class="timeline-line"></div>
+                                {% endif %}
                             </div>
-                        </div>
-                    </div>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No improvement records found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
+                            
+                            <!-- Delete Confirmation Modal -->
+                            <div class="modal fade" id="deletedConfirmModal{{ record.id }}" tabindex="-1"
+                                aria-labelledby="deleteModalLabel{{ record.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title" id="deleteModalLabel{{ record.id }}">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>تأیید حذف
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <i class="bi bi-trash text-danger" style="font-size: 4rem;"></i>
+                                            <h5 class="mt-3">آیا از حذف این رکورد مطمئن هستید؟</h5>
+                                            <p class="text-muted">این عمل غیرقابل بازگشت است</p>
+                                        </div>
+                                        <div class="modal-footer justify-content-center">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                                            <a href="{% url 'students:delete_student_improvment' record.id %}" 
+                                            class="btn btn-danger">
+                                                <i class="bi bi-trash me-1"></i>حذف شود
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            {% endfor %}
+                            
+                            <!-- Start Point (Optional) -->
+                            <div class="timeline-item timeline-start">
+                                <div class="timeline-point">
+                                    <div class="point-circle bg-primary">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div class="point-date">شروع</div>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted mb-0">
+                                                <i class="bi bi-flag me-1"></i>
+                                                شروع مسیر یادگیری
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <div class="empty-state-icon mb-3">
+                                <i class="bi bi-graph-up text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">هنوز هیچ ارتقاعی ثبت نشده است</h5>
+                            <p class="text-muted mb-4">اولین قدم در مسیر پیشرفت این شاگرد را ثبت کنید</p>
+                            <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#exampleModal">
+                                <i class="bi bi-plus-circle me-2"></i>ثبت اولین ارتقاع
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                /* Timeline/Improvement Map Styles */
+                .improvement-timeline {
+                    position: relative;
+                    padding: 20px 0;
+                }
+                
+                .timeline-item {
+                    display: flex;
+                    margin-bottom: 30px;
+                    position: relative;
+                }
+                
+                .timeline-inverted {
+                    flex-direction: row-reverse;
+                }
+                
+                .timeline-point {
+                    flex: 0 0 100px;
+                    text-align: center;
+                    position: relative;
+                    z-index: 2;
+                }
+                
+                .point-circle {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    margin: 0 auto 10px;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                    transition: all 0.3s ease;
+                }
+                
+                .point-circle:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+                }
+                
+                .point-date {
+                    font-size: 0.85rem;
+                    color: #6c757d;
+                    font-weight: 500;
+                }
+                
+                .timeline-content {
+                    flex: 1;
+                    padding: 0 20px;
+                }
+                
+                .timeline-card {
+                    background: white;
+                    border: 1px solid #e9ecef;
+                    border-radius: 12px;
+                    box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+                    overflow: hidden;
+                    transition: all 0.3s ease;
+                }
+                
+                .timeline-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+                }
+                
+                .timeline-line {
+                    position: absolute;
+                    left: 50%;
+                    top: 60px;
+                    bottom: -30px;
+                    width: 2px;
+                    background: linear-gradient(to bottom, #667eea, #764ba2);
+                    transform: translateX(-50%);
+                    z-index: 1;
+                }
+                
+                .timeline-inverted .timeline-line {
+                    left: auto;
+                    right: 50%;
+                    transform: translateX(50%);
+                }
+                
+                /* Class badges */
+                .class-info .badge {
+                    padding: 8px 15px;
+                    font-size: 0.95rem;
+                    border-radius: 8px;
+                    display: inline-flex;
+                    align-items: center;
+                }
+                
+                /* Score badge */
+                .score-badge {
+                    background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+                    color: #333;
+                    padding: 6px 12px;
+                    border-radius: 20px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    display: inline-flex;
+                    align-items: center;
+                }
+                
+                .score-badge small {
+                    font-size: 0.8rem;
+                    opacity: 0.8;
+                }
+                
+                /* File section */
+                .file-section {
+                    background: #f8f9fa;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    border: 1px dashed #dee2e6;
+                }
+                
+                .file-section a:hover {
+                    color: #764ba2;
+                }
+                
+                /* Description section */
+                .description-section {
+                    background: #fff9e6;
+                    padding: 12px 15px;
+                    border-radius: 8px;
+                    border-right: 4px solid #ffd166;
+                }
+                
+                /* Start point */
+                .timeline-start .point-circle {
+                    background: #28a745;
+                }
+                
+                .timeline-start .timeline-card {
+                    background: #f8f9fa;
+                    border-style: dashed;
+                }
+                
+                /* Responsive Design */
+                @media (max-width: 768px) {
+                    .timeline-item, .timeline-inverted {
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    
+                    .timeline-point {
+                        margin-bottom: 20px;
+                    }
+                    
+                    .timeline-content {
+                        padding: 0;
+                        width: 100%;
+                    }
+                    
+                    .timeline-line {
+                        left: 50%;
+                        top: 60px;
+                        bottom: -30px;
+                        transform: translateX(-50%);
+                    }
+                    
+                    .timeline-inverted .timeline-line {
+                        left: 50%;
+                        right: auto;
+                        transform: translateX(-50%);
+                    }
+                    
+                    .class-info {
+                        flex-direction: column;
+                        text-align: center;
+                    }
+                    
+                    .class-info i.bi-arrow-right {
+                        transform: rotate(90deg);
+                        margin: 10px 0;
+                    }
+                    
+                    .timeline-meta, .timeline-actions {
+                        margin-top: 10px;
+                    }
+                }
+                
+                /* Card gradient header */
+                .bg-gradient-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                }
+                
+                /* Text justify for RTL */
+                .text-justify {
+                    text-align: justify;
+                    text-align-last: right;
+                    line-height: 1.8;
+                }
+                
+                /* Empty state */
+                .empty-state-icon {
+                    animation: float 3s ease-in-out infinite;
+                }
+                
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Animate timeline items on scroll
+                    const timelineItems = document.querySelectorAll('.timeline-item');
+                    
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.style.opacity = '1';
+                                entry.target.style.transform = 'translateY(0)';
+                            }
+                        });
+                    }, {
+                        threshold: 0.1
+                    });
+                    
+                    timelineItems.forEach(item => {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(20px)';
+                        item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        observer.observe(item);
+                    });
+                });
+            </script>
+
+        </div>
+    </div>
+</div>
+
+<!-- Full Screen Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" 
+     aria-labelledby="exampleModalLabel" aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    <i class="bi bi-arrow-up-circle me-2"></i>
+                    ارتقاع شاگرد: {{ student.first_name }} {{ student.last_name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10 col-xl-8">
+                            <form class="needs-validation" novalidate="novalidate"
+                                  action="{% url 'students:student_improvment' id=student.id %}"
+                                  method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <!-- Header Section -->
+                                <div class="text-center mb-5">
+                                    <div class="improvement-process mb-4">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <!-- Past Class -->
+                                            <div class="process-step text-center">
+                                                <div class="step-circle bg-info">
+                                                    <i class="bi bi-book text-white"></i>
+                                                </div>
+                                                <h6 class="mt-2">صنف قبلی</h6>
+
+                                                <div class="step-form">
+                                                    <select name="past_class" class="form-select" required>
+                                                        
+                                                        {% for fee in paid_fess_classes %}
+                                                            <option value="{{ fee.st_class.id }}">
+                                                                {{ fee.st_class.name }}
+                                                            </option>
+                                                        {% empty %}
+                                                            <option disabled>هیچ صنفی پیدا نشد</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Arrow -->
+                                           <div class="arrow-container mx-4">
+                                                <i class="bi bi-arrow-left-circle-fill text-primary" style="font-size: 2.5rem;"></i>
+                                            </div>
+                                            
+                                            <!-- Middle Class (Optional) -->
+                                            <div class="process-step text-center">
+                                                <div class="step-circle bg-warning">
+                                                    <i class="bi bi-arrow-left-right text-white"></i>
+                                                </div>
+                                                <h6 class="mt-2">تکمیل دوره</h6>
+                                                <div class="step-form">
+                                                    <input type="text" name="middle_class" class="form-control text-center" 
+                                                           placeholder="دوره تکمیل شده" style="min-width: 150px;">
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Arrow -->
+                                              <div class="arrow-container mx-4">
+                                                <i class="bi bi-arrow-left-circle-fill text-primary" style="font-size: 2.5rem;"></i>
+                                            </div>
+                                            
+                                            <!-- New Class -->
+                                            <div class="process-step text-center">
+                                                <div class="step-circle bg-success">
+                                                    <i class="bi bi-book-half text-white"></i>
+                                                </div>
+                                                <h6 class="mt-2">صنف جدید</h6>
+                                                <div class="step-form">
+                                                    {{ form.after_class }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                                                
+                                <!-- Form Fields -->
+                                <div class="row">
+                                    <!-- Date and Score in one row -->
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">
+                                                <i class="bi bi-calendar-date me-2"></i>
+                                                تاریخ ارتقاع <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-calendar"></i>
+                                                </span>
+                                                {{ form.date }}
+                                            </div>
+                                            <small class="form-text text-muted">تاریخ تکمیل دوره قبلی را وارد کنید</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">
+                                                <i class="bi bi-award me-2"></i>
+                                                نمره اخذ شده <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-percent"></i>
+                                                </span>
+                                                {{ form.number }}
+                                                <span class="input-group-text">از ۱۰۰</span>
+                                            </div>
+                                            <div class="progress mt-2" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                    style="width: 85%;" aria-valuenow="85" aria-valuemin="0" 
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Upload File - Full Width -->
+                                    <div class="col-12">
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">
+                                                <i class="bi bi-file-earmark-text me-2"></i>
+                                                تقدیر نامه / گواهینامه
+                                            </label>
+                                            <div class="file-upload-area">
+                                                <div class="upload-box" onclick="document.getElementById('id_file').click()">
+                                                    <i class="bi bi-cloud-upload" style="font-size: 3rem;"></i>
+                                                    <p class="mt-2" id="fileName">فایل را اینجا رها کنید یا کلیک کنید</p>
+                                                    <small class="text-muted">فرمت‌های مجاز: PDF, JPG, PNG (حداکثر 5MB)</small>
+                                                </div>
+                                                {{ form.file }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Description - Full Width -->
+                                    <div class="col-12">
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">
+                                                <i class="bi bi-chat-left-text me-2"></i>
+                                                توضیحات تکمیلی
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-pencil"></i>
+                                                </span>
+                                                {{ form.description }}
+                                            </div>
+                                            <small class="form-text text-muted">هرگونه توضیح اضافی درباره ارتقاع، عملکرد شاگرد یا توصیه‌های خاص</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="modal-footer sticky-bottom bg-white border-top py-3">
+                                    <div class="d-flex justify-content-between w-100">
+                                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                            <i class="bi bi-x-circle me-1"></i>انصراف
+                                        </button>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-check-circle me-1"></i>ذخیره ارتقاع
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row"></div><!-- end of main-content -->
-</div>
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="font-family: 'Vazirmatn', sans-serif;"
-aria-hidden="true">
-<div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">ارتقاع شاگرد</h5>
-            <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                    aria-hidden="true">×</span></button>
-        </div>
-        <div class="modal-body">
-            <form class="needs-validation" novalidate="novalidate"
-            action="{% url 'students:student_improvment' id=student.id %}"
-            method="post" enctype="multipart/form-data">
-                {% csrf_token %} 
-                <div class="row">
-                    <div class="col-12">
-                       
-                        <h5>معلومات ارتقاع </h5>
-                    </div>
-                    <!-- Personal Info -->
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="firstName1">تاریخ ارتقاع<span style="color: red;">*</span></label>
-                        {{ form.date }}
-                    </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="lastName1">صنف قبلی<span style="color: red;">*</span></label>
-                       {{form.past_class}}
-                    </div>                    
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="lastName1">نمره اخذ شده<span style="color: red;">*</span></label>
-                       {{form.number}}
-                    </div>                    
-                    <div class="col-md-6 form-group mb-3">
-                        <label for="lastName1">صنف بعدی<span style="color: red;">*</span></label>
-                        {{ form.after_class }}
-                    </div>
-                    <div class="col-md-6 form-group mb-3">
-                        <label for="email">تقدیر نامه </label>
-                        {{ form.file }}
-                    </div>
-                    <div class="col-md-12 form-group mb-3">
-                        <label for="phone">توضیحات</label>
-                        {{ form.description }}
-                    </div>
-            
-                    <!-- Submit Buttons -->
-                    <div class="col-12 modal-footer">
-                        <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
-                        <button class="btn btn-primary " type="submit">ذخیره کردن</button>
-                    </div>
-                </div>
-            </form>
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    $('#datepicker21').datepicker({});
-                });
-            </script>
-            
-        </div>
-    </div>
-</div>
 </div>
 
 <style>
-    /* Apply styles for all screen sizes */
-    #pwa-install-btn {
-        position: relative;
-        border-radius: 50px;
-        background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        /* Starting blend */
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        padding: 10px 25px;
-        margin-top: 10px;
-        font-family: XW_Zar_Bd_0;
-        z-index: 1;
-        overflow: hidden;
-        animation: centerColorBlend 6s ease-in-out infinite;
-        background-size: 200% 200%;
+    /* Button Styles */
+    .btn-add-improvement {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
         border: none;
+        border-radius: 10px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
-
-    /* Animated multicolor border */
-    #pwa-install-btn:after {
-        content: '';
-        position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
-        border-radius: 50px;
-        background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-        z-index: -1;
-        animation: animatedborder 3s linear infinite;
-        background-size: 300% 300%;
+    
+    .btn-add-improvement:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
     }
-
-    /* Border animation */
-    @keyframes animatedborder {
-        0% {
-            background-position: 0% 50%;
+    
+    /* Improvement Process Steps */
+    .process-step {
+        position: relative;
+        min-width: 180px;
+    }
+    
+    .step-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .arrow-container {
+        display: flex;
+        align-items: center;
+    }
+    
+    .step-form select, .step-form input {
+        width: 100%;
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    /* File Upload Area */
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.05);
+    }
+    
+    .upload-box {
+        color: #6c757d;
+    }
+    
+    /* Form Input Styling */
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    /* Modal Fullscreen Adjustments */
+    .modal-fullscreen .modal-content {
+        border-radius: 0;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .improvement-process .d-flex {
+            flex-direction: column;
         }
-
-        50% {
-            background-position: 100% 50%;
+        
+        .arrow-container {
+            transform: rotate(90deg);
+            margin: 1rem 0;
         }
-
-        100% {
-            background-position: 0% 50%;
+        
+        .process-step {
+            margin-bottom: 2rem;
         }
     }
-
-    /* Center gradient animation */
-    @keyframes centerColorBlend {
-        0% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
-
-        33% {
-            background: radial-gradient(circle at center, #ff0080, #00c3ff);
-        }
-
-        66% {
-            background: radial-gradient(circle at center, #00c3ff, #00ff72);
-        }
-
-        100% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
+    
+    /* Badge Styles */
+    .badge {
+        font-size: 0.85em;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+    
+    /* Table Hover Effect */
+    .table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize datepicker
+        $('#datepicker21').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+        
+        // File upload preview
+        document.getElementById('id_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'هیچ فایلی انتخاب نشده';
+            document.querySelector('.upload-box p').textContent = fileName;
+        });
+        
+        // Drag and drop for file upload
+        const uploadArea = document.querySelector('.file-upload-area');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            uploadArea.style.borderColor = '#667eea';
+            uploadArea.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+        }
+        
+        function unhighlight() {
+            uploadArea.style.borderColor = '#dee2e6';
+            uploadArea.style.backgroundColor = 'transparent';
+        }
+        
+        uploadArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('id_file').files = files;
+            document.querySelector('.upload-box p').textContent = files[0]?.name || 'فایل آپلود شد';
+        }
+    });
+</script>
 
 {% endblock %}

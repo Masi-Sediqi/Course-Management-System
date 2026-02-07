@@ -69,7 +69,8 @@
     </h4>
 
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+  <script src="{% static 'js/sweet.js' %}"></script>
     <script>
         {% if messages %}
             {% for message in messages %}

@@ -18,3 +18,17 @@ class suppliersForm(forms.ModelForm):
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
+
+class JDateForm(forms.Form):
+    date = forms.CharField(
+        label='تاریخ',
+        widget=AdminJalaliDateWidget(attrs={
+            "placeholder": "0/0/0000", 
+            "id": "datepicker3",
+            'class': 'form-control'
+        }),
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

@@ -132,7 +132,8 @@
     </h4>
 
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+  <script src="{% static 'js/sweet.js' %}"></script>
     <script>
         {% if messages %}
             {% for message in messages %}
@@ -196,7 +197,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-info font-weight-bold text-uppercase mb-1">مجموع آیتم‌ها</div>
+                            <div class="text-info font-weight-bold text-uppercase mb-1">مجموع کتاب </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ total_item.total_item|default:"0" }}
                             </div>
@@ -209,15 +210,15 @@
             </div>
         </div>
 
-        <!-- Remaining Items -->
+        <!-- Total Value -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card summary-card border-left-warning h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-warning font-weight-bold text-uppercase mb-1">موجودی باقی‌مانده</div>
+                            <div class="text-warning font-weight-bold text-uppercase mb-1">مقدار باقی‌مانده</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ total_item.remain_item|default:"0" }}
+                                {{ total_item.total_remain_item|default:"0" }} 
                             </div>
                         </div>
                         <div class="bg-warning text-white rounded-circle p-3">
@@ -272,7 +273,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-center gap-3">
                 <!-- Edit Button -->
-                <a href="#" class="btn btn-primary">
+                <a href="{% url 'library:edit_item' item.id %}" class="btn btn-primary">
                     <i class="fas fa-edit ml-2"></i>ویرایش
                 </a>
                 
@@ -282,7 +283,7 @@
                 </button>
                 
                 <!-- New Purchase Button -->
-                <a href="#" class="btn btn-success">
+                <a href="{% url 'library:purchase_item' id=item.id %}" class="btn btn-success">
                     <i class="fas fa-plus ml-2"></i>خرید جدید
                 </a>
                 
@@ -310,13 +311,14 @@
                         <tr>
                             <th scope="col" width="50">#</th>
                             <th scope="col">تاریخ خرید</th>
-                            <th scope="col">تعداد</th>
+                            <th scope="col">تعداد {{ item.get_buy_unit_display }}</th>
                             <th scope="col">قیمت فی</th>
                             <th scope="col">قیمت کل</th>
                             <th scope="col">پرداخت شده</th>
                             <th scope="col">باقی‌مانده</th>
                             <th scope="col">تامین کننده</th>
                             <th scope="col">توضیحات</th>
+                            <th scope="col">عملیات</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -324,7 +326,7 @@
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
                             <td>{{ purchase.date }}</td>
-                            <td>{{ purchase.number }}</td>
+                            <td>{{ purchase.number }} {{ item.get_buy_unit_display }} </td>
                             <td>{{ purchase.per_price }}</td>
                             <td class="font-weight-bold">{{ purchase.total_price }}</td>
                             <td class="price-paid">{{ purchase.paid_price }}</td>
@@ -333,10 +335,66 @@
                                 <span class="badge badge-info">{{ purchase.supplier.name|default:"-" }}</span>
                             </td>
                             <td>{{ purchase.description|truncatechars:20|default:"-" }}</td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'library:edit_purchase_item' purchase.id %}" 
+                                    class="btn btn-sm btn-outline-warning border-warning"
+                                    data-toggle="tooltip" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger border-danger"
+                                            data-toggle="modal"
+                                            data-target="#deleteConfirmModal{{ item.id }}"
+                                            data-toggle="tooltip" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                  
+                                </div>
+                            </td>
                         </tr>
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteConfirmModal{{ item.id }}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-light">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-exclamation-triangle text-danger ml-2"></i>
+                                            تأیید حذف
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <div class="mb-3">
+                                            <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-3" 
+                                                style="width: 60px; height: 60px;">
+                                                <i class="fas fa-trash fa-2x"></i>
+                                            </div>
+                                            <h6 class="mb-2">آیا از حذف این خرید مطمئن هستید؟</h6>
+                                            <p class="mb-1"><strong>"{{ item.name }}"</strong></p>
+                                            <p class="text-muted small mb-0">نوع: {{ item.get_item_type_display }}</p>
+                                        </div>
+                                        <div class="alert alert-warning alert-dismissible fade show py-2 mb-0" role="alert">
+                                            <i class="fas fa-exclamation-circle ml-1"></i>
+                                            <small>این عملیات قابل بازگشت نمی‌باشد.</small>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                            <i class="fas fa-times ml-1"></i> انصراف
+                                        </button>
+                                        <a href="{% url 'library:delete_purchase_item' purchase.id %}" class="btn btn-danger">
+                                            <i class="fas fa-trash ml-1"></i> حذف نهایی
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="text-center py-5">
+                            <td colspan="10" class="text-center py-5">
                                 <div class="empty-state">
                                     <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
                                     <h6 class="text-muted">هیچ خریدی یافت نشد</h6>
@@ -347,57 +405,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Item Modal -->
-<div class="modal fade" id="deleteItemModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">تأیید حذف آیتم</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="بستن">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                    <h5>آیا مطمئن هستید که می‌خواهید این آیتم را حذف کنید؟</h5>
-                </div>
-                
-                <div class="alert alert-warning">
-                    <div class="d-flex align-items-start">
-                        <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
-                        <div>
-                            <strong class="d-block mb-1">توجه:</strong>
-                            <ul class="mb-0 pl-3">
-                                <li>تمام اطلاعات آیتم شامل سوابق خرید حذف خواهد شد</li>
-                                <li>این عملیات قابل بازگشت نیست</li>
-                                <li>اگر موجودی دارید ابتدا موجودی را صفر کنید</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card border-danger mb-3">
-                    <div class="card-body">
-                        <h6 class="card-title text-danger">معلومات آیتم:</h6>
-                        <p class="mb-1"><strong>نام:</strong> {{ item.name }}</p>
-                        <p class="mb-1"><strong>نوع:</strong> {{ item.get_item_type_display }}</p>
-                        <p class="mb-0"><strong>موجودی:</strong> {{ total_item.remain_item|default:"0" }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times ml-2"></i>انصراف
-                </button>
-                <a href="#" class="btn btn-danger">
-                    <i class="fas fa-trash ml-2"></i>حذف آیتم
-                </a>
             </div>
         </div>
     </div>

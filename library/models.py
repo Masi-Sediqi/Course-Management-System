@@ -3,13 +3,9 @@ from home.models import suppliers
 import jdatetime
 
 class Item(models.Model):
-    ITEM_TYPE = (
-        ('book', 'کتاب'),
-        ('stationery', 'قرطاسیه'),
-    )
+
     date = models.CharField(max_length=13)
     name = models.CharField(max_length=150)
-    item_type = models.CharField(max_length=20, choices=ITEM_TYPE)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -19,7 +15,7 @@ class Item(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({self.get_item_type_display()})"
+        return f"{self.name}"
 
 
 class Purchase(models.Model):
@@ -40,7 +36,7 @@ class Purchase(models.Model):
 class TotalItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='total')
     total_item = models.IntegerField(default=0)
-    remain_item = models.FloatField(default=0)
+    total_remain_item = models.IntegerField(default=0)
     per_price = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now=True)
 

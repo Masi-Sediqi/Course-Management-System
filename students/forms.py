@@ -49,7 +49,7 @@ class StudentImporvmentForm(forms.ModelForm):
 
     class Meta:
         model = StudentImporvment
-        fields = ["date","description","file","after_class","past_class","number"]
+        fields = ["date","description","file","after_class","number"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["date"].widget.attrs.update(
@@ -61,13 +61,10 @@ class StudentImporvmentForm(forms.ModelForm):
         self.fields["file"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
-        self.fields["after_class"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
+        self.fields["after_class"].widget.attrs.update({
+            "class": "form-select"
+        })
         self.fields["number"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["past_class"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )
 
@@ -76,33 +73,10 @@ class BuyBookForm(forms.ModelForm):
 
     class Meta:
         model = BuyBook
-        fields = ["date","description","paid_amount"]
+        fields = ["date","description"]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["date"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["paid_amount"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["description"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
 
-class BuyStationeryForm(forms.ModelForm):
-    date = forms.CharField(label='تاریخ',widget=AdminJalaliDateWidget(attrs={"placeholder": "0/0/0000", "id": "datepicker22",'class': 'form-control' }))
-
-    class Meta:
-        model = BuyStationery
-        fields = ["date","description","paid_stationery_amount"]
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["date"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
-        self.fields["paid_stationery_amount"].widget.attrs.update(
-        {"class": "form-control", "placeholder": ""}
-        )
         self.fields["description"].widget.attrs.update(
         {"class": "form-control", "placeholder": ""}
         )

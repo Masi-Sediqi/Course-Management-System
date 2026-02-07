@@ -1,201 +1,677 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+
+    .supplier-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #4e73df;
+        border-top: none;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #3e63cf 0%, #1a3aae 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #d53929 0%, #a91f12 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 74, 59, 0.3);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .price-paid {
+        color: #1cc88a;
+        font-weight: bold;
+    }
+
+    .price-remain {
+        color: #e74a3b;
+        font-weight: bold;
+    }
+
+    .badge-book {
+        background-color: #36b9cc;
+        color: white;
+    }
+
+    .badge-stationery {
+        background-color: #1cc88a;
+        color: white;
+    }
+</style>
+
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
     <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد / </span> معلومات کامل استاد
+        <span class="text-muted fw-light">تامین‌کنندگان / </span> معلومات تامین‌کننده
     </h4>
-    
 
-    <div class="card shadow-sm border rounded-3">
-        <div class="card-body text-center">
-            <div class="row">
+    <!-- SweetAlert2 -->
+  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+  <script src="{% static 'js/sweet.js' %}"></script>
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
+        {% endif %}
+    </script>
 
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Financial"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0" style="font-size: 13px;">پول باقی مانده</p>
-                                <p class="text-danger text-24 line-height-1 mb-2"> {{ total_book_stationary_remain }} </p>
+    <!-- Supplier Header -->
+    <div class="card mb-4">
+        <div class="supplier-header">
+            <div class="row align-items-center">
+                <div class="col-md-9 text-right">
+                    <h3 class="mb-2">{{ supplier.name }}</h3>
+                    <p class="mb-1">
+                        <i class="fas fa-calendar ml-2"></i>
+                        تاریخ ثبت: {{ supplier.date }}
+                    </p>
+                    {% if supplier.description %}
+                    <p class="mb-0">
+                        <i class="fas fa-align-right ml-2"></i>
+                        توضیحات: {{ supplier.description|truncatechars:100 }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center"
+                        style="width: 120px; height: 120px; color: #4e73df; font-size: 48px; font-weight: bold;">
+                        {{ supplier.name|slice:":1" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <!-- Total Paid -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card border-left-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-success font-weight-bold text-uppercase mb-1">مجموع پرداخت‌شده</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_paid|default:"0" }}
                             </div>
+                        </div>
+                        <div class="bg-success text-white rounded-circle p-3">
+                            <i class="fas fa-money-check-alt fa-2x"></i>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Financial"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0" style="font-size: 13px;">پول پرداخت مانده</p>
-                                <p class="text-gray-600 text-24 line-height-1 mb-2"> {{ total_book_stationary_paid }} </p>
+            </div>
+        </div>
+
+        <!-- Total Remaining -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card border-left-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-warning font-weight-bold text-uppercase mb-1">مجموع باقی‌مانده</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ latest_supplier_colculation.remain_balance|default:"0" }}
                             </div>
+                        </div>
+                        <div class="bg-warning text-white rounded-circle p-3">
+                            <i class="fas fa-clock fa-2x"></i>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Total Amount -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card border-left-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-info font-weight-bold text-uppercase mb-1">مجموع کل مبالغ</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total|default:"0" }}
+                            </div>
+                        </div>
+                        <div class="bg-info text-white rounded-circle p-3">
+                            <i class="fas fa-calculator fa-2x"></i>
+                        </div>
+                    </div>
                 </div>
-            <!-- ✅ Student Image -->
-            <img 
-                src="{% static 'images/student/people-face-avatar-icon-cartoon-character-png.png' %}" 
-                alt="عکس استاد" 
-                class="rounded-circle mb-3" 
-                width="120" 
-                height="120"
-                style="object-fit: cover; border: 3px solid #ccc;"
-            >
+            </div>
+        </div>
+    </div>
 
-            <h5 class="card-title mb-4 text-primary border-bottom pb-2">محاسبات تامین کننده</h5>
-
-            <div class="card shadow-sm mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                <h6 class="mb-0">جزئیات تامین‌کننده</h6>
-                <button class="btn btn-sm btn-outline-secondary" id="toggleSupplierInfo" type="button">
-                <i class="fa-solid fa-chevron-up" id="supplierToggleIcon"></i>
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center gap-3">
+                <!-- Balance Button -->
+                {% if not supplier_colculation %}
+                <button class="btn btn-primary" data-toggle="modal" data-target="#balanceModal">
+                    <i class="fas fa-chart-line ml-2"></i> بیلانس
                 </button>
+                {% else %}
+                <button class="btn btn-primary" disabled>
+                    <i class="fas fa-chart-line ml-2"></i> بیلانس
+                </button>
+                {% endif %}
+
+                <button class="btn btn-success" data-toggle="modal" data-target="#paymentModal">
+                    <i class="fas fa-chart-line ml-2"></i> پرداخت
+                </button>
+
+                <!-- Edit Button -->
+                <a href="{% url 'home:edit_supplier' supplier.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit ml-2"></i>ویرایش
+                </a>
+
+                <!-- Delete Button with Modal -->
+                <button class="btn btn-danger" data-toggle="modal" data-target="#deleteSupplierModal">
+                    <i class="fas fa-trash ml-2"></i>حذف
+                </button>
+
+                <!-- Back Button -->
+                <a href="" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right ml-2"></i>بازگشت
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Combined Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">لیست تمام خریدها</h5>
+                <span class="badge badge-primary">
+                    تعداد: {{ item_purchased.count }}
+                </span>
             </div>
 
-            <div class="card-body p-0" id="supplierInfoSection">
-                <div class="table-responsive">
-                <table class="table table-bordered table-striped mb-0">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" width="50">#</th>
+                            <th scope="col">نوع محاسبه</th>
+                            <th scope="col">تاریخ</th>
+                            <th scope="col">آیتم خریداری</th>
+                            <th scope="col">مقدار کل</th>
+                            <th scope="col">مقدار پرداخت شده</th>
+                            <th scope="col">مقدار باقی‌مانده</th>
+                            <th scope="col">بیلانس عمومی</th>
+                            <th scope="col">توضیحات</th>
+                            <th scope="col" width="100">عملیات</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                    <tr>
-                        <th>نام مکمل</th>
-                        <td>{{ supplier.name }}</td>
-                    </tr>
-                    <tr>
-                        <th>تاریخ</th>
-                        <td>{{ supplier.date }}</td>
-                    </tr>
-                    <tr>
-                        <th style="width: 150px;">توضیحات</th>
-                        <td style="white-space: pre-wrap;">{{ supplier.description|default:"ندارد" }}</td>
-                    </tr>
+                        {% if supplier_colculation %}
+                        {% for calc in supplier_colculation %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>
+                                {% if calc.colculation_type %}
+                                {% if calc.colculation_type == 'بیلانس' %}
+                                <span class="badge badge-info">{{ calc.colculation_type }}</span>
+                                {% elif calc.colculation_type == 'پرداخت' %}
+                                <span class="badge badge-success">{{ calc.colculation_type }}</span>
+                                {% elif calc.colculation_type == 'خریداری' %}
+                                <span class="badge badge-warning">{{ calc.colculation_type }}</span>
+                                {% else %}
+                                <span class="badge badge-secondary">{{ calc.colculation_type }}</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ calc.date|default:"-" }}</td>
+                            <td>
+                                {% if calc.purchase_item %}
+                                <span class="badge badge-primary">{{ calc.purchase_item.item.name }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="font-weight-bold">
+                                {% if calc.total_price %}
+                                {{ calc.total_price }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-success font-weight-bold">
+                                {% if calc.paid_price %}
+                                {{ calc.paid_price }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-warning font-weight-bold">
+                                {% if calc.remain_price %}
+                                {{ calc.remain_price }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-danger font-weight-bold">
+                                {% if calc.remain_balance %}
+                                {{ calc.remain_balance }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if calc.purchase_item and calc.purchase_item.description %}
+                                {{ calc.purchase_item.description|truncatechars:20 }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+
+                            {% if only_one_balance and calc.colculation_type == 'بیلانس' %}
+
+                                <!-- فقط وقتی یک balance داریم -->
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{% url 'home:edit_balance' calc.id %}">
+                                            <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
+                                        </a>
+                                        <a class="dropdown-item text-danger" data-toggle="modal"
+                                            data-target="#deleteCalculationModal{{ calc.id }}">
+                                            <i class="fas fa-trash ml-2"></i>حذف
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="deleteCalculationModal{{ calc.id }}" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">تأیید حذف محاسبه</h5>
+                                                <button type="button" class="close" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <p>آیا مطمئن هستید که می‌خواهید این محاسبه بیلانس را حذف کنید؟</p>
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle ml-2"></i>
+                                                    این عملیات قابل بازگشت نیست.
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                    انصراف
+                                                </button>
+                                                <a href="{% url 'home:delete_balance' calc.id %}" class="btn btn-danger">
+                                                    حذف
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% elif calc.colculation_type == 'پرداخت' and latest_payment and calc.id == latest_payment.id %}
+
+                                <!-- فقط آخرین payment قابل ویرایش -->
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{% url 'home:edit_balance' calc.id %}">
+                                            <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
+                                        </a>
+                                        <a class="dropdown-item text-danger" data-toggle="modal"
+                                            data-target="#deleteCalculationModal{{ calc.id }}">
+                                            <i class="fas fa-trash ml-2"></i>حذف
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="deleteCalculationModal{{ calc.id }}" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">تأیید حذف محاسبه</h5>
+                                                <button type="button" class="close" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <p>آیا مطمئن هستید که می‌خواهید این محاسبه بیلانس را حذف کنید؟</p>
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle ml-2"></i>
+                                                    این عملیات قابل بازگشت نیست.
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                    انصراف
+                                                </button>
+                                                <a href="{% url 'home:delete_balance' calc.id %}" class="btn btn-danger">
+                                                    حذف
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% else %}
+
+                                <!-- بقیه همه قفل -->
+                                <span class="text-muted">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+
+                            {% endif %}
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-muted">هیچ محاسبه‌ای یافت نشد</h6>
+                                    <p class="text-muted small">برای این تامین‌کننده هنوز محاسبه‌ای ثبت نشده است</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
-                </div>
             </div>
 
-            </div>
+            <style>
+                .fa-lock {
+                    color: #6c757d;
+                    font-size: 0.9rem;
+                    opacity: 0.6;
+                }
 
-               <div class="row">
-      <!-- ✅ Left: Income -->
-      <div class="col-md-6 mb-4">
-        <div class="card border-success">
-          <div class="card-header bg-success text-white text-center fw-bold">
-            قرطاسیه
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered mb-0">
-                <thead class="table-success">
-                  <tr>
-                    <th>#</th>
-                    <th>تاریخ</th>
-                    <th>قرطاسیه</th>
-                    <th>مقدار کل</th>
-                    <th>مقدار پرداخت شده</th>
-                    <th>مقدار باقی مانده</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for i in combined_stationery %}
-                  <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ i.date }}</td>
-                    <td>{{ i.name }}</td>
-                    <td>{{ i.stationery_price }}</td>
-                    <td>{{ i.stationery_paid_price }}</td>
-                    <td>{{ i.stationery_remain_price }}</td>
-                  </tr>
-                  {% empty %}
-                  <tr><td colspan="6" class="text-center text-muted">هیچ قرطاسیه یافت نشد.</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+                .dropdown-menu {
+                    min-width: 140px;
+                    border-radius: 8px;
+                    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+                }
 
-      <!-- ✅ Right: Expenses -->
-      <div class="col-md-6 mb-4">
-        <div class="card border-info">
-          <div class="card-header bg-info text-white text-center fw-bold">
-            کتابها
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered mb-0">
-                <thead class="table-info">
-                  <tr>
-                    <th>#</th>
-                    <th>تاریخ</th>
-                    <th>نام کتاب</th>
-                    <th>مقدار کل</th>
-                    <th>مقدار پرداخت شده</th>
-                      <th>مقدار باقی مانده</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for e in combined_books %}
-                  <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ e.date }}</td>
-                    <td>{{ e.name }}</td>
-                    <td>{{ e.price }}</td>
-                    <td>{{ e.paid_price }}</td>
-                    <td>{{ e.remain_price }}</td>
-                  </tr>
-                  {% empty %}
-                  <tr><td colspan="6" class="text-center text-muted">هیچ کتاب یافت نشد.</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-           
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("toggleSupplierInfo");
-    const section = document.getElementById("supplierInfoSection");
-    const icon = document.getElementById("supplierToggleIcon");
+                .dropdown-item {
+                    padding: 0.5rem 1rem;
+                    font-size: 0.9rem;
+                }
 
-    toggleBtn.addEventListener("click", function() {
-        if (section.style.display === "none") {
-            section.style.display = "block";
-            icon.classList.replace("bi-chevron-down", "bi-chevron-up");
-        } else {
-            section.style.display = "none";
-            icon.classList.replace("bi-chevron-up", "bi-chevron-down");
-        }
-    });
-});
-</script>
-
-    
-            
+                .dropdown-item i {
+                    width: 20px;
+                }
+            </style>
         </div>
     </div>
-
-
-
-<!-- Search filter script -->
-<script>
-    document.getElementById("studentSearch").addEventListener("keyup", function () {
-        let value = this.value.toLowerCase();
-        let rows = document.querySelectorAll("#studentsTable tbody tr");
-
-        rows.forEach(function (row) {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(value) ? "" : "none";
-        });
-    });
-</script>
-
-
 </div>
 
+<!-- Balance Modal -->
+<div class="modal fade" id="balanceModal" tabindex="-1" role="dialog" style="font-family: 'Vazirmatn', sans-serif;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">بیلانس تامین‌کننده</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3 needs-validation" novalidate method="post"
+                    action="{% url 'home:supplier_detail' supplier.id %}">
+                    {% csrf_token %}
+                    <div class="col-12">
+                        <h5>معلومات بیلانس</h5>
+                    </div>
 
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">تاریخ</label>
+                        <div class="col-sm-8">
+                            {{ jdate_form.date }}
+                        </div>
+                    </div>
+
+                    <!-- مجموع پرداخت‌شده -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">آخرین مقدار پرداخت‌شده</label>
+                        <div class="col-sm-8">
+                            <input type="number" class="form-control" name="last_paid">
+                        </div>
+                    </div>
+
+                    <!-- مجموع باقی‌مانده -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">آخرین مقدار باقی‌مانده</label>
+                        <div class="col-sm-8">
+                            <input type="number" class="form-control" name="last_remain">
+                        </div>
+                    </div>
+
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                            بستن
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            ارسال
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Balance Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" style="font-family: 'Vazirmatn', sans-serif;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">بیلانس تامین‌کننده</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3 needs-validation" novalidate method="post"
+                    action="{% url 'home:supplier_detail' supplier.id %}">
+                    {% csrf_token %}
+                    <div class="col-12">
+                        <h5>معلومات بیلانس</h5>
+                    </div>
+
+                    <!-- مجموع پرداخت‌شده -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">آخرین مقدار پرداخت‌شده</label>
+                        <div class="col-sm-8">
+                            {{ jdate_form.date }}
+                        </div>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            $('#datepicker3').datepicker({
+
+                            });
+                        });
+                    </script>
+                    <!-- مجموع پرداخت‌شده -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">آخرین مقدار پرداخت‌شده</label>
+                        <div class="col-sm-8">
+                            <input type="number" class="form-control" name="last_paid">
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                            بستن
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            ارسال
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="form_type" value="payment">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Supplier Modal -->
+<div class="modal fade" id="deleteSupplierModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">تأیید حذف تامین‌کننده</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h5>آیا مطمئن هستید که می‌خواهید این تامین‌کننده را حذف کنید؟</h5>
+                </div>
+
+                <div class="alert alert-warning">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                        <div>
+                            <strong class="d-block mb-1">توجه:</strong>
+                            <ul class="mb-0 pl-3">
+                                <li>تمام اطلاعات تامین‌کننده حذف خواهد شد</li>
+                                <li>سوابق خریدهای مرتبط باقی می‌مانند</li>
+                                <li>این عملیات قابل بازگشت نیست</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-danger mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title text-danger">معلومات تامین‌کننده:</h6>
+                        <p class="mb-1"><strong>نام:</strong> {{ supplier.name }}</p>
+                        <p class="mb-1"><strong>تاریخ ثبت:</strong> {{ supplier.date }}</p>
+                        <p class="mb-0"><strong>تعداد خریدها:</strong> 0 </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times ml-2"></i>انصراف
+                </button>
+                <a href="{% url 'home:delete_supplier' supplier.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash ml-2"></i>حذف تامین‌کننده
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

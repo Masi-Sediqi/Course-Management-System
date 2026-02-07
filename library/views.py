@@ -59,7 +59,7 @@ def item_info(request, id):
     purchages = item.purchases.all()  # دسترسی به خریدهای مرتبط با این آیتم
     total_item = TotalItem.objects.filter(item=item).last()
     if total_item:
-        item_price = total_item.remain_item * total_item.per_price
+        item_price = total_item.total_item * total_item.per_price
     else:
         item_price = 0
 
@@ -72,47 +72,159 @@ def item_info(request, id):
     return render(request, 'library/item_info.html', context)
 
 
-def buy_book_again(request, id):
+def purchase_item(request, id):
     referer = request.META.get('HTTP_REFERER', '/')
     item = Item.objects.get(id=id)
+    item_balance = TotalItem.objects.filter(item=item).last()
+    if not item_balance:
+        item_balance = TotalItem.objects.create(item=item, total_item=0, total_remain_item=0, per_price=0)
+
+    total_balance = TotalBalance.objects.last()
+    if not total_balance:
+        total_balance = TotalBalance.objects.create(total_income=0, total_expenses=0, total_receivable=0, total_payable=0)
 
     if request.method == "POST":
         form = PurchaseForm(request.POST)
         if form.is_valid():
-            
-            return redirect(referer)
+            date = form.cleaned_data.get('date')
+            number = float(request.POST.get('number'))
+            per_price = request.POST.get('per_price')
+            total_price = request.POST.get('total_price')
+            paid_price = request.POST.get('paid_price')
+            remain_price = request.POST.get('remain_price')
+
+            instance = form.save(commit=False)
+            instance.item = item
+            instance.number = number
+            instance.per_price = per_price
+            instance.total_price = total_price
+            instance.paid_price = paid_price
+            instance.remain_price = remain_price
+            instance.save()
+
+            # Update TotalItem
+            item_balance.total_item += int(number)
+            item_balance.per_price = float(per_price)
+            item_balance.total_remain_item += int(number)
+            item_balance.save()
+
+            # Update TotalBalance
+            total_balance.total_expenses += float(paid_price)
+            total_balance.total_payable += float(remain_price)
+            total_balance.save()
+
+            latest_col = ColculationWithSupplier.objects.filter(supplier=instance.supplier).last()
+            if latest_col:
+                remain_balance = latest_col.remain_balance + float(remain_price)
+            else:
+                remain_balance = remain_price
+
+            ColculationWithSupplier.objects.create(
+                supplier=instance.supplier,
+                colculation_type='خریداری',
+                total_price=float(total_price),
+                paid_price=float(paid_price),
+                remain_price=float(remain_price),
+                remain_balance=remain_balance,
+                purchase_item=instance,
+                date=date
+            )
+
+            messages.success(request, "خرید با موفقیت ثبت شد.")
+            return redirect('library:item_info', id=item.id)
     else:
         form = PurchaseForm()
 
     context = {
         'form':form,
+        'item':item,
     }
     return render(request, 'library/buy-book-again.html', context)
 
-def delete_buy_again(request, id):
+def delete_purchase_item(request, id):
+    purchase = get_object_or_404(Purchase, id=id)
+    item = purchase.item
 
-    record = get_object_or_404(BuyBookAgain, id=id)
-    total_book = TotalBook.objects.get(book=record.book.id)
-    total_book.total_book -= record.number_of_book
-    total_book.total_amount -= record.number_of_book
-    total_book.save()
+    item_balance = TotalItem.objects.filter(item=item).last()
+    total_balance = TotalBalance.objects.last()
 
-    total_ex = TotalExpenses.objects.get(pk=1)
-    total_ex.total_amount -= record.paid_price
-    total_ex.save()
+    # Update TotalItem
+    item_balance.total_item -= purchase.number
+    item_balance.total_remain_item -= purchase.number
+    item_balance.save()
+
+    # Update TotalBalance
+    total_balance.total_expenses -= purchase.paid_price
+    total_balance.total_payable -= purchase.remain_price
+    total_balance.save()
+
     messages.success(request, 'ریکارد موفقانه حذف شد')
-    record.delete()
-    return redirect("library:buy_book_again", id=record.book.id)  # change this to your list view name
+    purchase.delete()
+    return redirect("library:item_info", id=item.id)  
+
+def edit_purchase_item(request, id):
+    purchase = get_object_or_404(Purchase, id=id)
+    item = purchase.item
+    item_balance = TotalItem.objects.filter(item=item).last()
+    total_balance = TotalBalance.objects.get(pk=1)
 
 
-def update_per_price(request, id):
-
-    total_book = get_object_or_404(TotalBook, id=id)
     if request.method == "POST":
-        per_price = request.POST.get("per_price")
-        if per_price:
-            total_book.per_price = per_price
-            total_book.save()
-            messages.success(request, "مقدار فی با موفقیت تغییر یافت.")
-    return redirect("library:buy_book_again", id=total_book.book.id)  # change to your view name
+        form = PurchaseForm(request.POST, instance=purchase)
+        if form.is_valid():
+            old_number = purchase.number
+            old_paid_price = purchase.paid_price
+            old_remain_price = purchase.remain_price
 
+            updated_purchase = form.save(commit=False)
+            new_number = int(request.POST.get('number'))
+            new_paid_price = float(request.POST.get('paid_price'))
+            new_remain_price = float(request.POST.get('remain_price'))
+
+            updated_purchase.number = new_number
+            updated_purchase.paid_price = new_paid_price
+            updated_purchase.remain_price = new_remain_price
+            updated_purchase.save()
+
+            # Update TotalItem
+            item_balance.total_item += (new_number - old_number)
+            item_balance.total_remain_item += (new_number - old_number)
+            item_balance.save()
+
+            # Update TotalBalance
+            total_balance.total_expenses += (new_paid_price - old_paid_price)
+            total_balance.total_payable += (new_remain_price - old_remain_price)
+            total_balance.save()
+
+            delete_old_colculation = ColculationWithSupplier.objects.get(purchase_item=purchase)
+            delete_old_colculation.delete()
+
+            # Update ColculationWithSupplier
+            latest_col = ColculationWithSupplier.objects.filter(supplier=updated_purchase.supplier).last()
+            if latest_col:
+                remain_balance = latest_col.remain_balance - old_remain_price + new_remain_price
+            else:
+                remain_balance = new_remain_price
+
+            ColculationWithSupplier.objects.create(
+                supplier=updated_purchase.supplier,
+                colculation_type='خریداری',
+                total_price=float(updated_purchase.total_price),
+                paid_price=float(updated_purchase.paid_price),
+                remain_price=float(updated_purchase.remain_price),
+                remain_balance=remain_balance,
+                purchase_item=updated_purchase,
+                date=updated_purchase.date
+            )
+
+            messages.success(request, "خرید با موفقیت ویرایش شد.")
+            return redirect('library:item_info', id=item.id)
+    else:
+        form = PurchaseForm(instance=purchase)
+
+    context = {
+        'form':form,
+        'purchase':purchase,
+        'item':item,
+    }
+    return render(request, 'library/edit-purchase-item.html', context)

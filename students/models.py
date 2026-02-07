@@ -33,40 +33,13 @@ class Student_fess_info(models.Model):
 class BuyBook(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     date = models.CharField(max_length=14, blank=False)
-    book = models.ManyToManyField(Item, blank=False)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     number_of_book = models.IntegerField(default=1)
+    per_price = models.FloatField()
     total_amount = models.FloatField()
     paid_amount = models.FloatField(blank=False)
     remain_amount = models.FloatField(default=0)
     description = models.TextField(blank=True)
-
-class BookRecord(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
-    book = models.ForeignKey(Item, on_delete=models.CASCADE)
-    buy_book = models.ForeignKey(BuyBook, on_delete=models.CASCADE)
-    date = models.CharField(max_length=14, blank=False)
-    number_of_book = models.IntegerField(default=1)
-    total_amount = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-class BuyStationery(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) 
-    date = models.CharField(max_length=14, blank=False)
-    stationery = models.ManyToManyField(Item)
-    number_of_stationery = models.IntegerField(default=1)
-    total_stationery_amount = models.FloatField()
-    paid_stationery_amount = models.FloatField(blank=False)
-    remain_amount = models.FloatField(default=0)
-    description = models.TextField(blank=True)
-
-class StationeryRecord(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
-    stationery = models.ForeignKey(Item, on_delete=models.CASCADE)
-    buy_stationery = models.ForeignKey(BuyStationery, on_delete=models.CASCADE)
-    date = models.CharField(max_length=14, blank=False)
-    number_of_stationery = models.IntegerField(default=1)
-    total_amount = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
 
 class StudentImporvment(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
@@ -76,8 +49,7 @@ class StudentImporvment(models.Model):
     after_class = models.ForeignKey(SubClass, on_delete=models.CASCADE, null=True, related_name="after_class")
     file = models.FileField(upload_to=f"student/", blank=True)
     description = models.TextField(blank=True)
-
-
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class StudentBalance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)

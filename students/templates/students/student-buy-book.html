@@ -3,414 +3,233 @@
 
 {% block content %}
 
-                <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-  <script src="{% static 'js/sweet.js' %}"></script>
-
-  <script>
-    {% if messages %}
-    {% for message in messages %}
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-      title: "{{ message|escapejs }}",
-      showConfirmButton: false,
-      timer: 4000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
-    });
-    {% endfor %}
-    {% endif %}
-  </script>
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.25);
+    }
+    
+    .item-card {
+        height: 100%;
+        border-left: 4px solid;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+    }
+    
+    .item-card.book {
+        border-left-color: #36b9cc;
+    }
+    
+    .item-card.stationery {
+        border-left-color: #1cc88a;
+    }
+    
+    .item-header {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        text-align: center;
+    }
+    
+    .item-body {
+        padding: 1.25rem;
+        text-align: center;
+    }
+    
+    .item-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 24px;
+    }
+    
+    .btn-buy {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-buy:hover {
+        background: linear-gradient(135deg, #ee5a52 0%, #d6453b 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-buy::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-buy:hover::before {
+        left: 100%;
+    }
+    
+    .item-name {
+        font-weight: 600;
+        color: #2e3a4d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        min-height: 60px;
+    }
+    
+    .item-date {
+        color: #888;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state {
+        padding: 4rem 1rem;
+        text-align: center;
+        background: #f8f9fc;
+        border-radius: 0.75rem;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 1.5rem;
+    }
+    
+    .back-btn {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+</style>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
     <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش عواید 
+        <span class="text-muted fw-light">داشبورد / </span>خرید کتاب برای شاگرد
     </h4>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="col-lg-12 text-right">
-                        
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal">
-                     خرید کتاب
-                </button>
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal1">
-                    خرید قرطاسیه
-                </button>
-                 <!-- Right-side back button -->
-  <a href="{% url 'students:student_detail' student.id %}" class="btn btn-secondary btn-lg m-1">
-    بازگشت
-  </a>
-        
-            </div>
-            <!-- Tabs Header -->
-            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">کتابها و قرطاسیه ها</a>
-                </li>
+    <!-- SweetAlert2 -->
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <script src="{% static 'js/sweet.js' %}"></script>
 
-            </ul>
-    
-            <!-- Tabs Content -->
-            <div class="tab-content mt-4" id="incomeTabsContent">
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>تاریخ</th>
-                                    <th>خرید</th>
-                                    <th>تعداد</th>
-                                    <th>مقدار مجموعی</th>
-                                    <th>مقدار پرداخت شده</th>
-                                    <th>مقدار باقی مانده</th>
-                                    <th>توضیحات</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                {% for i in all_records %}
-                                <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>{{ i.date }}</td>
-                                    <td>{{ i.type }}</td>
-                                    <td>
-                                        {% for name in i.names %}
-                                            <span class="badge bg-primary">{{ name }}</span>{% if not forloop.last %} + {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    <td>{{ i.total }}</td>
-                                    <td>{{ i.paid }}</td>
-                                    <td>{{ i.remain }}</td>
-                                    <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
-                                    <td>
-                                        <div class="dropdown">
-                                          <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                          </button>
-                                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
-                                            {% if i.type == "کتاب" %}
-                                            <a class="dropdown-item text-info" href="{{ i.more_info }}">معلومات کامل</a>
-                                            {% else %}
-                                            <a class="dropdown-item text-info" href="{{ i.more_info_stationery }}">معلومات کامل</a>
-                                            {% endif %}
-                                            <!-- <a class="dropdown-item text-info" href="{{ i.edit_link }}">تغیرات</a> -->
-                                            <a class="dropdown-item text-info" href="#">تغیرات</a>
-                                            <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                             حذف
-                                              </a>
-                                        </div>
-                                        </div>
-                                      </td>
-                                </tr>
-                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                      <div class="modal-content text-center">
-                                        <div class="modal-header">
-                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                          </button>
-                                        </div>
-                                        <div class="modal-body">
-                                          <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                          <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                          <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                            <a href="{{ i.delete_link }}" class="btn btn-danger">بلی، حذف کن</a>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
-                    </div>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- Header with Student Info -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title mb-1">شاگرد: {{ student.first_name }} {{ student.last_name }}</h5>
+                    <p class="text-muted mb-0">انتخاب کتاب برای خرید</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'students:student_detail' student.id %}" class="btn back-btn flex-fill mr-2">
+                        <i class="fas fa-arrow-right ml-2"></i>بازگشت به پروفایل
+                    </a>
+                    <a href="{% url 'students:student_purchased' student.id %}" class="btn back-btn flex-fill">
+                        <i class="fas fa-shopping-bag ml-2"></i>تمام خریداری ها
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-    
- 
-    
-</div>
 
-<!--  Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel"> بخش خرید کتاب</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
-            </div>
-            <div class="modal-body">
-                <form class="needs-validation" novalidate action="{% url 'students:buy_book' student.id %}" method="POST">
-                    {% csrf_token %}
-                
-                    <!-- Main fields (date, money, description) -->
-                    <div class="card shadow-sm rounded-3 mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">جزئیات خرید</h5>
-                
-                            <div class="row g-3">
-                                <!-- تاریخ -->
-                                <div class="col-md-6">
-                                    <label for="datepicker21" class="form-label">تاریخ</label>
-                                    {{ buy_book_form.date }}
-                                </div><script> document.addEventListener('DOMContentLoaded', function () { $('#datepicker21').datepicker({ }); }); </script>
-                
-                                <div class="col-md-6">
-                                    <label for="paid_amount" class="form-label">مقدار پول</label>
-                                    {{ buy_book_form.paid_amount }}
-                                </div>
-                                
-                                <div class="p-2 border rounded" style="max-height: 220px; overflow-y: auto;">
-                                    {% for tb in total_book %}
-                                        <div class="form-check d-flex align-items-center mb-2">
-                                            <input 
-                                                class="form-check-input book-checkbox" 
-                                                type="checkbox" 
-                                                name="books" 
-                                                value="{{ tb.id }}" 
-                                                data-price="{{ tb.book.per_book_price_for_buy }}"
-                                                id="book{{ tb.id }}">
-                                            
-                                            <label class="form-check-label ms-2 flex-grow-1" for="book{{ tb.id }}" style="padding-right: 20px;">
-                                                {{ tb.book.name }}
-                                                <span class="badge bg-secondary">موجودی: {{ tb.total_amount }}</span>
-                                                <span class="badge bg-info">قیمت: {{ tb.book.per_book_price_for_buy }}</span>
-                                            </label>
-                                
-                                            <input 
-                                                type="number" 
-                                                name="quantity_{{ tb.id }}" 
-                                                class="form-control form-control-sm d-none book-qty" 
-                                                min="1" 
-                                                max="{{ tb.total_amount }}" 
-                                                value="1" 
-                                                style="width: 90px;">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <strong>مجموع قیمت: <span id="totalPrice">0</span> افغانی</strong><br>
-                                    <strong>مبلغ باقی مانده: <span id="remainAmount">0</span> افغانی</strong>
-                                </div>
-                                <!-- توضیحات -->
-                                <div class="col-md-12">
-                                    <label for="description" class="form-label">تفصیل</label>
-                                    {{ buy_book_form.description }}
-                                </div>
-                            </div>
-                        </div>
+    <!-- Items Grid -->
+    {% if items %}
+    <div class="row">
+        {% for item in items %}
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="card item-card {% if 'کتاب' in item.name or 'book' in item.name|lower %}book{% else %}stationery{% endif %}">
+                <div class="item-header">
+                    <div class="item-icon">
+                        {% if 'کتاب' in item.name or 'book' in item.name|lower %}
+                            <i class="fas fa-book"></i>
+                        {% else %}
+                            <i class="fas fa-pen-fancy"></i>
+                        {% endif %}
                     </div>
+                    <h5 class="mb-0">{{ item.name|truncatechars:20 }}</h5>
+                </div>
                 
-                   
-                    <input type="hidden" name="form_type" value="buy-book">
-                
-                    <div class="text-end">
-                        <button class="btn btn-primary px-4" type="submit">
-                            ذخیره کردن
-                        </button>
+                <div class="item-body">
+                    <div class="item-date">
+                        <i class="fas fa-calendar ml-1"></i>
+                        {{ item.date }}
                     </div>
-                </form>
-                <script>
-                    document.addEventListener("DOMContentLoaded", () => {
                     
-                        const totalPriceElem = document.getElementById("totalPrice");
-                        const remainElem = document.getElementById("remainAmount");
-                        const paidInput = document.querySelector('input[name="paid_amount"]');
+                    <div class="item-description">
+                        {{ item.description|truncatechars:80|default:"بدون توضیحات" }}
+                    </div>
                     
-                        function updateTotalPrice() {
-                            let total = 0;
-                            document.querySelectorAll(".book-checkbox:checked").forEach(cb => {
-                                const qtyInput = cb.closest(".form-check").querySelector(".book-qty");
-                                const qty = parseInt(qtyInput.value) || 1;
-                                const price = parseFloat(cb.dataset.price) || 0;
-                                total += qty * price;
-                            });
-                            totalPriceElem.textContent = total;
-                            updateRemain();
-                        }
-                    
-                        function updateRemain() {
-                            const total = parseFloat(totalPriceElem.textContent) || 0;
-                            const paid = parseFloat(paidInput.value) || 0;
-                            const remain = total - paid;
-                            remainElem.textContent = remain >= 0 ? remain : 0;
-                        }
-                    
-                        // Toggle quantity input when checkbox is checked
-                        document.querySelectorAll(".book-checkbox").forEach(cb => {
-                            cb.addEventListener("change", function() {
-                                const qtyInput = this.closest(".form-check").querySelector(".book-qty");
-                                if (this.checked) {
-                                    qtyInput.classList.remove("d-none");
-                                } else {
-                                    qtyInput.classList.add("d-none");
-                                    qtyInput.value = 1;
-                                }
-                                updateTotalPrice();
-                            });
-                        });
-                    
-                        // Update total when quantity changes
-                        document.querySelectorAll(".book-qty").forEach(qtyInput => {
-                            qtyInput.addEventListener("input", updateTotalPrice);
-                        });
-                    
-                        // Update remaining when paid amount changes
-                        paidInput.addEventListener("input", updateRemain);
-                    });
-                    </script>
+                    <a href="{% url 'students:student_purchased_items' student.id item.id %}" class="btn btn-buy w-100">
+                        <i class="fas fa-shopping-cart ml-2"></i>خرید این کتاب
+                    </a>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-</div>
-
-<!--  Modal -->
-<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش خرید قرطاسیه</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
-            </div>
-            <div class="modal-body">
-                <form class="needs-validation" novalidate action="{% url 'students:buy_book' student.id %}" method="POST">
-                    {% csrf_token %}
-                
-                    <!-- Main fields (date, money, description) -->
-                    <div class="card shadow-sm rounded-3 mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">جزئیات خرید</h5>
-                
-                            <div class="row g-3">
-                                <!-- تاریخ -->
-                                <div class="col-md-6">
-                                    <label for="datepicker22" class="form-label">تاریخ</label>
-                                    {{ buy_stationery_form.date }}
-                                </div><script> document.addEventListener('DOMContentLoaded', function () { $('#datepicker22').datepicker({ }); }); </script>
-                
-                                <div class="col-md-6">
-                                    <label for="paid_stationery_amount" class="form-label">مقدار پول</label>
-                                    {{ buy_stationery_form.paid_stationery_amount }}
-                                </div>
-                                
-                                <div class="p-2 border rounded" style="max-height: 220px; overflow-y: auto;">
-                                    {% for s in allStationeryItem %}
-                                        <div class="form-check d-flex align-items-center mb-2">
-                                            <input 
-                                                class="form-check-input stationery-checkbox" 
-                                                type="checkbox" 
-                                                name="stationery" 
-                                                value="{{ s.id }}" 
-                                                data-price="{{ s.per_price  }}"
-                                                id="stationery{{ s.id }}">
-                                            
-                                            <label class="form-check-label ms-2 flex-grow-1" for="stationery{{ s.id }}" style="padding-right: 20px;">
-                                                {{ s.stationery.name }}
-                                                <span class="badge bg-secondary">موجودی: {{ s.total_stationery }}</span>
-                                                <span class="badge bg-info">قیمت: {{ s.stationery.per_price_for_buy }}</span>
-                                            </label>
-                                
-                                            <input 
-                                                type="number" 
-                                                name="quantity_{{ s.id }}" 
-                                                class="form-control form-control-sm d-none stationery-qty" 
-                                                min="1" 
-                                                max="{{ s.total_stationery }}" 
-                                                value="1" 
-                                                style="width: 90px;">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <strong>مجموع قیمت: <span id="stationeryTotalPrice">0</span> افغانی</strong><br>
-                                    <strong>مبلغ باقی مانده: <span id="stationeryRemainAmount">0</span> افغانی</strong>
-                                </div>
-                                
-                                <!-- توضیحات -->
-                                <div class="col-md-12">
-                                    <label for="description" class="form-label">تفصیل</label>
-                                    {{ buy_stationery_form.description }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                
-                   
-                    <div class="text-end">
-                        <button class="btn btn-primary px-4" type="submit">
-                            ذخیره کردن
-                        </button>
-                    </div>
-                </form>
-                <script>
-                    document.addEventListener("DOMContentLoaded", () => {
-                        const totalPriceElem = document.getElementById("stationeryTotalPrice");
-                        const remainElem = document.getElementById("stationeryRemainAmount");
-                        const paidInput = document.querySelector('input[name="paid_stationery_amount"]');
-                    
-                        function updateTotalPrice() {
-                            let total = 0;
-                            document.querySelectorAll(".stationery-checkbox:checked").forEach(cb => {
-                                const qtyInput = cb.closest(".form-check").querySelector(".stationery-qty");
-                                const qty = parseInt(qtyInput.value) || 1;
-                                const price = parseFloat(cb.dataset.price) || 0;
-                                total += qty * price;
-                            });
-                            totalPriceElem.textContent = total;
-                            updateRemain();
-                        }
-                    
-                        function updateRemain() {
-                            const total = parseFloat(totalPriceElem.textContent) || 0;
-                            const paid = parseFloat(paidInput.value) || 0;
-                            const remain = total - paid;
-                            remainElem.textContent = remain >= 0 ? remain : 0;
-                        }
-                    
-                        document.querySelectorAll(".stationery-checkbox").forEach(cb => {
-                            cb.addEventListener("change", function() {
-                                const qtyInput = this.closest(".form-check").querySelector(".stationery-qty");
-                                qtyInput.classList.toggle("d-none", !this.checked);
-                                if (!this.checked) qtyInput.value = 1;
-                                updateTotalPrice();
-                            });
-                        });
-                    
-                        document.querySelectorAll(".stationery-qty").forEach(qtyInput => {
-                            qtyInput.addEventListener("input", updateTotalPrice);
-                        });
-                    
-                        paidInput.addEventListener("input", updateRemain);
-                    });
-                    </script>
-            </div>
-        </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <h4 class="text-muted mb-3">هیچ کتابی یافت نشد</h4>
+        <p class="text-muted">در حال حاضر هیچ کتابی برای خرید موجود نیست</p>
     </div>
+    {% endif %}
 </div>
 
 {% endblock %}

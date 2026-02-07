@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        padding: 1.5rem;
+    }
+
+    .back-btn {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+    }
+
+    .back-btn:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #17a673 0%, #13895c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(28, 200, 138, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #e74a3b 0%, #d52a1e 100%);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #d52a1e 0%, #b3241a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(231, 74, 59, 0.3);
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-paid {
+        background-color: rgba(28, 200, 138, 0.15);
+        color: #1cc88a;
+    }
+
+    .status-remain {
+        background-color: rgba(231, 74, 59, 0.15);
+        color: #e74a3b;
+    }
+
+    .status-partial {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+    }
+
+    th {
+        background-color: #f8f9fc;
+        border-bottom: 2px solid #e3e6f0;
+        color: #4e73df;
+        font-weight: 600;
+        padding: 1rem;
+    }
+
+    td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / </span>خرید کتاب برای شاگرد
+    </h4>
+
+    <!-- SweetAlert2 -->
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <script src="{% static 'js/sweet.js' %}"></script>
+
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title mb-1">شاگرد: {{ student.first_name }} {{ student.last_name }}</h5>
+                    <p class="text-muted mb-0">لیست خرید کتاب‌ها</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'students:student_detail' student.id %}" class="btn back-btn flex-fill mr-2">
+                        <i class="fas fa-arrow-right ml-2"></i>بازگشت به پروفایل
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BuyBook Records Table -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>کتاب</th>
+                        <th>تعداد</th>
+                        <th>قیمت فی</th>
+                        <th>مجموع کل</th>
+                        <th>پرداخت شده</th>
+                        <th>باقی‌مانده</th>
+                        <th>وضعیت</th>
+                        <th>توضیحات</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for buybook in purchased_books %}
+                    <tr>
+                        <td>{{ buybook.date }}</td>
+                        <td>{{ buybook.item.name }}</td>
+                        <td>{{ buybook.number_of_book }}</td>
+                        <td class="">{{ buybook.per_price|floatformat:0 }} افغانی</td>
+                        <td class="">{{ buybook.total_amount|floatformat:0 }} افغانی</td>
+                        <td class="">{{ buybook.paid_amount|floatformat:0 }} افغانی</td>
+                        <td class="">{{ buybook.remain_amount|floatformat:0 }} افغانی</td>
+                        <td>
+                            {% if buybook.remain_amount == 0 %}
+                            <span class="status-badge status-paid">پرداخت کامل</span>
+                            {% elif buybook.paid_amount == 0 %}
+                            <span class="status-badge status-remain">پرداخت نشده</span>
+                            {% else %}
+                            <span class="status-badge status-partial">پرداخت جزئی</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if buybook.description %}
+                            <span title="{{ buybook.description }}">{{ buybook.description|truncatechars:20 }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <!-- Edit Button -->
+                                <a href="{% url 'students:edit_student_purchased_items' buybook.id %}" class="btn btn-edit" title="ویرایش">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger border-danger"
+                                    data-toggle="modal" data-target="#deleteConfirmModal{{ buybook.id }}"
+                                    data-toggle="tooltip" title="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <div class="modal fade" id="deleteConfirmModal{{ buybook.id }}" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-light">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-exclamation-triangle text-danger ml-2"></i>
+                                        تأیید حذف
+                                    </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <div class="mb-3">
+                                        <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-3"
+                                            style="width: 60px; height: 60px;">
+                                            <i class="fas fa-trash fa-2x"></i>
+                                        </div>
+                                        <h6 class="mb-2">آیا از حذف این خرید مطمئن هستید؟</h6>
+                                        <p class="mb-1"><strong>"{{ buybook.item.name }}"</strong></p>
+                                    </div>
+                                    <div class="alert alert-warning alert-dismissible fade show py-2 mb-0" role="alert">
+                                        <i class="fas fa-exclamation-circle ml-1"></i>
+                                        <small>این عملیات قابل بازگشت نمی‌باشد.</small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                        <i class="fas fa-times ml-1"></i> انصراف
+                                    </button>
+                                    <a href="{% url 'students:delete_student_purchased_items' buybook.id %}"
+                                        class="btn btn-danger">
+                                        <i class="fas fa-trash ml-1"></i> حذف نهایی
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h5 class="text-muted mt-3">هیچ رکورد خریدی یافت نشد</h5>
+                            <p class="text-muted">هنوز کتابی توسط این شاگرد خریداری نشده است</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

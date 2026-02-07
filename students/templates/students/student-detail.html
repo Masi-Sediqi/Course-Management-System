@@ -269,7 +269,11 @@
                     </a>
 
                     <!-- Balance Button -->
-                    <a href="#" class="btn btn-balance btn-gradient" data-toggle="modal" data-target="#balanceModal">
+                    <a href="#"
+                    class="btn btn-balance btn-gradient {% if has_balance %}disabled{% endif %}"
+                    {% if not has_balance %}
+                        data-toggle="modal" data-target="#balanceModal"
+                    {% endif %}>
                         <i class="fas fa-chart-line ml-2"></i> آخرین بیلانس
                     </a>
 

@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.25);
+    }
+    
+    .calculation-result {
+        background: #f8f9fc;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e3e6f0;
+    }
+    
+    .amount-field {
+        background-color: #f8f9fc !important;
+        font-weight: 600;
+    }
+    
+    .warning-alert {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .back-btn {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+    
+    .item-info-card {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .item-info-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2e3a4d;
+    }
+    
+    .required-star {
+        color: #ff6b6b;
+        margin-right: 4px;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / </span>خرید کتاب برای شاگرد
+    </h4>
+
+    <!-- SweetAlert2 -->
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <script src="{% static 'js/sweet.js' %}"></script>
+
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- Header with Student and Item Info -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-1">شاگرد: {{ student.first_name }} {{ student.last_name }}</h5>
+                    <p class="text-muted mb-0">فرم خرید کتاب</p>
+                </div>
+                <a href="#" onclick="window.history.back()" class="btn back-btn">
+                    <i class="fas fa-arrow-right ml-2"></i>بازگشت 
+                </a>
+            </div>
+            
+            <!-- Item Information -->
+            <div class="item-info-card text-center">
+                <i class="fas fa-book"></i>
+                <h4>{{ item_id.name }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Form -->
+    <div class="card">
+        <div class="card-body">
+            <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'students:edit_student_purchased_items' purchase.id %}">
+                {% csrf_token %}
+                
+                <!-- Date -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">
+                        <span class="required-star">*</span>تاریخ
+                    </label>
+                    <div class="col-sm-8">
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.date.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Amount -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">
+                        <span class="required-star">*</span>تعداد
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="number" 
+                            class="form-control" 
+                            id="amount" 
+                            name="amount" 
+                            required 
+                            min="1"
+                            value="{{ purchase.number_of_book }}">
+                    </div>
+                </div>
+                
+                <!-- Per Price -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">
+                        <span class="required-star">*</span>قیمت فی
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="number" 
+                            class="form-control" 
+                            id="per_price" 
+                            name="per_price" 
+                            required 
+                            min="0" 
+                            step="0.01"
+                            value="{{ purchase.per_price }}">
+                    </div>
+                </div>
+                
+                <!-- Total Price (Calculated) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">قیمت کل</label>
+                    <div class="col-sm-8">
+                        <input type="text" 
+                            class="form-control amount-field" 
+                            id="total_price" 
+                            name="total_price"
+                            readonly
+                            value="{{ purchase.total_amount }}">
+                    </div>
+                </div>
+                
+                <!-- Paid Price -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">
+                        <span class="required-star">*</span>مقدار پرداخت شده
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="number" 
+                            class="form-control" 
+                            id="paid_price" 
+                            name="paid_price" 
+                            required 
+                            min="0" 
+                            step="0.01"
+                            value="{{ purchase.paid_amount }}">
+                    </div>
+                </div>
+                
+                <!-- Remain Price (Calculated) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">مقدار باقی‌مانده</label>
+                    <div class="col-sm-8">
+                        <input type="text" 
+                            class="form-control amount-field" 
+                            id="remain_price" 
+                            name="remain_price"
+                            value="{{ purchase.remain_amount }}">
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label form-label">توضیحات</label>
+                    <div class="col-sm-8">
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.description.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Simplified Balances Information -->
+                <div class="col-12 mb-4">
+                    <div class="alert alert-info p-3">
+                        <p class="mb-0">
+                            <strong>موجودی کتاب:</strong> 
+                            {{ total_item_balance|default:"0" }} افغانی
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Warning Alert for Negative Remain -->
+                <div class="col-12">
+                    <div id="warning_alert" class="alert alert-warning warning-alert" style="display: none;">
+                        <i class="fas fa-exclamation-triangle ml-2"></i>
+                        مقدار پرداخت شده بیشتر از قیمت کل است! فرم قفل شده است.
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="col-12 d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-secondary ml-2" onclick="window.history.back()">
+                        انصراف
+                    </button>
+                    <button class="btn btn-primary" type="submit" id="submit_button">
+                        <i class="fas fa-save ml-2"></i>ثبت خرید
+                    </button>
+                </div>
+            </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                $('#datepicker21').datepicker({});
+                });
+            </script>
+            <script>
+                // Get form elements
+                const amountField = document.getElementById('amount');
+                const perPriceField = document.getElementById('per_price');
+                const paidPriceField = document.getElementById('paid_price');
+                const submitButton = document.getElementById('submit_button');
+                const warningAlert = document.getElementById('warning_alert');
+                
+                // Calculate total price when amount or per price changes
+                amountField.addEventListener('input', calculateTotal);
+                perPriceField.addEventListener('input', calculateTotal);
+                paidPriceField.addEventListener('input', calculateRemain);
+                
+                function calculateTotal() {
+                    const amount = parseFloat(amountField.value) || 0;
+                    const perPrice = parseFloat(perPriceField.value) || 0;
+                    const totalPrice = amount * perPrice;
+                    
+                    document.getElementById('total_price').value = totalPrice.toFixed(2);
+                    calculateRemain();
+                }
+                
+                function calculateRemain() {
+                    const totalPrice = parseFloat(document.getElementById('total_price').value) || 0;
+                    const paidPrice = parseFloat(paidPriceField.value) || 0;
+                    const remainPrice = totalPrice - paidPrice;
+                    
+                    document.getElementById('remain_price').value = remainPrice.toFixed(2);
+                    
+                    // Check if paid price exceeds total price
+                    if (paidPrice > totalPrice) {
+                        // Show warning
+                        warningAlert.style.display = 'block';
+                        
+                        // Disable form submission
+                        submitButton.disabled = true;
+                        submitButton.classList.remove('btn-primary');
+                        submitButton.classList.add('btn-secondary');
+                        
+                        // Disable all input fields except paid_price (so user can fix it)
+                        disableFormFields(true);
+                        paidPriceField.disabled = false; // Keep paid price editable to fix the issue
+                    } else {
+                        // Hide warning
+                        warningAlert.style.display = 'none';
+                        
+                        // Enable form submission
+                        submitButton.disabled = false;
+                        submitButton.classList.remove('btn-secondary');
+                        submitButton.classList.add('btn-primary');
+                        
+                        // Enable all form fields
+                        disableFormFields(false);
+                    }
+                }
+                
+                function disableFormFields(disable) {
+                    // Get all input, textarea, and select fields except paid_price
+                    const formFields = document.querySelectorAll('input:not(#paid_price), textarea, select');
+                    
+                    formFields.forEach(field => {
+                        field.disabled = disable;
+                    });
+                }
+                
+                // Initialize form state on page load
+                calculateRemain();
+            </script>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

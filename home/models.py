@@ -16,12 +16,18 @@ class suppliers(models.Model):
     def __str__(self):
         return self.name
     
-class Remaining(models.Model):
+class ColculationWithSupplier(models.Model):
+    COL_TYPE = [
+        ('بیلانس', 'بیلانس'),
+        ('پرداخت', 'پرداخت'),
+        ('خریداری', 'خریداری'),
+    ]
     supplier = models.ForeignKey(suppliers, on_delete=models.CASCADE)
-    total_amount = models.FloatField()
+    colculation_type = models.CharField(max_length=100, choices=COL_TYPE, blank=True, null=True)
+    total_price = models.FloatField(default=0, blank=True, null=True)
+    paid_price = models.FloatField(default=0, blank=True, null=True)
+    remain_price = models.FloatField(default=0, blank=True, null=True)
+    remain_balance = models.FloatField(blank=True,null=True,verbose_name='بیلانس باقی‌مانده')
+    purchase_item = models.ForeignKey('library.Purchase', on_delete=models.CASCADE, blank=True, null=True)
+    date = models.CharField(max_length=14, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        if self.total_amount < 0:
-            self.total_amount = 0
-        super().save(*args, **kwargs)

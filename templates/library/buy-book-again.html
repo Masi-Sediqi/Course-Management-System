@@ -3,347 +3,310 @@
 
 {% block content %}
 
-<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-<script src="{% static 'js/sweet.js' %}"></script>
-
-<script>
-  {% if messages %}
-  {% for message in messages %}
-  Swal.fire({
-    toast: true,
-    position: 'top-end',
-    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-    title: "{{ message|escapejs }}",
-    showConfirmButton: false,
-    timer: 4000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener('mouseenter', Swal.stopTimer)
-      toast.addEventListener('mouseleave', Swal.resumeTimer)
+<style>
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
     }
-  });
-  {% endfor %}
-  {% endif %}
-</script>
+    
+    .form-control {
+        border-radius: 0.35rem;
+        border: 1px solid #d1d3e2;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #3e63cf 0%, #1a3aae 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #0e8fff 0%, #3bc91f 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .amount-field {
+        font-weight: bold;
+        font-size: 1.1rem;
+        background-color: #f8f9fc;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+    
+    .calculation-result {
+        background-color: #f8f9fc;
+        border-radius: 0.35rem;
+        padding: 1rem;
+        border-left: 4px solid #4e73df;
+    }
+</style>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
     <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش خریداری جدید 
+        <span class="text-muted fw-light">کتابخانه / </span> فورم خریداری
     </h4>
 
+    <!-- SweetAlert2 -->
+    <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+    <script src="{% static 'js/sweet.js' %}"></script>
 
-    <div class="row">
-        <!-- ICON BG-->
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Add-User"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">مقدار کُل</p>
-                        <p class="lead text-success text-24 mb-2">{{total_book.total_book}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Financial"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">فروخته شده</p>
-                        <p class="lead text-danger text-24 mb-2">{{get_total_expenses.total_amount}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">باقی مانده</p>
-                        <p class="lead text-primary text-24 mb-2">{{total_book.total_amount}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-<!-- Card -->
-        <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4" 
-                style="cursor:pointer;" 
-                data-toggle="modal" 
-                data-target="#perPriceModal">
-                <div class="card-body text-center">
-                    <i class="i-Checkout-Basket"></i>
-                    <div class="content">
-                        <p class="text-muted mt-2 mb-0">مقدار فی</p>
-                        <p class="lead text-primary text-24 mb-2">{{ total_book.per_price }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
 
-        <!-- Modal -->
-        <div class="modal fade" id="perPriceModal" tabindex="-1" role="dialog" aria-labelledby="perPriceModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-            <form method="POST" action="{% url 'library:update_per_price' total_book.id %}">
-                {% csrf_token %}
-                <div class="modal-header">
-                <h5 class="modal-title" id="perPriceModalLabel">تغییر مقدار فی</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                </div>
-
-                <div class="modal-body">
-                <div class="form-group">
-                    <label>مقدار جدید</label>
-                    <input type="number" name="per_price" class="form-control" value="{{ total_book.per_price }}" required>
-                </div>
-                </div>
-
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">بستن</button>
-                <button type="submit" class="btn btn-primary">ذخیره</button>
-                </div>
-            </form>
-    </div>
-  </div>
-</div>
-
-    </div>
-
-
+    <!-- Purchase Form Card -->
     <div class="card">
         <div class="card-body">
-            <div class="col-lg-12 text-right">
-                        
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal">
-                   خریداری جدید "{{ book.name }}"
-                </button>
-              
-        
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">معلومات خرید</h5>
+                <a href="{% url 'library:library_view' %}" class="btn btn-secondary text-white">
+                    <i class="fas fa-arrow-right ml-2"></i>بازگشت
+                </a>
             </div>
-            <!-- Tabs Header -->
-            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab">خرید</a>
-                </li>
-            </ul>
+            
+            <!-- Purchase Form -->
+            <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'library:purchase_item' id=item.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="purchase">
     
-            <!-- Tabs Content -->
-            <div class="tab-content mt-4" id="incomeTabsContent">
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-                    <p>در بخش پایین، معلومات تمام خریداری کتاب {{ book.name }} را مشاهده میکنید.</p>
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive shadow rounded">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-dark text-center">
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">تاریخ</th>
-                                    <th scope="col">تعداد</th>
-                                    <th scope="col">مقدار فی</th>
-                                    <th scope="col">مقدار کُل</th>
-                                    <th scope="col">مقدار پرداخت شده</th>
-                                    <th scope="col">مقدار برای فروش</th>
-                                    <th scope="col">توضیحات</th>
-                                    <th scope="col">عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for i in records %}
-                                <tr class="text-center">
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{ i.date }}</td>
-                                    <td>{{ i.number_of_book }}</td>
-                                    <td>{{ i.per_price }}</td>
-                                    <td>{{ i.price }}</td>
-                                    <td>{{ i.paid_price }}</td>
-                                    <td><span class="badge bg-success px-3 py-2">{{ i.per_book_price_for_buy }} </span></td>
-                                    <td class="text-muted">{{ i.description|default:"—" }}</td>
-                                    <td>
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a href="{% url 'library:edit_buy_book_again' i.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                                <i class="bi bi-pencil"></i> ویرایش
-                                            </a>
-                           
-
-                                         <a class="btn btn-sm btn-outline-danger rounded-pill px-3" data-toggle="modal"
-                                         data-target="#deleteConfirmModal{{ i.id }}">
-                                       حذف
-                                       </a>
-
-
-                                          <!-- Delete Confirmation Modal -->
-                                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog"
-                                        aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content text-center">
-                                            <div class="modal-header">
-                                            <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            </div>
-                                            <div class="modal-body">
-                                            <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                            <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                                <a href="{% url 'library:delete_buy_again' id=i.id %}" class="btn btn-danger">بلی، حذف
-                                                کن</a>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </div>
-                                         
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">
-                                        هیچ داده‌ای موجود نیست
-                                    </td>
-                                </tr>
-
-                                
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <!-- تاریخ -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تاریخ<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        {{ form.date }}
                     </div>
-                    
                 </div>
-    
-            </div>
-        </div>
-    </div>
-    
- 
-    
-</div>
-
-<!--  Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش خریداری دوباره کتاب "{{ book.name }}"</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'library:buy_book_again' id=book.id %}" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    <input type="hidden" name="form_type" value="book">
-            
-                    <div class="modal-body">
-                      <div class="container-fluid">
-                        <div class="row g-3">
-            
-                          <div class="col-md-3">
-                            <label for="{{ form.date.id_for_label }}" class="form-label">
-                              تاریخ <span class="text-danger">*</span>
-                            </label>
-                            {{ form.date }}
-                          </div>
-
-                          <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker6').datepicker({
-                            
-                                });
-                            });
-                        </script>
-
-                          <div class="col-md-3">
-                            <label for="{{ form.number_of_book.id_for_label }}" class="form-label">
-                              تعداد <span class="text-danger">*</span>
-                            </label>
-                            {{ form.number_of_book }}
-                          </div>
-
-                          <div class="col-md-3">
-                            <label for="{{ form.supplier.id_for_label }}" class="form-label">
-                              تامین کننده <span class="text-danger">*</span>
-                            </label>
-                            {{ form.supplier }}
-                          </div>
-            
-                          <div class="col-md-3">
-                            <label for="{{ form.per_price.id_for_label }}" class="form-label">
-                              مقدار فی <span class="text-danger">*</span>
-                            </label>
-                            {{ form.per_price }}
-                          </div>
-            
-                          <div class="col-md-3">
-                            <label for="{{ form.price.id_for_label }}" class="form-label">
-                              قیمت <span class="text-danger">*</span>
-                            </label>
-                            {{ form.price }}
-                          </div>
-                          <div class="col-md-3">
-                            <label for="{{ form.paid_price.id_for_label }}" class="form-label">
-                              مقدار پرداخت شده <span class="text-danger">*</span>
-                            </label>
-                            {{ form.paid_price }}
-                          </div>
-            
-                          <div class="col-md-3">
-                            <label for="{{ form.per_book_price_for_buy.id_for_label }}" class="form-label"  data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
-                            title="*">
-                              مقدار فی برای فروش <span class="text-danger">*</span>
-                            </label>
-                            {{ form.per_book_price_for_buy }}
-                          </div>
-            
-                          <script>
-                            document.addEventListener("DOMContentLoaded", function() {
-                                const numberBookField = document.getElementById("{{ form.number_of_book.id_for_label }}");
-                                const perPriceBookField = document.getElementById("{{ form.per_price.id_for_label }}");
-                                const totalBookField = document.getElementById("{{ form.price.id_for_label }}");
-                            
-                                function calculateBookTotal() {
-                                    let number = parseFloat(numberBookField.value) || 0;
-                                    let perPrice = parseFloat(perPriceBookField.value) || 0;
-                                    let total = number * perPrice;
-                            
-                                    totalBookField.value = total.toFixed(2); // 2 decimals
-                                }
-                            
-                                numberBookField.addEventListener("input", calculateBookTotal);
-                                perPriceBookField.addEventListener("input", calculateBookTotal);
-                            });
-                            </script>
-                            
-                         
-            
-                          <div class="col-md-12">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">
-                              توضیحات
-                            </label>
-                            {{ form.description }}
-                          </div>
-            
+                
+                <!-- تامین کننده -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تامین کننده<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        {{ form.supplier }}
+                    </div>
+                </div>
+                
+                <!-- تعداد (Static Input) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">تعداد <span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="number" name="number" required min="1" step="1">
+                    </div>
+                </div>
+                
+                <!-- قیمت فی (Static Input) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">قیمت فی <span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="per_price" name="per_price" required min="0" step="0.01">
+                    </div>
+                </div>
+                
+                <!-- قیمت کل (Calculated Automatically) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">قیمت کل</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control amount-field" id="total_price" name="total_price" readonly>
+                    </div>
+                </div>
+                
+                <!-- مقدار پرداخت شده (Static Input) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">مقدار پرداخت شده<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="paid_price" name="paid_price" required min="0" step="0.01">
+                    </div>
+                </div>
+                
+                <!-- مقدار باقی‌مانده (Calculated Automatically) -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">مقدار باقی‌مانده</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control amount-field" id="remain_price" name="remain_price" readonly>
+                    </div>
+                </div>
+                
+                <!-- توضیحات -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label class="col-sm-4 col-form-label">توضیحات</label>
+                    <div class="col-sm-8">
+                        {{ form.description }}
+                    </div>
+                </div>
+                
+                <!-- Calculation Summary -->
+                <div class="col-12 calculation-result mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>تعداد:</strong> <span id="summary_number">0</span></p>
+                            <p class="mb-2"><strong>قیمت فی:</strong> <span id="summary_per_price">0</span></p>
+                            <p class="mb-0"><strong>قیمت کل:</strong> <span id="summary_total_price" class="text-success">0</span></p>
                         </div>
-                      </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>پرداخت شده:</strong> <span id="summary_paid_price" class="text-primary">0</span></p>
+                            <p class="mb-0"><strong>باقی‌مانده:</strong> <span id="summary_remain_price" class="text-danger">0</span></p>
+                        </div>
                     </div>
-            
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-                      <button type="submit" class="btn btn-success">ذخیره کتاب</button>
+                </div>
+                
+                <!-- Warning Alert for Negative Remain -->
+                <div class="col-12">
+                    <div id="warning_alert" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle ml-2"></i>
+                        مقدار پرداخت شده بیشتر از قیمت کل است!
                     </div>
-                  </form>
-            </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="col-12 d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-secondary ml-2" onclick="window.history.back()">
+                        انصراف
+                    </button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-save ml-2"></i>ثبت خرید
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<!-- Date Picker Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker3').datepicker({});
+        
+        // Get input elements
+        const numberInput = document.getElementById('number');
+        const perPriceInput = document.getElementById('per_price');
+        const totalPriceInput = document.getElementById('total_price');
+        const paidPriceInput = document.getElementById('paid_price');
+        const remainPriceInput = document.getElementById('remain_price');
+        const warningAlert = document.getElementById('warning_alert');
+        
+        // Get summary elements
+        const summaryNumber = document.getElementById('summary_number');
+        const summaryPerPrice = document.getElementById('summary_per_price');
+        const summaryTotalPrice = document.getElementById('summary_total_price');
+        const summaryPaidPrice = document.getElementById('summary_paid_price');
+        const summaryRemainPrice = document.getElementById('summary_remain_price');
+        
+        // Format number function
+        function formatNumber(num) {
+            return new Intl.NumberFormat('fa-IR').format(num);
+        }
+        
+        // Calculate total price function
+        function calculateTotalPrice() {
+            const number = parseFloat(numberInput.value) || 0;
+            const perPrice = parseFloat(perPriceInput.value) || 0;
+            const total = number * perPrice;
+            
+            totalPriceInput.value = total.toFixed(2);
+            updateSummary();
+            calculateRemainPrice();
+        }
+        
+        // Calculate remaining price function
+        function calculateRemainPrice() {
+            const totalPrice = parseFloat(totalPriceInput.value) || 0;
+            const paidPrice = parseFloat(paidPriceInput.value) || 0;
+            const remain = totalPrice - paidPrice;
+            
+            remainPriceInput.value = remain.toFixed(2);
+            
+            // Show/hide warning
+            if (remain < 0) {
+                warningAlert.style.display = 'block';
+                remainPriceInput.classList.add('is-invalid');
+            } else {
+                warningAlert.style.display = 'none';
+                remainPriceInput.classList.remove('is-invalid');
+            }
+            
+            updateSummary();
+        }
+        
+        // Update summary function
+        function updateSummary() {
+            const number = parseFloat(numberInput.value) || 0;
+            const perPrice = parseFloat(perPriceInput.value) || 0;
+            const totalPrice = parseFloat(totalPriceInput.value) || 0;
+            const paidPrice = parseFloat(paidPriceInput.value) || 0;
+            const remainPrice = parseFloat(remainPriceInput.value) || 0;
+            
+            summaryNumber.textContent = formatNumber(number);
+            summaryPerPrice.textContent = formatNumber(perPrice) + ' افغانی';
+            summaryTotalPrice.textContent = formatNumber(totalPrice) + ' افغانی';
+            summaryPaidPrice.textContent = formatNumber(paidPrice) + ' افغانی';
+            summaryRemainPrice.textContent = formatNumber(remainPrice) + ' افغانی';
+            
+            // Color code remain price
+            if (remainPrice > 0) {
+                summaryRemainPrice.classList.add('text-danger');
+                summaryRemainPrice.classList.remove('text-success');
+            } else if (remainPrice < 0) {
+                summaryRemainPrice.classList.add('text-danger');
+                summaryRemainPrice.classList.remove('text-success');
+            } else {
+                summaryRemainPrice.classList.add('text-success');
+                summaryRemainPrice.classList.remove('text-danger');
+            }
+        }
+        
+        // Add event listeners
+        numberInput.addEventListener('input', calculateTotalPrice);
+        perPriceInput.addEventListener('input', calculateTotalPrice);
+        paidPriceInput.addEventListener('input', calculateRemainPrice);
+        
+        // Initialize calculations
+        calculateTotalPrice();
+        calculateRemainPrice();
+    });
+</script>
 
 {% endblock %}

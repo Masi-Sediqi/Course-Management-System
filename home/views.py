@@ -2,11 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from students.models import *
 from account.models import *
-from django.utils import timezone
 from .forms import *
 from django.db.models import Sum
 from django.contrib import messages
-from itertools import chain
 # Create your views here.
 
 @login_required
@@ -62,82 +60,104 @@ def edit_supplier(request, id):
 
 def supplier_detail(request, id):
     supplier = suppliers.objects.get(id=id)
-    supplier_books = Books.objects.filter(supplier=supplier)
-    supplier_books_again = BuyBookAgain.objects.filter(supplier=supplier)
+    supplier_colculation = ColculationWithSupplier.objects.filter(supplier=supplier)
+    latest_supplier_colculation = ColculationWithSupplier.objects.filter(supplier=supplier).last()
 
-    supplier_books = Books.objects.filter(supplier=supplier)
-    supplier_books_again = BuyBookAgain.objects.filter(supplier=supplier)
+    supplier_colculation = ColculationWithSupplier.objects.filter(supplier=supplier).order_by('created_at')
 
-    combined_books = []
+    latest_record = supplier_colculation.last()
+    latest_payment = supplier_colculation.filter(colculation_type='پرداخت').last()
+    only_one_balance = (
+        supplier_colculation.count() == 1 and
+        latest_record and
+        latest_record.colculation_type == 'بیلانس'
+    )
 
-    # Append Books items
-    for b in supplier_books:
-        combined_books.append({
-            'date': b.date,
-            'name': b.name,
-            'price': b.price,
-            'paid_price': b.paid_price,
-            'remain_price': b.remain_price,
-        })
+    total_paid = supplier_colculation.aggregate(Sum('paid_price'))['paid_price__sum'] or 0
+    total_remain = supplier_colculation.aggregate(Sum('remain_price'))['remain_price__sum'] or 0
+    total = total_paid + total_remain
 
-    # Append BuyBookAgain items
-    for b in supplier_books_again:
-        combined_books.append({
-            'date': b.date,
-            'name': b.book.name,  # comes from related field
-            'price': b.price,
-            'paid_price': b.paid_price,
-            'remain_price': b.remain_price,
-        })
+    jdate_form = JDateForm()
 
+    if request.method == "POST":
+        jdate_form = JDateForm(request.POST)
+        if jdate_form.is_valid():
+            date = jdate_form.cleaned_data.get('date')
+            last_paid = float(request.POST.get('last_paid'))
+            latest_col = ColculationWithSupplier.objects.filter(supplier=supplier).last()
+            if latest_col:
+                remain_balance = latest_col.remain_balance - last_paid
+            else:
+                remain_balance = 0
 
-    # 💰 Collect total paid amount for this supplier
-    total_book_paid = supplier_books.aggregate(total_paid=Sum('paid_price'))['total_paid'] or 0
-    total_book_paid_again = supplier_books_again.aggregate(total_paid=Sum('paid_price'))['total_paid'] or 0
-    total_book_remain = supplier_books.aggregate(total_remain=Sum('remain_price'))['total_remain'] or 0
-    total_book_remain_again = supplier_books_again.aggregate(total_remain=Sum('remain_price'))['total_remain'] or 0
-
-    supplier_Stationery = StationeryItem.objects.filter(supplier=supplier)
-    supplier_Stationery_again = BuyStationeryAgain.objects.filter(supplier=supplier)
-
-    combined_stationery = []
-
-    # Add original stationery purchases
-    for s in supplier_Stationery:
-        combined_stationery.append({
-            'date': s.date,
-            'name': s.name,
-            'stationery_price': s.stationery_price,
-            'stationery_paid_price': s.stationery_paid_price,
-            'stationery_remain_price': s.stationery_remain_price,
-        })
-
-    # Add “buy again” stationery purchases
-    for s in supplier_Stationery_again:
-        combined_stationery.append({
-            'date': s.date,
-            'name': s.stationery.name,  # comes from foreign key
-            'stationery_price': s.stationery_price,
-            'stationery_paid_price': s.stationery_paid_price,
-            'stationery_remain_price': s.stationery_remain_price,
-        })
-
-    # (optional) Sort by date if you want chronological order
-    # Make sure date is in a sortable format (e.g., 'YYYY/MM/DD')
-    combined_stationery.sort(key=lambda x: x['date'], reverse=True)
-
-    # 💰 Collect total paid amount for this supplier
-    total_paid = supplier_Stationery.aggregate(total_paid=Sum('stationery_paid_price'))['total_paid'] or 0
-    total_remain = supplier_Stationery.aggregate(total_remain=Sum('stationery_remain_price'))['total_remain'] or 0
-
-    total_book_stationary_paid = total_book_paid + total_paid + total_book_paid_again
-    total_book_stationary_remain = total_book_remain + total_remain + total_book_remain_again
+        form_type = request.POST.get('form_type')
+        if form_type == "payment":
+            
+            ColculationWithSupplier.objects.create(
+                supplier=supplier,
+                colculation_type='پرداخت',
+                total_price=0,
+                paid_price=last_paid,
+                remain_price=0,
+                remain_balance=remain_balance,
+                date=date
+            )
+        else:
+            last_paid = float(request.POST.get('last_paid'))
+            last_remain = float(request.POST.get('last_remain'))
+            ColculationWithSupplier.objects.create(
+                supplier=supplier,
+                colculation_type='بیلانس',
+                total_price=0,
+                paid_price=last_paid,
+                remain_price=last_remain,
+                remain_balance=last_remain,
+                date=date
+            )
+            messages.success(request, 'بیلانس تامین کننده با موفقیت ثبت شد')
+        return redirect('home:supplier_detail', id=id)
 
     context = {
         'supplier':supplier,
-        'combined_stationery':combined_stationery,
-        'total_book_stationary_paid':total_book_stationary_paid,
-        'total_book_stationary_remain':total_book_stationary_remain,
-        'combined_books':combined_books,
+        'total_paid':total_paid,
+        'total_remain':total_remain,
+        'total':total,
+        'supplier_colculation':supplier_colculation,
+        'jdate_form':jdate_form,
+        'latest_supplier_colculation':latest_supplier_colculation,
+        'latest_payment': latest_payment,
+        'only_one_balance': only_one_balance,
     }
     return render(request, 'home/detail-supplier.html', context)
+
+def delete_balance(request, id):
+    balance = ColculationWithSupplier.objects.get(id=id)
+    balance.delete()
+    messages.success(request, 'بیلانس تامین کننده با موفقیت حذف شد')
+    return redirect('home:supplier_detail', id=balance.supplier.id)
+
+def edit_balance(request, id):
+    balance = ColculationWithSupplier.objects.get(id=id)
+    if request.method == "POST":
+        form = JDateForm(request.POST)
+        if form.is_valid():
+            date = form.cleaned_data.get('date')
+            last_paid = float(request.POST.get('last_paid'))
+            last_remain = float(request.POST.get('last_remain'))
+
+            balance.paid_price = last_paid
+            balance.remain_price = last_remain
+            balance.remain_balance = last_remain
+            balance.date = date
+            balance.save()
+            messages.success(request, 'تاریخ بیلانس تامین کننده با موفقیت ویرایش شد')
+            return redirect('home:supplier_detail', id=balance.supplier.id)
+    else:
+        form = JDateForm(initial={'date': balance.date})
+    
+    context = {
+        'form':form,
+        'balance':balance,
+    }
+
+    return render(request, 'home/edit-balance.html', context)
