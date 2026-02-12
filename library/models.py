@@ -3,9 +3,9 @@ from home.models import suppliers
 import jdatetime
 
 class Item(models.Model):
-
     date = models.CharField(max_length=13)
     name = models.CharField(max_length=150)
+    image = models.ImageField(blank=True, null=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

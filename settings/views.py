@@ -41,17 +41,5 @@ def settings(request):
 
 
 def delete_database(request):
-
-    delete_all_student = Student.objects.all().delete()
-    delete_all_teacher = Teacher.objects.all().delete()
-    delete_all_book = Books.objects.all().delete()
-    delete_all_category = StationeryCategory.objects.all().delete()
-    delete_all_stationery = StationeryItem.objects.all().delete()
-    delete_all_mainclasses = MainClass.objects.all().delete()
-    delete_all_classes = SubClass.objects.all().delete()
-    delete_all_income = TotalIncome.objects.all().delete()
-    delete_all_expense = TotalExpenses.objects.all().delete()
-    delete_all_other_income = OtherIncome.objects.all().delete()
-    delete_all_other_expense = Expenses.objects.all().delete()
     messages.success(request, 'تمام معلومات دیتابیس موفقانه حذف گردید')
     return redirect('settings:settings')

@@ -100,9 +100,11 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between">
+                {% if system_permission and system_permission.add_supplier %}
                 <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#exampleModal">
                     <i class="fas fa-user-plus ml-2"></i>تامین کننده جدید
                 </button>
+                {% endif %}
                 <a href="{% url 'home:dashboard' %}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-right ml-2"></i>بازگشت به داشبورد
                 </a>
@@ -111,6 +113,7 @@
     </div>
 
     <!-- Main Content Card -->
+     {% if system_permission and system_permission.view_supplier %}
     <div class="card">
         <div class="card-body">
             <h5 class="card-title mb-4">لیست تامین کننده‌ها</h5>
@@ -171,14 +174,18 @@
                                         <a class="dropdown-item" href="{% url 'home:supplier_detail' supplier.id %}">
                                             <i class="fas fa-eye ml-2 text-info"></i>مشاهده
                                         </a>
+                                        {% if system_permission and system_permission.edit_supplier %}
                                         <a class="dropdown-item" href="{% url 'home:edit_supplier' supplier.id %}">
                                             <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
                                         </a>
+                                        {% endif %}
+                                        {% if system_permission and system_permission.delete_supplier %}
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item text-danger" data-toggle="modal"
                                            data-target="#deleteConfirmModal{{ supplier.id }}">
                                             <i class="fas fa-trash ml-2"></i>حذف
                                         </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </td>
@@ -223,6 +230,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <!-- Add Supplier Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">

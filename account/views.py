@@ -1,26 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponse, HttpResponseRedirect
+from .models import *
 from .forms import *
+from management.models import *
+from management.forms import *
 from django.contrib import messages
 from .models import Employee
 from django.urls import reverse
 from django.contrib.auth.forms import PasswordChangeForm
-from django.template.loader import render_to_string
-# say to user this is your account ? or no
 from django.contrib.auth import update_session_auth_hash
-from django.core.mail import EmailMessage
 from django.contrib.auth.models import User, Group, Permission
 from .models import Employee
 import jdatetime
-# Create your views here.
+from home.models import *
 
 
 def account_register(request):
-   # if request.user.is_authenticated:
-        #    return redirect('/')
     if request.method == 'POST':
         registerForm = RegistrationForm(request.POST)
         if registerForm.is_valid():
@@ -37,8 +34,6 @@ def account_register(request):
     return render(request, 'home/auth/sign_up.html', {'form':registerForm})
 
 
-
-
 @login_required
 def delete_user(request):
     user = Employee.objects.get(name=request.user)
@@ -46,6 +41,7 @@ def delete_user(request):
     user.save()
     logout(request)
     return redirect('Account:delete_confirmation')
+
 
 @login_required
 def change_password(request):
@@ -161,23 +157,63 @@ def change_account_password(request,id):
 
 @login_required
 def assign_permission_for_user(request, id):
-    url = request.META.get('HTTP_REFERER')
     user = get_object_or_404(Employee, id=id)
-
+    url = request.META.get('HTTP_REFERER', '/')
+    
+    # Get existing permission or create new with all fields set to False
+    permission, created = SystemPermission.objects.get_or_create(
+        account=user
+    )
+    
     if request.method == 'POST':
-        form = UserPermissionAssignForm(request.POST)
+        form = SystemPermissionForm(request.POST, instance=permission)
         if form.is_valid():
-            permissions = form.cleaned_data['permissions']
-            user.user_permissions.set(permissions)
-            messages.success(request, 'برای یوزر موفقانه صلاحیت داده شد.')
+            form.save()
+            
+            # Count granted permissions
+            granted_count = 0
+            for field in SystemPermission._meta.get_fields():
+                if field.name not in ['id', 'account', 'created_at']:
+                    if getattr(permission, field.name):
+                        granted_count += 1
+            
+            SystemLog.objects.create(
+                section="کاربران",
+                action="تخصیص دسترسی",
+                description=f"دسترسی‌های کاربر {user.name} به‌روزرسانی شد. ({granted_count} دسترسی فعال)",
+                user=request.user
+            )
+            
+            messages.success(request, 'دسترسی‌ها با موفقیت ذخیره شدند.')
             return redirect(url)
+        else:
+            messages.error(request, 'خطا در ذخیره‌سازی دسترسی‌ها.')
     else:
-        form = UserPermissionAssignForm()
-        # Set initial selected permissions for this user
-        form.fields['permissions'].initial = user.user_permissions.all()
-
+        form = SystemPermissionForm(instance=permission)
+    
+    # Calculate permission statistics for all fields
+    total_permissions = 0
+    granted_permissions = 0
+    
+    for field in SystemPermission._meta.get_fields():
+        if field.name not in ['id', 'account', 'created_at']:
+            total_permissions += 1
+            if getattr(permission, field.name):
+                granted_permissions += 1
+    
     context = {
         'form': form,
         'user': user,
+        'permission': permission,
+        'granted_permissions': granted_permissions,
+        'total_permissions': total_permissions,
+        'created': created,
     }
-    return render(request, 'account/users/assign_perm copy.html', context)
+    return render(request, 'account/users/assign_permission.html', context)
+
+def account_more_info(request, id):
+    account = Employee.objects.get(id=id)
+    context = {
+        'account':account
+    }
+    return render(request, 'account/users/user-info.html', context)

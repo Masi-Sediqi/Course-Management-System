@@ -1,0 +1,1530 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #4e73df;
+        --success-color: #1cc88a;
+        --danger-color: #e74a3b;
+        --warning-color: #f6c23e;
+        --info-color: #36b9cc;
+    }
+    
+    .permission-card {
+        border-radius: 1rem;
+        box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .permission-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #2e59d9 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 1rem 1rem 0 0;
+    }
+    
+    .section-card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .section-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .section-header {
+        background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e3e6f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .permission-item {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f0f2f5;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .permission-item:hover {
+        background-color: #f8f9fc;
+    }
+    
+    .permission-item:last-child {
+        border-bottom: none;
+    }
+    
+    .permission-label {
+        font-size: 0.95rem;
+        margin-right: 2.5rem;
+        color: #333;
+    }
+    
+    .bulk-actions {
+        background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .permission-progress {
+        height: 10px;
+        border-radius: 5px;
+        background-color: #e3e6f0;
+        overflow: hidden;
+    }
+    
+    .permission-progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--success-color) 0%, #17a673 100%);
+        transition: width 0.5s ease;
+    }
+    
+    .section-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .section-actions button {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .section-content {
+        padding: 1rem;
+    }
+    
+    .badge-permission-count {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+    }
+    
+    @media (max-width: 768px) {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .section-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / مدیریت کاربران /</span> 
+        <span class="text-primary">مدیریت دسترسی‌ها</span>
+    </h4>
+    
+    <!-- User Info Card -->
+    <div class="card permission-card">
+        <div class="permission-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-1">
+                        <i class="fas fa-user-shield ml-2"></i>
+                        تنظیم دسترسی‌های کاربر
+                    </h5>
+                    <p class="mb-0 opacity-75">
+                        کاربر: <strong>{{ user.name }}</strong> | ایمیل: {{ user.email }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-left">
+                    <a href="{% url 'account:account_more_info' user.id %}" class="btn btn-light">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت به پروفایل
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Permission Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="bulk-actions">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chart-bar ml-2"></i>
+                                آمار دسترسی‌ها
+                            </h6>
+                            <span id="permission-counter" class="badge badge-primary">
+                                {{ granted_permissions }} از {{ total_permissions }} دسترسی
+                            </span>
+                        </div>
+                        <div class="permission-progress mb-3">
+                            <div id="progress-bar" class="permission-progress-bar" style="width: {% widthratio granted_permissions total_permissions 100 %}%"></div>
+                        </div>
+                        
+                        <div class="d-flex gap-3 flex-wrap">
+                            <button type="button" id="grant-all-btn" class="btn btn-success">
+                                <i class="fas fa-check-circle ml-2"></i> اعطای همه دسترسی‌ها
+                            </button>
+                            <button type="button" id="revoke-all-btn" class="btn btn-danger">
+                                <i class="fas fa-times-circle ml-2"></i> لغو همه دسترسی‌ها
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Permission Form -->
+            <form id="permission-form" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_selected">
+                
+                <!-- Students Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">👨‍🎓 مدیریت دانش‌آموزان</h6>
+                                <small class="text-muted" id="students-stats">0/21 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('students')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('students')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="students-count">0/21</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <!-- Student Basic -->
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_student.id_for_label }}">
+                                                {{ form.add_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_student.id_for_label }}">
+                                                {{ form.view_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_student.id_for_label }}">
+                                                {{ form.edit_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_student.id_for_label }}">
+                                                {{ form.delete_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.active_deactive_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.active_deactive_student.id_for_label }}">
+                                                {{ form.active_deactive_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Student Registration -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">ثبت‌نام دانش‌آموزان</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_registeration_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_registeration_student.id_for_label }}">
+                                                {{ form.add_registeration_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_registration_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_registration_student.id_for_label }}">
+                                                {{ form.view_registration_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_registration_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_registration_student.id_for_label }}">
+                                                {{ form.edit_registration_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_registration_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_registration_student.id_for_label }}">
+                                                {{ form.delete_registration_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Student Buy Book -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">خرید کتاب دانش‌آموزان</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_buybook_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_buybook_student.id_for_label }}">
+                                                {{ form.add_buybook_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_buybook_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_buybook_student.id_for_label }}">
+                                                {{ form.view_buybook_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_buybook_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_buybook_student.id_for_label }}">
+                                                {{ form.edit_buybook_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_buybook_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_buybook_student.id_for_label }}">
+                                                {{ form.delete_buybook_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Student Improving -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">ارتقاء دانش‌آموزان</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_improving_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_improving_student.id_for_label }}">
+                                                {{ form.add_improving_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_improving_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_improving_student.id_for_label }}">
+                                                {{ form.view_improving_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_improving_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_improving_student.id_for_label }}">
+                                                {{ form.edit_improving_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_improving_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_improving_student.id_for_label }}">
+                                                {{ form.delete_improving_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Student Paid Remain -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">پرداخت باقی‌مانده دانش‌آموزان</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_paid_remain_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_paid_remain_student.id_for_label }}">
+                                                {{ form.add_paid_remain_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_paid_remain_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_paid_remain_student.id_for_label }}">
+                                                {{ form.view_paid_remain_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_paid_remain_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_paid_remain_student.id_for_label }}">
+                                                {{ form.edit_paid_remain_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_paid_remain_student }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_paid_remain_student.id_for_label }}">
+                                                {{ form.delete_paid_remain_student.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Teachers Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">👨‍🏫 مدیریت اساتید</h6>
+                                <small class="text-muted" id="teachers-stats">0/17 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('teachers')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('teachers')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="teachers-count">0/17</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <!-- Teacher Basic -->
+                            <div class="col-12 mb-2">
+                                <small class="text-primary font-weight-bold">اطلاعات پایه اساتید</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_teacher.id_for_label }}">
+                                                {{ form.add_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_teacher.id_for_label }}">
+                                                {{ form.view_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_teacher.id_for_label }}">
+                                                {{ form.edit_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_teacher.id_for_label }}">
+                                                {{ form.delete_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.active_deactive_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.active_deactive_teacher.id_for_label }}">
+                                                {{ form.active_deactive_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Teacher Salary -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">پرداخت حقوق اساتید</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_paid_salary_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_paid_salary_teacher.id_for_label }}">
+                                                {{ form.add_paid_salary_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_paid_salary_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_paid_salary_teacher.id_for_label }}">
+                                                {{ form.view_paid_salary_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_paid_salary_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_paid_salary_teacher.id_for_label }}">
+                                                {{ form.edit_paid_salary_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_paid_salary_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_paid_salary_teacher.id_for_label }}">
+                                                {{ form.delete_paid_salary_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Teacher Loan -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">قرض اساتید</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_loan_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_loan_teacher.id_for_label }}">
+                                                {{ form.add_loan_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_loan_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_loan_teacher.id_for_label }}">
+                                                {{ form.view_loan_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_loan_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_loan_teacher.id_for_label }}">
+                                                {{ form.edit_loan_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_loan_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_loan_teacher.id_for_label }}">
+                                                {{ form.delete_loan_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Teacher Attendance -->
+                            <div class="col-12 mt-3 mb-2">
+                                <small class="text-primary font-weight-bold">حضور و غیاب اساتید</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_attendance_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_attendance_teacher.id_for_label }}">
+                                                {{ form.add_attendance_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_attendance_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_attendance_teacher.id_for_label }}">
+                                                {{ form.view_attendance_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_attendance_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_attendance_teacher.id_for_label }}">
+                                                {{ form.edit_attendance_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_attendance_teacher }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_attendance_teacher.id_for_label }}">
+                                                {{ form.delete_attendance_teacher.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Suppliers Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">🚚 مدیریت تامین‌کنندگان</h6>
+                                <small class="text-muted" id="suppliers-stats">0/6 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('suppliers')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('suppliers')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="suppliers-count">0/6</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_supplier }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_supplier.id_for_label }}">
+                                                {{ form.add_supplier.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_supplier }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_supplier.id_for_label }}">
+                                                {{ form.view_supplier.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_supplier }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_supplier.id_for_label }}">
+                                                {{ form.edit_supplier.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_supplier }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_supplier.id_for_label }}">
+                                                {{ form.delete_supplier.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_balance_supplier }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_balance_supplier.id_for_label }}">
+                                                {{ form.add_balance_supplier.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.paid_money_supplier }}
+                                            <label class="form-check-label permission-label" for="{{ form.paid_money_supplier.id_for_label }}">
+                                                {{ form.paid_money_supplier.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Library Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">📚 مدیریت کتابخانه</h6>
+                                <small class="text-muted" id="library-stats">0/5 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('library')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('library')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="library-count">0/5</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_book }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_book.id_for_label }}">
+                                                {{ form.add_book.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_book }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_book.id_for_label }}">
+                                                {{ form.view_book.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_book }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_book.id_for_label }}">
+                                                {{ form.edit_book.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_book }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_book.id_for_label }}">
+                                                {{ form.delete_book.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.purchase_book }}
+                                            <label class="form-check-label permission-label" for="{{ form.purchase_book.id_for_label }}">
+                                                {{ form.purchase_book.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classes Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-school"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">🏫 مدیریت کلاس‌ها</h6>
+                                <small class="text-muted" id="classes-stats">0/4 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('classes')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('classes')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="classes-count">0/4</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_class }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_class.id_for_label }}">
+                                                {{ form.add_class.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_class }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_class.id_for_label }}">
+                                                {{ form.view_class.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_class }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_class.id_for_label }}">
+                                                {{ form.edit_class.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_class }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_class.id_for_label }}">
+                                                {{ form.delete_class.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Income Expenses Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">💰 مدیریت مالی</h6>
+                                <small class="text-muted" id="finance-stats">0/6 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('finance')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('finance')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="finance-count">0/6</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.add_income_expenses }}
+                                            <label class="form-check-label permission-label" for="{{ form.add_income_expenses.id_for_label }}">
+                                                {{ form.add_income_expenses.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.view_income_expenses }}
+                                            <label class="form-check-label permission-label" for="{{ form.view_income_expenses.id_for_label }}">
+                                                {{ form.view_income_expenses.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.edit_income_expenses }}
+                                            <label class="form-check-label permission-label" for="{{ form.edit_income_expenses.id_for_label }}">
+                                                {{ form.edit_income_expenses.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.delete_income_expenses }}
+                                            <label class="form-check-label permission-label" for="{{ form.delete_income_expenses.id_for_label }}">
+                                                {{ form.delete_income_expenses.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.collect_income }}
+                                            <label class="form-check-label permission-label" for="{{ form.collect_income.id_for_label }}">
+                                                {{ form.collect_income.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.collect_expenses }}
+                                            <label class="form-check-label permission-label" for="{{ form.collect_expenses.id_for_label }}">
+                                                {{ form.collect_expenses.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reports Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">📊 گزارشات</h6>
+                                <small class="text-muted" id="reports-stats">0/5 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('reports')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('reports')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="reports-count">0/5</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.student_report }}
+                                            <label class="form-check-label permission-label" for="{{ form.student_report.id_for_label }}">
+                                                {{ form.student_report.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.teachers_report }}
+                                            <label class="form-check-label permission-label" for="{{ form.teachers_report.id_for_label }}">
+                                                {{ form.teachers_report.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.income_expenses_report }}
+                                            <label class="form-check-label permission-label" for="{{ form.income_expenses_report.id_for_label }}">
+                                                {{ form.income_expenses_report.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.library_report }}
+                                            <label class="form-check-label permission-label" for="{{ form.library_report.id_for_label }}">
+                                                {{ form.library_report.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.supplier_report }}
+                                            <label class="form-check-label permission-label" for="{{ form.supplier_report.id_for_label }}">
+                                                {{ form.supplier_report.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings & History Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">⚙️ تنظیمات و تاریخچه</h6>
+                                <small class="text-muted" id="system-stats">0/2 دسترسی</small>
+                            </div>
+                        </div>
+                        <div class="section-actions">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="grantSection('system')">
+                                <i class="fas fa-check-circle"></i> انتخاب همه
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeSection('system')">
+                                <i class="fas fa-times-circle"></i> لغو همه
+                            </button>
+                            <span class="badge-permission-count" id="system-count">0/2</span>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.setting }}
+                                            <label class="form-check-label permission-label" for="{{ form.setting.id_for_label }}">
+                                                {{ form.setting.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="permission-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check form-switch">
+                                            {{ form.history }}
+                                            <label class="form-check-label permission-label" for="{{ form.history.id_for_label }}">
+                                                {{ form.history.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{% url 'account:account_more_info' user.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times ml-2"></i> انصراف
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save ml-2"></i> ذخیره تغییرات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Define section field counts
+    const SECTION_COUNTS = {
+        'students': 21,
+        'teachers': 17,
+        'suppliers': 6,
+        'library': 5,
+        'classes': 4,
+        'finance': 6,
+        'reports': 5,
+        'system': 2
+    };
+
+    // Grant all permissions in a section
+    function grantSection(section) {
+        const checkboxes = document.querySelectorAll(`[data-section="${section}"]`);
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        updateSectionStats(section);
+        updateProgressBar();
+    }
+
+    // Revoke all permissions in a section
+    function revokeSection(section) {
+        const checkboxes = document.querySelectorAll(`[data-section="${section}"]`);
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateSectionStats(section);
+        updateProgressBar();
+    }
+
+    // Update statistics for a specific section
+    function updateSectionStats(section) {
+        const checkboxes = document.querySelectorAll(`.permission-checkbox[data-section="${section}"]`);
+        const total = SECTION_COUNTS[section] || checkboxes.length;
+        const checked = document.querySelectorAll(`.permission-checkbox[data-section="${section}"]:checked`).length;
+        
+        // Update section stats text
+        const statsElement = document.getElementById(`${section}-stats`);
+        if (statsElement) {
+            statsElement.textContent = `${checked}/${total} دسترسی`;
+        }
+        
+        // Update section count badge
+        const countElement = document.getElementById(`${section}-count`);
+        if (countElement) {
+            countElement.textContent = `${checked}/${total}`;
+        }
+    }
+
+    // Update overall progress bar
+    function updateProgressBar() {
+        const checkboxes = document.querySelectorAll('.permission-checkbox');
+        const total = checkboxes.length;
+        const checked = document.querySelectorAll('.permission-checkbox:checked').length;
+        const progressBar = document.getElementById('progress-bar');
+        const counter = document.getElementById('permission-counter');
+        
+        const percentage = (checked / total) * 100;
+        
+        if (progressBar) {
+            progressBar.style.width = percentage + '%';
+        }
+        
+        if (counter) {
+            counter.textContent = `${checked} از ${total} دسترسی`;
+        }
+    }
+
+    // Grant all permissions
+    function grantAllPermissions() {
+        const checkboxes = document.querySelectorAll('.permission-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        
+        // Update all section stats
+        Object.keys(SECTION_COUNTS).forEach(section => {
+            updateSectionStats(section);
+        });
+        
+        updateProgressBar();
+    }
+
+    // Revoke all permissions
+    function revokeAllPermissions() {
+        const checkboxes = document.querySelectorAll('.permission-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Update all section stats
+        Object.keys(SECTION_COUNTS).forEach(section => {
+            updateSectionStats(section);
+        });
+        
+        updateProgressBar();
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add data-section attributes to all permission checkboxes
+        const studentsFields = [
+            'add_student', 'view_student', 'edit_student', 'delete_student', 'active_deactive_student',
+            'add_registeration_student', 'view_registration_student', 'edit_registration_student', 'delete_registration_student',
+            'add_buybook_student', 'view_buybook_student', 'edit_buybook_student', 'delete_buybook_student',
+            'add_improving_student', 'view_improving_student', 'edit_improving_student', 'delete_improving_student',
+            'add_paid_remain_student', 'view_paid_remain_student', 'edit_paid_remain_student', 'delete_paid_remain_student'
+        ];
+        
+        studentsFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'students');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Teachers
+        const teachersFields = [
+            'add_teacher', 'view_teacher', 'edit_teacher', 'delete_teacher', 'active_deactive_teacher',
+            'add_paid_salary_teacher', 'view_paid_salary_teacher', 'edit_paid_salary_teacher', 'delete_paid_salary_teacher',
+            'add_loan_teacher', 'view_loan_teacher', 'edit_loan_teacher', 'delete_loan_teacher',
+            'add_attendance_teacher', 'view_attendance_teacher', 'edit_attendance_teacher', 'delete_attendance_teacher'
+        ];
+        
+        teachersFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'teachers');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Suppliers
+        const suppliersFields = [
+            'add_supplier', 'view_supplier', 'edit_supplier', 'delete_supplier',
+            'add_balance_supplier', 'paid_money_supplier'
+        ];
+        
+        suppliersFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'suppliers');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Library
+        const libraryFields = [
+            'add_book', 'view_book', 'edit_book', 'delete_book', 'purchase_book'
+        ];
+        
+        libraryFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'library');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Classes
+        const classesFields = [
+            'add_class', 'view_class', 'edit_class', 'delete_class'
+        ];
+        
+        classesFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'classes');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Finance
+        const financeFields = [
+            'add_income_expenses', 'view_income_expenses', 'edit_income_expenses', 'delete_income_expenses',
+            'collect_income', 'collect_expenses'
+        ];
+        
+        financeFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'finance');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Reports
+        const reportsFields = [
+            'student_report', 'teachers_report', 'income_expenses_report', 'library_report', 'supplier_report'
+        ];
+        
+        reportsFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'reports');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // System
+        const systemFields = [
+            'setting', 'history'
+        ];
+        
+        systemFields.forEach(fieldId => {
+            const checkbox = document.getElementById(`id_${fieldId}`);
+            if (checkbox) {
+                checkbox.setAttribute('data-section', 'system');
+                checkbox.classList.add('permission-checkbox');
+            }
+        });
+        
+        // Add event listeners to individual checkboxes
+        const checkboxes = document.querySelectorAll('.permission-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const section = this.dataset.section;
+                updateSectionStats(section);
+                updateProgressBar();
+            });
+        });
+        
+        // Add event listeners to bulk action buttons
+        const grantAllBtn = document.getElementById('grant-all-btn');
+        const revokeAllBtn = document.getElementById('revoke-all-btn');
+        
+        if (grantAllBtn) {
+            grantAllBtn.addEventListener('click', grantAllPermissions);
+        }
+        
+        if (revokeAllBtn) {
+            revokeAllBtn.addEventListener('click', revokeAllPermissions);
+        }
+        
+        // Initialize all section stats
+        Object.keys(SECTION_COUNTS).forEach(section => {
+            updateSectionStats(section);
+        });
+        
+        // Initialize progress bar
+        updateProgressBar();
+    });
+</script>
+
+{% endblock %}

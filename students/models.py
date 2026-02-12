@@ -12,6 +12,8 @@ class Student(models.Model):
     gender = models.CharField(max_length=10, choices=[('Male', 'مرد'), ('Female', 'زن')])
     registered_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to="student/", blank=True)
+
+    deactivated_at = models.CharField(max_length=14, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -56,4 +58,18 @@ class StudentBalance(models.Model):
     date = models.CharField(max_length=14, blank=False)
     paid = models.FloatField(default=0)
     remain = models.FloatField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.paid < 0:
+            self.paid = 0
+        if self.remain < 0:
+            self.remain = 0
+        super().save(*args, **kwargs)
+
+class StudentPaidRemainAmount(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
+    date = models.CharField(max_length=14, blank=False)
+    paid = models.FloatField(default=0)
+    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

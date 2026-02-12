@@ -15,26 +15,26 @@
 
     <script>
         {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{{ message|escapejs }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            {% endfor %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
         {% endif %}
     </script>
-    
+
     <div class="separator-breadcrumb border-top"></div>
-    
+
     <!-- Main Content -->
     <div class="row">
         <div class="col-md-12 mb-3">
@@ -44,13 +44,16 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="card-title mb-0">لیست صنوف</h5>
                         <div>
+                            {% if system_permission and system_permission.add_class %}
                             <button class="btn btn-info" type="button" data-toggle="modal" data-target="#exampleModal">
                                 <i class="fas fa-plus ml-2"></i>صنف جدید
                             </button>
+                            {% endif %}
                         </div>
                     </div>
-                    
+
                     <!-- Table -->
+                    {% if system_permission and system_permission.view_class %}
                     <div class="row" id="classesGrid">
                         {% for i in sub_records %}
                         <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
@@ -59,37 +62,45 @@
                                     <!-- Actions Dropdown - Moved to left -->
                                     <div class="position-absolute top-0 start-0 mt-2 ms-2">
                                         <div class="dropdown">
-                                            <button class="btn btn-xs btn-light btn-icon rounded-circle p-0" type="button" 
-                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <button class="btn btn-xs btn-light btn-icon rounded-circle p-0"
+                                                type="button" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
                                                 <i class="fas fa-ellipsis-v fa-sm"></i>
                                             </button>
                                             <div class="dropdown-menu dropdown-menu-start">
+                                                {% if system_permission and system_permission.edit_class %}
                                                 <a class="dropdown-item" href="{% url 'classes:edit_sub_class' i.pk %}">
                                                     <i class="fas fa-edit ml-2 text-warning fa-xs"></i>ویرایش
                                                 </a>
+                                                {% endif %}
                                                 {% if i.active == False %}
-                                                <a class="dropdown-item" href="{% url 'classes:active_sub_class' i.pk %}">
+                                                <a class="dropdown-item"
+                                                    href="{% url 'classes:active_sub_class' i.pk %}">
                                                     <i class="fas fa-check ml-2 text-success fa-xs"></i>فعال سازی
                                                 </a>
                                                 {% else %}
-                                                <a class="dropdown-item" href="{% url 'classes:deactive_sub_class' i.pk %}">
+                                                <a class="dropdown-item"
+                                                    href="{% url 'classes:deactive_sub_class' i.pk %}">
                                                     <i class="fas fa-ban ml-2 text-danger fa-xs"></i>غیر فعال
                                                 </a>
                                                 {% endif %}
+                                                {% if system_permission and system_permission.delete_class %}
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item text-danger" data-toggle="modal" 
-                                                data-target="#deleteConfirmModal{{ i.id }}">
+                                                <a class="dropdown-item text-danger" data-toggle="modal"
+                                                    data-target="#deleteConfirmModal{{ i.id }}">
                                                     <i class="fas fa-trash ml-2 fa-xs"></i>حذف
                                                 </a>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    
+
+
                                     <!-- Class Name - Compact -->
                                     <div class="mb-2">
                                         <div class="d-flex align-items-center">
-                                            <div class="class-icon bg-primary bg-opacity-10 text-primary rounded-circle p-1 me-2">
+                                            <div
+                                                class="class-icon bg-primary bg-opacity-10 text-primary rounded-circle p-1 me-2">
                                                 <i class="fas fa-chalkboard-teacher fa-sm"></i>
                                             </div>
                                             <div class="flex-grow-1" style="min-width: 0;">
@@ -97,86 +108,92 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Class Details - Compact -->
                                     <div class="class-details">
                                         <!-- Start Date -->
                                         <div class="d-flex align-items-center mb-1">
-                                            <div class="detail-icon bg-info bg-opacity-10 text-info rounded-circle p-1 me-1">
+                                            <div
+                                                class="detail-icon bg-info bg-opacity-10 text-info rounded-circle p-1 me-1">
                                                 <i class="fas fa-calendar-alt fa-xs"></i>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <small class="text-muted d-block">تاریخ آغاز</small>
-                                                <span class="small font-weight-medium text-truncate d-block">{{ i.start_date|default:"-" }}</span>
+                                                <span class="small font-weight-medium text-truncate d-block">{{i.start_date|default:"-" }}</span>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Teachers - Compact -->
                                         <div class="mb-1">
                                             <small class="text-muted d-block mb-1">اساتید</small>
                                             <div class="d-flex flex-wrap gap-1">
                                                 {% for t in i.teacher.all %}
-                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-1">
-                                                        <small>{{ t.name|truncatechars:8 }}</small>
-                                                    </span>
+                                                <span
+                                                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-1">
+                                                    <small>{{ t.name }}</small>
+                                                </span>
                                                 {% empty %}
-                                                    <span class="text-muted small">تعیین نشده</span>
+                                                <span class="text-muted small">تعیین نشده</span>
                                                 {% endfor %}
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Books - Compact -->
                                         <div class="mb-1">
                                             <small class="text-muted d-block mb-1">کتابها</small>
                                             <div class="d-flex flex-wrap gap-1">
                                                 {% for t in i.books.all %}
-                                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 p-1">
-                                                        <small>{{ t.name|truncatechars:8 }}</small>
-                                                    </span>
+                                                <span
+                                                    class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 p-1">
+                                                    <small>{{ t.name|truncatechars:8 }}</small>
+                                                </span>
                                                 {% empty %}
-                                                    <span class="text-muted small">تعیین نشده</span>
+                                                <span class="text-muted small">تعیین نشده</span>
                                                 {% endfor %}
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Capacity & Room - Compact -->
                                         <div class="row mt-2 g-1">
                                             <div class="col-6">
                                                 <div class="text-center p-1 bg-light rounded">
                                                     <small class="text-muted d-block">ظرفیت</small>
-                                                    <span class="font-weight-bold text-primary d-block">{{ i.capacity }}</span>
+                                                    <span class="font-weight-bold text-primary d-block">{{ i.capacity}}</span>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="text-center p-1 bg-light rounded">
                                                     <small class="text-muted d-block">صنف</small>
-                                                    <span class="font-weight-bold text-success d-block">{{ i.room|default:"-" }}</span>
+                                                    <span class="font-weight-bold text-success d-block">{{i.room|default:"-" }}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Footer - Compact -->
                                 <div class="card-footer bg-transparent border-top py-2 px-3">
                                     <div class="d-flex justify-content-between align-items-center">
-                                          {% if i.active == True %}
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 p-1">
-                                                <i class="fas fa-circle fa-xs ml-1"></i> فعال
-                                            </span>
+                                        {% if i.active == True %}
+                                        <span
+                                            class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 p-1">
+                                            <i class="fas fa-circle fa-xs ml-1"></i> فعال
+                                        </span>
                                         {% else %}
-                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 p-1">
-                                                <i class="fas fa-circle fa-xs ml-1"></i> غیرفعال
-                                            </span>
+                                        <span
+                                            class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 p-1">
+                                            <i class="fas fa-circle fa-xs ml-1"></i> غیرفعال
+                                        </span>
                                         {% endif %}
-                                        <a href="{% url 'classes:edit_sub_class' i.pk %}" class="btn btn-xs btn-outline-primary py-1 px-2">
+                                        <a href="{% url 'classes:class_info' i.id %}"
+                                            class="btn btn-xs btn-outline-primary py-1 px-2">
                                             <i class="fas fa-eye fa-xs ml-1"></i> جزئیات
                                         </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Delete Confirmation Modal -->
                         <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-sm" role="document">
@@ -186,54 +203,59 @@
                                             <i class="fas fa-exclamation-triangle text-danger ml-1 fa-sm"></i>
                                             تأیید حذف
                                         </h6>
-                                        <button type="button" class="close py-1 px-2" data-dismiss="modal" aria-label="بستن">
+                                        <button type="button" class="close py-1 px-2" data-dismiss="modal"
+                                            aria-label="بستن">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body text-center p-3">
                                         <div class="mb-2">
-                                            <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-2" 
+                                            <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-2"
                                                 style="width: 40px; height: 40px;">
                                                 <i class="fas fa-chalkboard-teacher"></i>
                                             </div>
                                             <p class="small mb-1"><strong>"{{ i.name|truncatechars:20 }}"</strong></p>
                                             <p class="text-muted small mb-2">دوره: {{ i.main_class.name|default:"بدون دوره"|truncatechars:15 }}</p>
                                         </div>
-                                        <div class="alert alert-warning alert-dismissible fade show py-1 px-2 mb-0" role="alert">
+                                        <div class="alert alert-warning alert-dismissible fade show py-1 px-2 mb-0"
+                                            role="alert">
                                             <i class="fas fa-exclamation-circle ml-1 fa-xs"></i>
                                             <small>این عملیات قابل بازگشت نیست.</small>
                                         </div>
                                     </div>
                                     <div class="modal-footer py-2">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            data-dismiss="modal">
                                             <i class="fas fa-times ml-1 fa-xs"></i> انصراف
                                         </button>
-                                        <a href="{% url 'classes:delete_sub_class' i.id %}" class="btn btn-danger btn-sm">
+                                        <a href="{% url 'classes:delete_sub_class' i.id %}"
+                                            class="btn btn-danger btn-sm">
                                             <i class="fas fa-trash ml-1 fa-xs"></i> حذف
                                         </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         {% empty %}
                         <div class="col-12">
                             <div class="card border-0">
                                 <div class="card-body text-center py-5">
                                     <div class="empty-state">
-                                        <div class="icon-circle bg-light text-muted mx-auto mb-3" 
+                                        <div class="icon-circle bg-light text-muted mx-auto mb-3"
                                             style="width: 60px; height: 60px;">
                                             <i class="fas fa-chalkboard-teacher"></i>
                                         </div>
                                         <h6 class="text-muted mb-2">هیچ صنفی یافت نشد</h6>
-                                        <p class="text-muted small mb-0">برای افزودن صنف جدید روی دکمه "صنف جدید" کلیک کنید</p>
+                                        <p class="text-muted small mb-0">برای افزودن صنف جدید روی دکمه "صنف جدید" کلیک
+                                            کنید</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-
+                    {% endif %}
                     <style>
                         /* Class Card Styling - Compact */
                         .class-card {
@@ -243,13 +265,13 @@
                             overflow: hidden;
                             font-size: 0.85rem;
                         }
-                        
+
                         .class-card:hover {
                             transform: translateY(-3px);
                             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
                             border-color: #4dabf7;
                         }
-                        
+
                         /* Icon Styling */
                         .class-icon {
                             width: 30px;
@@ -259,7 +281,7 @@
                             justify-content: center;
                             font-size: 0.9rem;
                         }
-                        
+
                         .detail-icon {
                             width: 28px;
                             height: 28px;
@@ -269,13 +291,13 @@
                             flex-shrink: 0;
                             font-size: 0.8rem;
                         }
-                        
+
                         /* Badge Styling */
                         .class-card .badge {
                             font-weight: 500;
                             font-size: 0.7rem;
                         }
-                        
+
                         /* Button Styling */
                         .btn-icon {
                             width: 24px;
@@ -285,7 +307,7 @@
                             justify-content: center;
                             font-size: 0.8rem;
                         }
-                        
+
                         /* Card Title */
                         .class-card .card-title {
                             font-size: 0.95rem;
@@ -293,73 +315,73 @@
                             color: #2c3e50;
                             margin-bottom: 0.1rem;
                         }
-                        
+
                         /* Dropdown Styling */
                         .dropdown-menu {
                             font-size: 0.85rem;
                             min-width: 120px;
                         }
-                        
+
                         .dropdown-item {
                             padding: 0.3rem 0.8rem;
                         }
-                        
+
                         .dropdown-item i {
                             font-size: 0.8rem;
                         }
-                        
+
                         /* Text Truncation */
                         .text-truncate {
                             overflow: hidden;
                             text-overflow: ellipsis;
                             white-space: nowrap;
                         }
-                        
+
                         /* Gap utility for flexbox */
                         .gap-1 {
                             gap: 0.25rem;
                         }
-                        
+
                         /* Empty State */
                         .empty-state {
                             opacity: 0.7;
                             transition: opacity 0.3s ease;
                         }
-                        
+
                         .empty-state:hover {
                             opacity: 1;
                         }
-                        
+
                         .icon-circle {
                             border-radius: 50%;
                             display: flex;
                             align-items: center;
                             justify-content: center;
                         }
-                        
+
                         /* Responsive Grid */
                         @media (max-width: 1200px) {
                             .col-xl-3 {
                                 padding: 0 6px;
                             }
                         }
-                        
+
                         @media (max-width: 992px) {
                             .col-lg-4 {
                                 padding: 0 6px;
                             }
                         }
-                        
+
                         @media (max-width: 768px) {
                             .col-md-6 {
                                 padding: 0 6px;
                             }
-                            
+
                             .class-card .card-body {
                                 padding: 0.75rem;
                             }
                         }
-                        
+
                         @media (max-width: 576px) {
                             .col-md-6 {
                                 max-width: 100%;
@@ -370,12 +392,12 @@
 
                     <script>
                         // Add hover effect to cards
-                        $(document).ready(function() {
+                        $(document).ready(function () {
                             $('.class-card').hover(
-                                function() {
+                                function () {
                                     $(this).addClass('shadow-sm');
                                 },
-                                function() {
+                                function () {
                                     $(this).removeClass('shadow-sm');
                                 }
                             );
@@ -389,98 +411,595 @@
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">ثبت صنف جدید</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+           
                 <div class="modal-body">
-                    <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'classes:main_classes' %}">
-                        {% csrf_token %}
-                        <div class="col-12">
-                            <h5>معلومات صنف جدید</h5>
-                        </div>
-                        
-                        <!-- نام صنف -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">نام صنف<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.name }}
+<form class="row g-3 needs-validation" novalidate method="post" 
+      action="{% url 'classes:main_classes' %}">
+    {% csrf_token %}
+    
+    <!-- Form Header -->
+    <div class="col-12 mb-4">
+        <h5 class="fw-bold">
+            <i class="fas fa-plus-circle ml-2 text-primary"></i>
+            اطلاعات صنف جدید
+        </h5>
+        <hr>
+    </div>
+
+    <!-- Basic Information Section -->
+    <div class="col-12">
+        <div class="row">
+            <!-- نام صنف -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    نام صنف <span class="text-danger">*</span>
+                </label>
+                {{ sub_form.name }}
+                <div class="invalid-feedback">
+                    لطفاً نام صنف را وارد کنید
+                </div>
+            </div>
+
+            <!-- تاریخ آغاز -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">تاریخ آغاز</label>
+                {{ sub_form.start_date }}
+            </div>
+
+            <!-- تایم -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">تایم</label>
+                {{ sub_form.time }}
+            </div>
+
+            <!-- ضرفیت صنف -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    ظرفیت صنف <span class="text-danger">*</span>
+                </label>
+                {{ sub_form.capacity }}
+                <div class="invalid-feedback">
+                    لطفاً ظرفیت صنف را وارد کنید
+                </div>
+            </div>
+
+            <!-- مقدار فیس -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    مقدار فیس <span class="text-danger">*</span>
+                </label>
+                {{ sub_form.fees }}
+                <div class="invalid-feedback">
+                    لطفاً مقدار فیس را وارد کنید
+                </div>
+            </div>
+
+            <!-- صنف (اتاق) -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    اتاق <span class="text-danger">*</span>
+                </label>
+                {{ sub_form.room }}
+                <div class="invalid-feedback">
+                    لطفاً اتاق را انتخاب کنید
+                </div>
+            </div>
+
+            <!-- تقسیم اوقات -->
+            <div class="col-md-12 mb-3">
+                <label class="form-label">
+                    توضیحات <span class="text-danger">*</span>
+                </label>
+                {{ sub_form.schedule }}
+                <div class="invalid-feedback">
+                    لطفاً تقسیم اوقات را وارد کنید
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teachers Selection Section -->
+    <div class="col-12 mb-4">
+        <div class="selection-container border rounded-3">
+            <div class="selection-header p-3 bg-light border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-tie text-primary ms-2"></i>
+                        <span class="fw-medium"> انتخاب استادان</span>
+                    </div>
+                    <div id="teachers-counter" class="badge bg-primary">
+                        ۰ انتخاب شده
+                    </div>
+                </div>
+            </div>
+            
+            <div class="selection-body p-3" style="max-height: 300px; overflow-y: auto;">
+                {% if teachers %}
+                <div class="row g-2">
+                    {% for teacher in teachers %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="selection-card teacher-card" 
+                             data-id="{{ teacher.id }}"
+                             onclick="toggleSelection(this, 'teacher')">
+                            <div class="d-flex align-items-center p-2">
+                                <!-- Teacher Avatar -->
+                                <div class="avatar me-3 position-relative">
+                                    {% if teacher.image %}
+                                    <img src="{{ teacher.image.url }}" 
+                                         alt="{{ teacher.name }}"
+                                         class="avatar-img"
+                                         onerror="handleImageError(this)">
+                                    {% endif %}
+                                    <div class="avatar-initial {% if teacher.image %}d-none{% else %}default{% endif %}">
+                                        {{ teacher.name|slice:":1" }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Teacher Info -->
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">{{ teacher.name }}</h6>
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-phone fa-xs ms-1"></i>
+                                        {{ teacher.phone|default:"ندارد" }}
+                                    </small>
+                                </div>
+                                
+                                <!-- Selection Indicator -->
+                                <div class="selection-indicator ms-2">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
                             </div>
+                            <!-- Hidden Input -->
+                            <input type="checkbox" 
+                                   name="selected_teachers" 
+                                   value="{{ teacher.id }}"
+                                   class="d-none selection-input">
                         </div>
-                        
-                        <!-- تاریخ آغاز -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">تاریخ آغاز</label>
-                            <div class="col-sm-8">
-                                {{ sub_form.start_date }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">هیچ استاد فعالی یافت نشد</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="selection-footer p-3 bg-light border-top">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle ms-1"></i>
+                    برای انتخاب استاد روی آن کلیک کنید
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Selection Section -->
+    <div class="col-12 mb-4">
+ 
+        <div class="selection-container border rounded-3">
+            <div class="selection-header p-3 bg-light border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-book-open text-success ms-2"></i>
+                        <span class="fw-medium">  انتخاب کتاب</span>
+                    </div>
+                    <div id="books-counter" class="badge bg-success">
+                        ۰ انتخاب شده
+                    </div>
+                </div>
+            </div>
+            
+            <div class="selection-body p-3" style="max-height: 300px; overflow-y: auto;">
+                {% if books %}
+                <div class="row g-2">
+                    {% for book in books %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="selection-card book-card" 
+                             data-id="{{ book.id }}"
+                             onclick="toggleSelection(this, 'book')">
+                            <div class="d-flex align-items-center p-2">
+                                <!-- Book Avatar -->
+                                <div class="avatar me-3 position-relative">
+                                    {% if book.image %}
+                                    <img src="{{ book.image.url }}" 
+                                         alt="{{ book.name }}"
+                                         class="avatar-img"
+                                         onerror="handleImageError(this)">
+                                    {% endif %}
+                                    <div class="avatar-initial book-initial {% if book.image %}d-none{% endif %}">
+                                        {{ book.name|slice:":1" }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Book Info -->
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">{{ book.name }}</h6>
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-user-tie fa-xs ms-1"></i>
+                                        {{ book.author|default:"ناشناس" }}
+                                    </small>
+                                </div>
+                                
+                                <!-- Selection Indicator -->
+                                <div class="selection-indicator ms-2">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
                             </div>
+                            <!-- Hidden Input -->
+                            <input type="checkbox" 
+                                   name="selected_books" 
+                                   value="{{ book.id }}"
+                                   class="d-none selection-input">
                         </div>
-                        
-                        <!-- اساتید -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">اساتید<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.teacher }}
-                            </div>
-                        </div>
-                        
-                        <!-- کتابها -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">کتابها<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.books }}
-                            </div>
-                        </div>
-                        
-                        <!-- تایم -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">تایم</label>
-                            <div class="col-sm-8">
-                                {{ sub_form.time }}
-                            </div>
-                        </div>
-                        
-                        <!-- ضرفیت صنف -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">ضرفیت صنف<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.capacity }}
-                            </div>
-                        </div>
-                        
-                        <!-- مقدار فیس -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">مقدار فیس<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.fees }}
-                            </div>
-                        </div>
-                        
-                        <!-- صنف -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">صنف<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.room }}
-                            </div>
-                        </div>
-                        
-                        <!-- تقسیم اوقات -->
-                        <div class="col-md-12 d-flex align-items-center mb-3">
-                            <label class="col-sm-4 col-form-label">تقسیم اوقات<span class="text-danger">*</span></label>
-                            <div class="col-sm-8">
-                                {{ sub_form.schedule }}
-                            </div>
-                        </div>
-                        
-                        <!-- Submit Buttons -->
-                        <div class="col-12 d-flex justify-content-end mt-3">
-                            <input type="hidden" name="form_type" value="class">
-                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">انصراف</button>
-                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
-                        </div>
-                    </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-book-dead fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">هیچ کتابی یافت نشد</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="selection-footer p-3 bg-light border-top">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle ms-1"></i>
+                    برای انتخاب کتاب روی آن کلیک کنید
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="col-12">
+        <input type="hidden" name="form_type" value="class">
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                <i class="fas fa-times ml-1"></i> انصراف
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save ml-1"></i> ذخیره صنف
+            </button>
+        </div>
+    </div>
+</form>
+
+<style>
+    /* Form Input Styling */
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    /* Avatar Container */
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 2px solid #e3e6f0;
+        background-color: white;
+        transition: all 0.3s ease;
+    }
+    
+    /* Avatar Image */
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block;
+    }
+    
+    /* Avatar Initial */
+    .avatar-initial {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        color: white;
+        z-index: 1;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    
+    /* Teacher avatar color */
+    .avatar-initial.default {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    
+    /* Book avatar color */
+    .avatar-initial.book-initial {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    }
+    
+    /* Selection Container */
+    .selection-container {
+        transition: all 0.3s ease;
+    }
+    
+    .selection-container:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Selection Card */
+    .selection-card {
+        background: white;
+        border: 2px solid #e3e6f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    
+    .selection-card:hover {
+        border-color: #4e73df;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.15);
+    }
+    
+    .selection-card.selected {
+        border-color: #1cc88a;
+        background-color: rgba(28, 200, 138, 0.05);
+    }
+    
+    .selection-card.selected .avatar {
+        border-color: #1cc88a;
+        box-shadow: 0 0 0 2px rgba(28, 200, 138, 0.2);
+    }
+    
+    .selection-card:hover .avatar {
+        border-color: #4e73df;
+        transform: scale(1.05);
+    }
+    
+    /* Selection Indicator */
+    .selection-indicator {
+        color: #e3e6f0;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    
+    .selection-card.selected .selection-indicator {
+        color: #1cc88a;
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    /* Selection Header */
+    .selection-header {
+        background: linear-gradient(135deg, #f8f9fe 0%, #ffffff 100%);
+    }
+    
+    /* Scrollbar Styling */
+    .selection-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .selection-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .selection-body::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+    
+    .selection-body::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .col-md-6, .col-lg-4 {
+            width: 100%;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .avatar-initial {
+            font-size: 16px;
+        }
+        
+        .selection-body {
+            max-height: 200px;
+        }
+    }
+</style>
+
+<script>
+    // Image error handler function
+    function handleImageError(imgElement) {
+        // Hide the broken image
+        imgElement.style.display = 'none';
+        
+        // Find the avatar initial div and show it
+        const avatarDiv = imgElement.closest('.avatar');
+        if (avatarDiv) {
+            const initialDiv = avatarDiv.querySelector('.avatar-initial');
+            if (initialDiv) {
+                initialDiv.classList.remove('d-none');
+                initialDiv.style.display = 'flex';
+            }
+        }
+    }
+    
+    // Toggle selection function
+    function toggleSelection(element, type) {
+        const checkbox = element.querySelector('.selection-input');
+        const isSelected = element.classList.contains('selected');
+        
+        if (isSelected) {
+            // Deselect
+            element.classList.remove('selected');
+            checkbox.checked = false;
+        } else {
+            // Select
+            element.classList.add('selected');
+            checkbox.checked = true;
+        }
+        
+        updateSelectionCounters();
+        
+        // Add click animation
+        element.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+            element.style.transform = '';
+        }, 150);
+    }
+    
+    // Update selection counters
+    function updateSelectionCounters() {
+        // Teachers counter
+        const selectedTeachers = document.querySelectorAll('.teacher-card.selected').length;
+        const teachersCounter = document.getElementById('teachers-counter');
+        if (teachersCounter) {
+            teachersCounter.textContent = `${selectedTeachers} انتخاب شده`;
+            teachersCounter.className = selectedTeachers === 0 ? 'badge bg-secondary' : 'badge bg-primary';
+        }
+        
+        // Books counter
+        const selectedBooks = document.querySelectorAll('.book-card.selected').length;
+        const booksCounter = document.getElementById('books-counter');
+        if (booksCounter) {
+            booksCounter.textContent = `${selectedBooks} انتخاب شده`;
+            booksCounter.className = selectedBooks === 0 ? 'badge bg-secondary' : 'badge bg-success';
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize image handlers
+        const images = document.querySelectorAll('.avatar-img');
+        images.forEach(img => {
+            // Check if image has already loaded and failed
+            if (img.complete && img.naturalHeight === 0) {
+                handleImageError(img);
+            }
+            
+            // Add error event listener
+            img.addEventListener('error', function() {
+                handleImageError(this);
+            });
+            
+            // Add load event to ensure initial is hidden when image loads successfully
+            img.addEventListener('load', function() {
+                const avatarDiv = this.closest('.avatar');
+                if (avatarDiv) {
+                    const initialDiv = avatarDiv.querySelector('.avatar-initial');
+                    if (initialDiv) {
+                        initialDiv.style.display = 'none';
+                        initialDiv.classList.add('d-none');
+                    }
+                }
+            });
+        });
+        
+        // Initialize counters
+        updateSelectionCounters();
+        
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            // Validate required fields
+            const requiredFields = ['name', 'capacity', 'fees', 'room', 'schedule'];
+            let missingFields = [];
+            
+            requiredFields.forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (field && !field.value.trim()) {
+                    missingFields.push(fieldName);
+                }
+            });
+            
+            // Check if at least one teacher is selected
+            const selectedTeachers = form.querySelectorAll('input[name="selected_teachers"]:checked');
+            if (selectedTeachers.length === 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'توجه',
+                    text: 'حداقل یک استاد باید انتخاب شود',
+                    confirmButtonText: 'متوجه شدم'
+                });
+                return false;
+            }
+            
+            // Check if at least one book is selected
+            const selectedBooks = form.querySelectorAll('input[name="selected_books"]:checked');
+            if (selectedBooks.length === 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'توجه',
+                    text: 'حداقل یک کتاب باید انتخاب شود',
+                    confirmButtonText: 'متوجه شدم'
+                });
+                return false;
+            }
+            
+            if (missingFields.length > 0) {
+                e.preventDefault();
+                // Show first missing field
+                const firstField = form.querySelector(`[name="${missingFields[0]}"]`);
+                if (firstField) {
+                    firstField.focus();
+                    firstField.classList.add('is-invalid');
+                }
+                return false;
+            }
+            
+            return true;
+        });
+        
+        // Initialize datepicker if exists
+        if (typeof $.fn.datepicker !== 'undefined' && $('#id_start_date').length) {
+            $('#id_start_date').datepicker({
+                format: 'yyyy/mm/dd',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'fa'
+            });
+        }
+    });
+</script>
+
+           
                 </div>
             </div>
         </div>
@@ -494,58 +1013,59 @@
         font-size: 0.85em;
         padding: 0.35em 0.65em;
     }
-    
+
     .dropdown-menu {
         min-width: 150px;
         border-radius: 8px;
         box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
     }
-    
+
     .dropdown-item {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
-    
+
     .dropdown-item i {
         width: 20px;
     }
-    
+
     .empty-state {
         padding: 3rem 1rem;
     }
-    
+
     .table th {
         font-weight: 600;
         border-top: none;
         color: #4e73df;
     }
-    
+
     .table td {
         vertical-align: middle;
         padding: 0.75rem;
     }
-    
+
     .table-hover tbody tr:hover {
         background-color: rgba(78, 115, 223, 0.05);
     }
-    
+
     .badge-primary {
         background-color: #4e73df;
     }
-    
+
     .badge-info {
         background-color: #36b9cc;
     }
-    
+
     .badge-success {
         background-color: #1cc88a;
     }
-    
+
     .badge-danger {
         background-color: #e74a3b;
     }
-    
-    .form-control, .form-select {
+
+    .form-control,
+    .form-select {
         border-radius: 0.35rem;
         border: 1px solid #d1d3e2;
     }
@@ -553,7 +1073,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-     
+
         // Date pickers
         $('#datepicker3').datepicker({});
         $('#datepicker4').datepicker({});

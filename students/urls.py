@@ -7,7 +7,6 @@ urlpatterns = [
     path('student/registration', views.students_registration, name="students_registration"),
     path('student/registration/<int:id>/delete', views.delete_students, name="delete_students"),
     path('student/registration/<int:id>/edit', views.edit_students, name="edit_students"),
-    path('student/registration-bill/<int:student_id>/<int:fees_id>/', views.student_bill, name="student_bill"),
     path('student/<int:student_id>/', views.student_detail, name='student_detail'),
     path('student/fees_info/<int:student_id>/', views.student_fees_detail, name='student_fees_detail'),
     path('student/activation/<int:student_id>/', views.student_activate, name='student_activate'),
@@ -24,4 +23,7 @@ urlpatterns = [
     path('student/payments/<int:student_id>/', views.student_payments, name='student_payments'),
     path('student/delete/purchased/<int:purchase_id>/', views.delete_student_purchased_items, name='delete_student_purchased_items'),
     path('student/edit/purchased/<int:purchase_id>/', views.edit_student_purchased_items, name='edit_student_purchased_items'),
+    path('student/paid/remain_amount/<int:student_id>/', views.student_paid_remain_money, name='student_paid_remain_money'),
+    path('student/delete/paid/remain_amount/<int:id>/', views.delete_student_paid_remain, name='delete_student_paid_remain'),
+    path('student/edit/paid/remain_amount/<int:id>/', views.edit_student_paid_remain, name='edit_student_paid_remain'),
 ]

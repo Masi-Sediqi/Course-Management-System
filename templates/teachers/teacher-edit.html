@@ -30,52 +30,64 @@
                 </h4>
             </div>
 
-
-            <form class="needs-validation" novalidate="novalidate" action="{% url 'teachers:edit_teacher' get_student_id.id %}" method="post">
+            <form class="needs-validation" novalidate method="post" action="{% url 'teachers:edit_teacher' get_student_id.id %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="row">
-                    <div class="col-12">
-                       
-                        <h5>معلومات استاد</h5>
-                    </div>
-                    <!-- Personal Info -->
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="firstName1">اسم<span style="color: red;">*</span></label>
-                        {{ form.name }}
-                    </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="lastName1">تخلص</label>
-                        {{ form.last_name }}
-                    </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="phone">شماره تماس</label>
-                        {{ form.phone }}
-                    </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="phone">جنسیت</label>
-                        {{ form.gender }}
-                    </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="date_of_registration">فیصدی<span style="color: red;">*</span></label>
-                        {{ form.percentage }}
-                    </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label for="gender">فایل</label>
-                        {{ form.file }}
-                    </div>
-                    <div class="col-md-12 form-group mb-3">
-                        <label for="gender">توضیحات</label>
-                        {{ form.description }}
-                    </div>
-            
-            
-                    <!-- Submit Buttons -->
-                    <div class="col-12 modal-footer">
-                        <a href="{% url 'teachers:teacher_detail' get_student_id.id %}" class="btn btn-secondary">برگشت</a>
-                        <button class="btn btn-primary " type="submit">ذخیره کردن</button>
+        
+                <!-- اسم -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label for="firstName1" class="col-sm-4 col-form-label">اسم<span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                    {{ form.name }}
                     </div>
                 </div>
-            </form>
+
+                <!-- شماره تماس -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label for="phone" class="col-sm-4 col-form-label">شماره تماس</label>
+                    <div class="col-sm-8">
+                    {{ form.phone }}
+                    </div>
+                </div>
+
+                <!-- جنسیت -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label for="phone" class="col-sm-4 col-form-label">جنسیت <span class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                    {{ form.gender }}
+                    </div>
+                </div>
+
+                <!-- فیصدی -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label for="date_of_registration" class="col-sm-4 col-form-label">فیصدی<span
+                        class="text-danger">*</span></label>
+                    <div class="col-sm-8">
+                    {{ form.percentage }}
+                    </div>
+                </div>
+
+                <!-- فایل -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label for="gender" class="col-sm-4 col-form-label">عکس</label>
+                    <div class="col-sm-8">
+                    {{ form.image }}
+                    </div>
+                </div>
+
+                <!-- توضیحات -->
+                <div class="col-md-12 d-flex align-items-center mb-3">
+                    <label for="gender" class="col-sm-4 col-form-label">توضیحات</label>
+                    <div class="col-sm-8">
+                    {{ form.description }}
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="col-12 d-flex justify-content-end mt-3">
+                    <button class="btn btn-secondary ml-2" type="button" data-dismiss="modal">برگشت</button>
+                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                </div>
+                </form>
         </div>
     </div>
 </div>

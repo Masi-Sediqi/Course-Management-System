@@ -190,13 +190,15 @@
                 <tr class="animate-row">
                   <td>{{ account.id }}</td>
                   <td>
-                    <div class="d-flex align-items-center">
-                      <img src="{% static 'images/student/user.jpg' %}" class="rounded-circle me-3" width="45" height="45" alt="User">
-                      <div>
-                        <h6 class="mb-0 fw-bold">{{ account.name }}</h6>
-                        <small class="text-muted ml-2">{{ account.email }}</small>
-                      </div>
-                    </div>
+                    <a href="{% url 'account:account_more_info' account.id %}">
+                        <div class="d-flex align-items-center">
+                        <img src="{% static 'images/student/user.jpg' %}" class="rounded-circle me-3" width="45" height="45" alt="User">
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ account.name }}</h6>
+                            <small class="text-muted ml-2">{{ account.email }}</small>
+                        </div>
+                        </div>
+                    </a>
                   </td>
   
                   <td>
@@ -240,8 +242,6 @@
                               <a class="dropdown-item text-info" href="{% url 'account:diactivate_employee' account.id %}">غیر فعال نمودن </a>
                              {% endif %}
                          
-                          <a class="dropdown-item text-info" href="{% url 'account:assign_permission_for_user' account.id %}">دادن صلاحیت</a>
-
                           <a class="dropdown-item text-danger" data-toggle="modal"
                             data-target="#deleteConfirmModal{{ account.id }}">
                            حذف

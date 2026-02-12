@@ -42,13 +42,15 @@
                 <div class="card-body">
                     <div class="card-title d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">سابقه ارتقاعات: {{ student.first_name }} {{ student.last_name }}</h5>
+                        {% if system_permission and system_permission.add_improving_student %}
                         <button id="pwa-install-btn" data-toggle="modal" data-target="#exampleModal" class="btn-add-improvement">
                             <i class="bi bi-arrow-up-circle me-2"></i>ارتقاع جدید
                         </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-                        
+            {% if system_permission and system_permission.view_improving_student %}
             <div class="col-md-12 mb-4">
                 <div class="card">
                     <div class="card-header bg-gradient-primary text-white">
@@ -138,15 +140,19 @@
                                                 </div>
                                                 <div class="timeline-actions">
                                                     <div class="btn-group btn-group-sm" role="group">
+                                                        {% if system_permission and system_permission.edit_improving_student %}
                                                         <a href="{% url 'students:edit_student_improvement' record.id %}" 
                                                         class="btn btn-outline-primary" title="ویرایش">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
+                                                        {% endif %}
+                                                        {% if system_permission and system_permission.delete_improving_student %}
                                                         <button type="button" class="btn btn-outline-danger" 
                                                                 data-toggle="modal" data-target="#deletedConfirmModal{{ record.id }}" 
                                                                 title="حذف">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -226,6 +232,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <style>
                 /* Timeline/Improvement Map Styles */

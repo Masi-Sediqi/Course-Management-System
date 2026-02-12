@@ -17,14 +17,17 @@
             </a>
 
             <!-- پرداخت‌ها / افزودن رکورد -->
+            {% if system_permission and system_permission.view_registration_student or system_permission.edit_registration_student or system_permission.delete_registration_student %}
             <a href="{% url 'students:student_payments' student.id %}"
             class="btn btn-sm btn-outline-success">
                 <i class="fas fa-plus-circle ml-1"></i> پرداخت‌ها
             </a>
+            {% endif %}
         </div>
     </div>
 
     <!-- Classes Grid -->
+    {% if system_permission and system_permission.add_registeration_student %}
     <div class="row">
         {% for class in classes %}
         <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
@@ -144,6 +147,7 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 
 <style>

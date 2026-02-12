@@ -1,34 +1,38 @@
-from django.urls import reverse
 from django.shortcuts import render, redirect , get_object_or_404
-from decimal import Decimal
-from management.models import *
+from home.models import *
 from .forms import *
-from django.db import transaction
 from .models import *
+from django.contrib.contenttypes.models import ContentType
+from management.models import *
 from django.http import HttpResponse
-from django.db.models import Sum
 from django.contrib import messages
-import openpyxl
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 # Create your views here.
 
 def students_registration(request):
 
     form = StudentForm()
-    students = Student.objects.filter(is_active=True)
+    students = Student.objects.all()
 
     if request.method == "POST":
         form = StudentForm(request.POST, request.FILES)
         if form.is_valid():
             form.save() 
             messages.success(request, 'شاگرد موفقانه ثبت شد')
+
+            SystemLog.objects.create(
+                section="شاگردان",
+                action=f"ثبت شاگرد جدید:",
+                description=f"یک شاگرد جدید با نام {form.cleaned_data.get('first_name')} ثبت شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
             return redirect('students:students_registration')
+
     else:
         form = StudentForm()
 
     form = StudentForm()
-    students = Student.objects.filter(is_active=True)
-
+    students = Student.objects.all()
+    
     context = {
         'students':students,
         'form':form,
@@ -40,6 +44,14 @@ def delete_students(request, id):
     get_student_id = Student.objects.get(id=id)
     if get_student_id:
         get_student_id.delete()
+
+        SystemLog.objects.create(
+            section="شاگردان",
+            action=f"حذف شاگرد:",
+            description=f"شاگرد با نام {get_student_id.first_name} حذف شد.",
+            user=request.user if request.user.is_authenticated else None
+        )
+
         messages.success(request, 'شاگرد موفقانه ذخیره شد')
         return redirect('students:students_registration')
     else:
@@ -53,6 +65,14 @@ def edit_students(request, id):
         form = StudentForm(request.POST,request.FILES, instance=get_student_id)
         if form.is_valid():
             form.save()
+
+            SystemLog.objects.create(
+                section="شاگردان",
+                action=f"تغییر اطلاعات شاگرد:",
+                description=f"اطلاعات شاگرد با نام {form.cleaned_data.get('first_name')} تغییر داده شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
+
             messages.success(request, f" دانش‌آموز{get_student_id.first_name} موفقانه تغییرات آورده شد.")
             return redirect('students:students_registration')  # or render response
         else:
@@ -66,47 +86,20 @@ def edit_students(request, id):
     }
     return render(request, 'students/edit_student.html', context)
 
-def student_bill(request, student_id, fees_id):
-    get_student_fees = Student_fess_info.objects.get(id=fees_id)
-    student = Student.objects.get(id=student_id)
-    return render(request, 'students/student-bill.html', {
-        'student': student,
-        'get_student_fees':get_student_fees,
-    })
-
-
 def student_detail(request, student_id):
     student = get_object_or_404(Student, id=student_id)
     student_balance = StudentBalance.objects.filter(student=student).last()
 
-    has_balance = False
-    if student_balance:
-        has_balance = True
-    else:
+    if not student_balance:
         StudentBalance.objects.create(
             student=student,
             paid=0,
             remain=0,
         )
 
-    if request.method == "POST":
-        paid_amount = request.POST.get('paid_amount')
-        remain_amount = request.POST.get('remain_amount')
-
-        StudentBalance.objects.filter(student=student).delete()
-
-        StudentBalance.objects.create(
-            student=student,
-            paid=paid_amount,
-            remain=remain_amount,
-        )
-        messages.success(request, 'بیلانس موفقانه اضافه شد، و بیلانس گذشته حذف شد.')
-        return redirect('students:student_detail', student.id)
-
     context = {
         'student': student,
         'student_balance': student_balance,
-        'has_balance': has_balance,
     }
     return render(request, 'students/student-detail.html', context)
 
@@ -147,42 +140,38 @@ def student_payments(request, student_id):
     }
     return render(request, 'students/student-payments.html', context)
 
+
 def student_paid_fees(request, stu_id, cla_id):
     referer = request.META.get('HTTP_REFERER', '/')
     student = Student.objects.get(id=stu_id)
     stu_class = SubClass.objects.get(id=cla_id)
     student_balance = StudentBalance.objects.filter(student=student).last()
-    income_expenses = TotalBalance.objects.last()
 
     if request.method == "POST":
         form = Student_fess_infoForm(request.POST)
         if form.is_valid():
             get_date = form.cleaned_data.get('date')
 
-            orginal_fess = float(request.POST.get('orginal_fees'))
-            paid_fees = float(request.POST.get('paid_fees'))
-            remaining = float(request.POST.get('remaining'))
-
+            orginal_fees = float(request.POST.get('orginal_fees', 0))
+            paid_fees = float(request.POST.get('paid_fees', 0))
+            remaining = float(request.POST.get('remaining', 0))
             waive_remaining = request.POST.get('waive_remaining') == "on"
 
-            student_balance.paid += paid_fees
-            student_balance.remain += remaining
-            student_balance.save()
-            if income_expenses:
-                income_expenses.total_income += paid_fees
-                income_expenses.total_receivable += remaining
-                income_expenses.save()
+            # Update StudentBalance
+            if student_balance:
+                student_balance.paid += paid_fees
+                student_balance.remain += remaining
+                student_balance.save()
             else:
-                TotalBalance.objects.create(
-                    total_income=paid_fees,
-                    total_receivable=remaining,
-                    total_expenses=0,
-                    total_payable=0,
+                student_balance = StudentBalance.objects.create(
+                    student=student,
+                    paid=paid_fees,
+                    remain=remaining
                 )
 
+            # Parse date
             try:
                 day, month, year = map(int, get_date.split('/'))
-
             except ValueError:
                 messages.error(
                     request,
@@ -191,35 +180,42 @@ def student_paid_fees(request, stu_id, cla_id):
                 return redirect(request.path)
 
             shamsi_months = {
-                1: "حمل",
-                2: "ثور",
-                3: "جوزا",
-                4: "سرطان",
-                5: "اسد",
-                6: "سنبله",
-                7: "میزان",
-                8: "عقرب",
-                9: "قوس",
-                10: "جدی",
-                11: "دلو",
-                12: "حوت",
+                1: "حمل", 2: "ثور", 3: "جوزا", 4: "سرطان", 5: "اسد", 6: "سنبله",
+                7: "میزان", 8: "عقرب", 9: "قوس", 10: "جدی", 11: "دلو", 12: "حوت",
             }
-
             month_name = shamsi_months.get(month)
-
             if not month_name:
                 messages.error(request, "ماه نامعتبر است")
                 return redirect(request.path)
 
+            # Save Student Fees Record
             fees_info = form.save(commit=False)
-            fees_info.student = student 
-            fees_info.st_class = stu_class 
+            fees_info.student = student
+            fees_info.st_class = stu_class
             fees_info.month = month_name
-            fees_info.orginal_fees = orginal_fess
+            fees_info.orginal_fees = orginal_fees
             fees_info.give_fees = paid_fees
             fees_info.remain_fees = remaining
             fees_info.not_remain = waive_remaining
             fees_info.save()
+
+            # --- Create FinanceRecord for this payment ---
+            FinanceRecord.objects.create(
+                date=fees_info.date,  
+                title=f"پرداخت فیس توسط {student.first_name}",
+                description=f"پرداخت فیس به مبلغ {paid_fees} توسط شاگرد {student.first_name} برای صنف {stu_class.name}",
+                amount=paid_fees,
+                type="income",
+                content_type=ContentType.objects.get_for_model(fees_info),
+                object_id=fees_info.id
+            )
+
+            SystemLog.objects.create(
+                section="شاگردان",
+                action=f"پرداخت فیس:",
+                description=f"فیس {paid_fees} برای شاگرد {student.first_name} ثبت شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
 
             messages.success(request, 'فیس ذیل موفقانه ذخیره شد')
             return redirect('students:student_payments', student_id=student.id)
@@ -227,140 +223,144 @@ def student_paid_fees(request, stu_id, cla_id):
         form = Student_fess_infoForm(initial={"orginal_fees": stu_class.fees})
 
     context = {
-        'student':student,
-        'stu_class':stu_class,
-        'form':form,
+        'student': student,
+        'stu_class': stu_class,
+        'form': form,
     }
     return render(request, 'students/student-paid-fees.html', context)
 
+
 def delete_paid_fess(request, id):
     referer = request.META.get('HTTP_REFERER', '/')
-    fess_id = Student_fess_info.objects.get(id=id)
-    student = fess_id.student
-    amount = fess_id.give_fees
+    fees_record = get_object_or_404(Student_fess_info, id=id)
+    student = fees_record.student
+    amount = fees_record.give_fees
+    remaining_amount = fees_record.remain_fees
 
+    # Update StudentBalance
     student_balance = StudentBalance.objects.filter(student=student).last()
+    if student_balance:
+        student_balance.paid -= amount
+        student_balance.remain -= remaining_amount
+        student_balance.save()
 
-    student_balance.paid -= amount
-    student_balance.remain -= fess_id.remain_fees
-    student_balance.save()
+    # Delete linked FinanceRecord (if exists)
+    content_type = ContentType.objects.get_for_model(Student_fess_info)
+    FinanceRecord.objects.filter(
+        content_type=content_type,
+        object_id=fees_record.id
+    ).delete()
 
-    income_expenses = TotalBalance.objects.last()
-    income_expenses.total_income -= amount
-    income_expenses.total_receivable -= fess_id.remain_fees
-    income_expenses.save()
+    # Delete the Student Fee record
+    fees_record.delete()
+
+    # Log the action
+    SystemLog.objects.create(
+        section="شاگردان",
+        action="حذف ریکارد فیس پرداخت شده",
+        description=f"ریکارد فیس پرداخت شده به مقدار {amount} برای شاگرد {student.first_name} حذف شد.",
+        user=request.user if request.user.is_authenticated else None
+    )
 
     messages.success(request, 'ریکارد پرداخت موفقانه حذف شد')
-    fess_id.delete()
     return redirect(referer)
+
 
 def edit_paid_fees(request, id):
     referer = request.META.get('HTTP_REFERER', '/')
-    fess_id = Student_fess_info.objects.get(id=id)
-    student = fess_id.student
+    fess_record = get_object_or_404(Student_fess_info, id=id)
+    student = fess_record.student
 
     student_balance = StudentBalance.objects.filter(student=student).last()
-    income_expenses = TotalBalance.objects.last()
-
-    old_paid_fess = fess_id.give_fees
+    old_paid_fees = fess_record.give_fees
 
     if request.method == "POST":
-        form = Student_fess_infoForm(request.POST, instance=fess_id)
+        form = Student_fess_infoForm(request.POST, instance=fess_record)
         if form.is_valid():
-         
             get_date = form.cleaned_data.get('date')
 
-            orginal_fess = float(request.POST.get('orginal_fees'))
-            paid_fees = float(request.POST.get('paid_fees'))
-            remaining = float(request.POST.get('remaining'))
-
+            orginal_fees = float(request.POST.get('orginal_fees', 0))
+            paid_fees = float(request.POST.get('paid_fees', 0))
+            remaining = float(request.POST.get('remaining', 0))
             waive_remaining = request.POST.get('waive_remaining') == "on"
 
             try:
                 day, month, year = map(int, get_date.split('/'))
-
             except ValueError:
-                messages.error(
-                    request,
-                    'فرمت تاریخ نادرست است. از قالب dd/mm/yyyy استفاده کنید.'
-                )
+                messages.error(request, 'فرمت تاریخ نادرست است. از قالب dd/mm/yyyy استفاده کنید.')
                 return redirect(request.path)
 
             shamsi_months = {
-                1: "حمل",
-                2: "ثور",
-                3: "جوزا",
-                4: "سرطان",
-                5: "اسد",
-                6: "سنبله",
-                7: "میزان",
-                8: "عقرب",
-                9: "قوس",
-                10: "جدی",
-                11: "دلو",
-                12: "حوت",
+                1: "حمل", 2: "ثور", 3: "جوزا", 4: "سرطان",
+                5: "اسد", 6: "سنبله", 7: "میزان", 8: "عقرب",
+                9: "قوس", 10: "جدی", 11: "دلو", 12: "حوت",
             }
-
-            instance = form.save(commit=False)
-
             month_name = shamsi_months.get(month)
 
-            if paid_fees >= old_paid_fess:
-                defference = paid_fees - old_paid_fess
-                
-                fess_id.give_fees += defference
-                fess_id.remain_fees -= defference
-                fess_id.save()
-
-                student_balance.paid += defference
-                student_balance.remain -= defference
+            # Update Student Balance
+            diff = paid_fees - old_paid_fees
+            if student_balance:
+                student_balance.paid += diff
+                student_balance.remain += (remaining - fess_record.remain_fees)
                 student_balance.save()
 
-                income_expenses.total_income += defference
-                income_expenses.total_receivable -= defference
-                income_expenses.save()
+            # Update FinanceRecord linked to this fee
+            content_type = ContentType.objects.get_for_model(Student_fess_info)
+            finance_record = FinanceRecord.objects.filter(
+                content_type=content_type,
+                object_id=fess_record.id
+            ).first()
 
-            else:
-                
-                defference = old_paid_fess - paid_fees
-                
-                fess_id.give_fees -= defference
-                fess_id.remain_fees += defference
-                fess_id.save()
+            if finance_record:
+                finance_record.amount = paid_fees
+                finance_record.description = f"فیس پرداخت شده برای شاگرد {student.first_name}"
+                finance_record.save()
 
-                student_balance.paid -= defference
-                student_balance.remain += defference
-                student_balance.save()
+            # Update the fee record
+            fess_record.give_fees = paid_fees
+            fess_record.remain_fees = remaining
+            fess_record.orginal_fees = orginal_fees
+            fess_record.month = month_name
+            fess_record.not_remain = waive_remaining
+            fess_record.save()
 
-                income_expenses.total_income -= defference
-                income_expenses.total_receivable += defference
-                income_expenses.save()
+            # Log the edit
+            SystemLog.objects.create(
+                section="شاگردان",
+                action="تغییر ریکارد فیس پرداخت شده",
+                description=f"ریکارد فیس پرداخت شده برای شاگرد {student.first_name} به مقدار {paid_fees} تغییر داده شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
 
-            instance.student = student 
-            instance.st_class = fess_id.st_class 
-            instance.month = month_name
-            instance.orginal_fees = orginal_fess
-            instance.not_remain = waive_remaining
-            instance.save()
-           
-            messages.success(request, 'ریکارد ذیل موفقانه ایدیت شد')
+            messages.success(request, 'ریکارد فیس موفقانه ایدیت شد')
             return redirect("students:student_payments", student_id=student.id)
         else:
-            return HttpResponse('Form Is Not Valid')
+            return HttpResponse('فرم معتبر نیست')
 
     else:
-        form = Student_fess_infoForm(instance=fess_id)
+        form = Student_fess_infoForm(instance=fess_record)
 
     context = {
-        'fess_id':fess_id,
-        'form':form,
+        'fess_id': fess_record,
+        'form': form,
     }
     return render(request, 'students/edit-student-paid-fees.html', context)
+
 
 def student_activate(request, student_id):
     student = get_object_or_404(Student, id=student_id)
     student.is_active = False
+
+    jalali_now = jdatetime.datetime.now().strftime("%d/%m/%Y")
+    student.deactivated_at = jalali_now
+    
     student.save()
+    SystemLog.objects.create(
+        section="شاگردان",
+        action=f"غیرفعال کردن شاگرد:",
+        description=f"شاگرد با نام {student.first_name} غیرفعال شد.",
+        user=request.user if request.user.is_authenticated else None
+    )
     return redirect(request.META.get('HTTP_REFERER'))
 
 
@@ -368,6 +368,12 @@ def student_activate_on(request, student_id):
     student = get_object_or_404(Student, id=student_id)
     student.is_active = True
     student.save()
+    SystemLog.objects.create(
+        section="شاگردان",
+        action=f"فعال کردن شاگرد:",
+        description=f"شاگرد با نام {student.first_name} فعال شد.",
+        user=request.user if request.user.is_authenticated else None
+    )
     return redirect(request.META.get('HTTP_REFERER'))
 
 def student_improvment(request, id):
@@ -384,6 +390,13 @@ def student_improvment(request, id):
             instance.student = student
             instance.past_class = past_class_instance
             instance.save()
+            SystemLog.objects.create(
+                section="شاگردان",
+                action=f"ارتقاع شاگرد:",
+                description=f"یک رکارد ارتقاع برای شاگرد {student.first_name} ثبت شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
+
             messages.success(request, f'ارتقاع جدید برای شاگرد {student.first_name} اضافه شد')
             return redirect(request.META.get('HTTP_REFERER'))
     else:
@@ -403,6 +416,12 @@ def delete_student_improvment(request, id):
     student_improvement = StudentImporvment.objects.get(id=id)
     student_improvement.delete()
     messages.success(request, f'ریکارد ارتقاع شاگرد {student_improvement.student.first_name} موفقانه حذف شد')
+    SystemLog.objects.create(
+        section="شاگردان",
+        action=f"حذف رکارد ارتقاع شاگرد:",
+        description=f"ریکارد ارتقاع برای شاگرد {student_improvement.student.first_name} حذف شد.",
+        user=request.user if request.user.is_authenticated else None
+    )
     return redirect(request.META.get('HTTP_REFERER'))
 
 def edit_student_improvement(request, id):
@@ -414,6 +433,12 @@ def edit_student_improvement(request, id):
             instance.student = student_improvement.student
             instance.save()
             messages.success(request, f'ریکارد ارتقاع شاگرد {student_improvement.student.first_name} موفقانه ایدیت شد.')
+            SystemLog.objects.create(
+                section="شاگردان",
+                action=f"ایدیت رکارد ارتقاع شاگرد:",
+                description=f"ریکارد ارتقاع برای شاگرد {student_improvement.student.first_name} ایدیت شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
             return redirect('students:student_improvment', id=student_improvement.student.id)
         else:
             form.errors()
@@ -425,16 +450,6 @@ def edit_student_improvement(request, id):
         'student_improvement':student_improvement,
     }
     return render(request, 'students/edit-student-improve.html', context)
-
-def student_improvement_classes(request, id):
-    student = Student.objects.get(id=id)
-    student_classes = student.classs.all()
-    return render(request, 'students/student-class-improvemtn.html')
-
-
-def student_buy_item(request, student_id):
-    student = Student.objects.get(id=id)
-    return render(request, 'students/student-buy-item.html')
 
 
 def buy_book(request, id):
@@ -454,10 +469,7 @@ def student_purchased_items(request, student_id, item_id):
     item = get_object_or_404(Item, id=item_id)
     total_item = TotalItem.objects.filter(item=item).last()
     book_exists = BuyBook.objects.filter(student=student, item=item).exists()
-
-    # Get balances
     student_balance = StudentBalance.objects.filter(student=student).last()
-    total_balance = TotalBalance.objects.last()
     
     if request.method == 'POST':
         form = BuyBookForm(request.POST)
@@ -469,7 +481,7 @@ def student_purchased_items(request, student_id, item_id):
                 paid_price = float(request.POST.get('paid_price', 0))
                 remain_price = float(request.POST.get('remain_price', 0))
                 
-                # Create BuyBook record
+                # Save BuyBook record
                 buy_book = form.save(commit=False)
                 buy_book.student = student
                 buy_book.item = item
@@ -479,7 +491,20 @@ def student_purchased_items(request, student_id, item_id):
                 buy_book.paid_amount = paid_price
                 buy_book.remain_amount = remain_price
                 buy_book.save()
-                
+
+                # --- Create FinanceRecord ---
+                content_type = ContentType.objects.get_for_model(BuyBook)
+
+                finance_record = FinanceRecord.objects.create(
+                    date=buy_book.date, 
+                    title=f"خرید کتاب: {item.name} توسط {student.first_name}",
+                    amount=paid_price,
+                    description=f"خرید {amount} کتاب {item.name} توسط {student.first_name}.",
+                    type='income',  # because student is paying money
+                    content_type=content_type,
+                    object_id=buy_book.id,
+                )
+
                 # Update TotalItem
                 if total_item:
                     total_item.total_remain_item -= amount
@@ -491,13 +516,14 @@ def student_purchased_items(request, student_id, item_id):
                     student_balance.remain += remain_price
                     student_balance.save()
 
-                # Update TotalItem balance
-                if total_balance:
-                    total_balance.total_income += paid_price
-                    total_balance.total_receivable += remain_price
-                    total_balance.save()
+                SystemLog.objects.create(
+                    section="شاگردان",
+                    action=f"خرید کتاب:",
+                    description=f"شاگرد {student.first_name} کتاب {item.name} را به تعداد {amount} خریداری کرد.",
+                    user=request.user if request.user.is_authenticated else None
+                )
 
-                messages.success(request, 'خرید کتاب با موفقیت ثبت شد.')
+                messages.success(request, 'خرید کتاب با موفقیت ثبت شد و در مالی ثبت شد.')
                 return redirect('students:student_detail', student_id=student.id)
                 
             except Exception as e:
@@ -515,41 +541,52 @@ def student_purchased_items(request, student_id, item_id):
     }
     return render(request, 'students/student-purchased-items.html', context)
 
+
 def delete_student_purchased_items(request, purchase_id):
-    purchased_records = BuyBook.objects.get(id=purchase_id)
+    purchased_record = BuyBook.objects.get(id=purchase_id)
 
     # Update TotalItem
-    total_item = TotalItem.objects.filter(item=purchased_records.item).last()
+    total_item = TotalItem.objects.filter(item=purchased_record.item).last()
     if total_item:
-        total_item.total_remain_item += purchased_records.number_of_book
+        total_item.total_remain_item += purchased_record.number_of_book
         total_item.save()
 
-    # update StudentBalance
-    student_balance = StudentBalance.objects.filter(student=purchased_records.student).last()
+    # Update StudentBalance
+    student_balance = StudentBalance.objects.filter(student=purchased_record.student).last()
     if student_balance:
-        student_balance.paid -= purchased_records.paid_amount
-        student_balance.remain -= purchased_records.remain_amount
+        student_balance.paid -= purchased_record.paid_amount
+        student_balance.remain -= purchased_record.remain_amount
         student_balance.save()
 
-    # Update TotalBalance
-    total_balance = TotalBalance.objects.last()
-    if total_balance:
-        total_balance.total_income -= purchased_records.paid_amount
-        total_balance.total_receivable -= purchased_records.remain_amount
-        total_balance.save()
-    
-    purchased_records.delete()
+    # Delete related FinanceRecord
+    content_type = ContentType.objects.get_for_model(BuyBook)
+    FinanceRecord.objects.filter(
+        content_type=content_type,
+        object_id=purchase_id
+    ).delete()
+
+    # Log the deletion
+    SystemLog.objects.create(
+        section="شاگردان",
+        action="حذف ریکارد خرید کتاب",
+        description=f"ریکارد خرید کتاب {purchased_record.item.name} برای شاگرد {purchased_record.student.first_name} حذف شد.",
+        user=request.user if request.user.is_authenticated else None
+    )
+
+    purchased_record.delete()
     messages.success(request, 'ریکارد خرید موفقانه حذف شد')
     return redirect(request.META.get('HTTP_REFERER'))
+
 
 def edit_student_purchased_items(request, purchase_id):
     purchase = BuyBook.objects.get(id=purchase_id)
     old_amount = purchase.number_of_book
+    old_paid = purchase.paid_amount
+    old_remain = purchase.remain_amount
 
     if request.method == 'POST':
         form = BuyBookForm(request.POST, instance=purchase)
         if form.is_valid():
-
             amount = int(request.POST.get('amount', 1))
             per_price = float(request.POST.get('per_price', 0))
             total_price = float(request.POST.get('total_price', 0))
@@ -561,45 +598,57 @@ def edit_student_purchased_items(request, purchase_id):
             # Update TotalItem
             total_item = TotalItem.objects.filter(item=purchase.item).last()
             if total_item:
-                if amount > old_amount:
-                    difference = amount - old_amount
-                    total_item.total_remain_item -= difference
-                elif amount < old_amount:
-                    difference = old_amount - amount
-                    total_item.total_remain_item += difference
+                difference = amount - old_amount
+                total_item.total_remain_item -= difference
                 total_item.save()
 
             # Update StudentBalance
             student_balance = StudentBalance.objects.filter(student=purchase.student).last()
             if student_balance:
-                student_balance.paid += (paid_price - purchase.paid_amount)
-                student_balance.remain += (remain_price - purchase.remain_amount)
+                student_balance.paid += (paid_price - old_paid)
+                student_balance.remain += (remain_price - old_remain)
                 student_balance.save()
-            
-            # Update TotalBalance
-            total_balance = TotalBalance.objects.last()
-            if total_balance:
-                total_balance.total_income += (paid_price - purchase.paid_amount)
-                total_balance.total_receivable += (remain_price - purchase.remain_amount)
-                total_balance.save()
 
-            instance.amount = amount
+            # --- Update linked FinanceRecord ---
+            content_type = ContentType.objects.get_for_model(BuyBook)
+            finance_record = FinanceRecord.objects.filter(
+                content_type=content_type,
+                object_id=purchase.id
+            ).last()
+            if finance_record:
+                # Update the amount
+                finance_record.amount = total_price
+                finance_record.title = f"خرید کتاب توسط {purchase.student.first_name}"
+                finance_record.description = f"خرید {amount} عدد از کتاب {purchase.item.name} توسط شاگرد {purchase.student.first_name}"
+                finance_record.save()
+
+            # Update purchase instance
+            instance.number_of_book = amount
             instance.per_price = per_price
             instance.total_amount = total_price
             instance.paid_amount = paid_price
             instance.remain_amount = remain_price
             instance.save()
-            
+
+            SystemLog.objects.create(
+                section="شاگردان",
+                action="تغییر ریکارد خرید کتاب",
+                description=f"ریکارد خرید کتاب {purchase.item.name} برای شاگرد {purchase.student.first_name} تغییر داده شد.",
+                user=request.user if request.user.is_authenticated else None
+            )
+
             messages.success(request, 'ریکارد خرید موفقانه ایدیت شد')
             return redirect('students:student_purchased', student_id=purchase.student.id)
     else:
         form = BuyBookForm(instance=purchase)
+
     context = {
         'form': form,
         'purchase': purchase,
         'student': purchase.student,
     }
     return render(request, 'students/edit-student-purchased-item.html', context)
+
 
 def student_purchased(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -610,3 +659,166 @@ def student_purchased(request, student_id):
         'purchased_books': purchased_books,
     }
     return render(request, 'students/student-purchased.html', context)
+
+
+def student_paid_remain_money(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    student_balance = StudentBalance.objects.filter(student=student).last()
+    current_remain = student_balance.remain if student_balance else 0
+
+    if request.method == "POST":
+        form = StudentPaidRemainAmountForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.student = student
+            instance.save()
+
+            paid_amount = instance.paid
+
+            # Update Student Balance
+            if student_balance:
+                student_balance.paid += paid_amount
+                student_balance.remain -= paid_amount
+                student_balance.save()
+
+            # Create Finance Record (Income)
+            FinanceRecord.objects.create(
+                date=instance.date,
+                title=f"پرداخت باقی‌مانده شاگرد {student.first_name}",
+                amount=paid_amount,
+                type="income",
+                description=instance.description or f"پرداخت باقی‌مانده توسط شاگرد {student.first_name}",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+            )
+
+            # System Log
+            SystemLog.objects.create(
+                section="شاگردان",
+                action="پرداخت باقی‌مانده",
+                description=f"شاگرد {student.first_name} مبلغ {paid_amount} از باقی‌مانده خود را پرداخت کرد.",
+                user=request.user if request.user.is_authenticated else None
+            )
+
+            messages.success(request, "پرداخت باقی‌مانده موفقانه ثبت شد")
+            return redirect("students:student_paid_remain_money", student_id=student.id)
+    else:
+        form = StudentPaidRemainAmountForm()
+    
+    paid_remain_records = StudentPaidRemainAmount.objects.filter(student=student)
+
+    context = {
+        'student': student,
+        'form': form,
+        'student_balance': student_balance,
+        'current_remain': current_remain,
+        'paid_remain_records':paid_remain_records
+    }
+    return render(request, 'students/student-paid-remain.html', context)
+
+
+def delete_student_paid_remain(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
+
+    remain_record = get_object_or_404(StudentPaidRemainAmount, id=id)
+    student = remain_record.student
+    paid_amount = remain_record.paid
+
+    # Update student balance
+    student_balance = StudentBalance.objects.filter(student=student).last()
+    if student_balance:
+        student_balance.paid -= paid_amount
+        student_balance.remain += paid_amount
+
+        # prevent negative values
+        student_balance.paid = max(student_balance.paid, 0)
+        student_balance.remain = max(student_balance.remain, 0)
+
+        student_balance.save()
+
+    # Delete linked finance record
+    content_type = ContentType.objects.get_for_model(StudentPaidRemainAmount)
+    FinanceRecord.objects.filter(
+        content_type=content_type,
+        object_id=remain_record.id
+    ).delete()
+
+    # Log
+    SystemLog.objects.create(
+        section="شاگردان",
+        action="حذف پرداخت باقی‌مانده:",
+        description=f"پرداخت باقی‌مانده به مقدار {paid_amount} برای شاگرد {student.first_name} حذف شد.",
+        user=request.user if request.user.is_authenticated else None
+    )
+
+    remain_record.delete()
+    messages.success(request, "ریکارد پرداخت باقی‌مانده حذف شد")
+
+    return redirect(referer)
+
+
+def edit_student_paid_remain(request, id):
+    remain_record = get_object_or_404(StudentPaidRemainAmount, id=id)
+    student = remain_record.student
+    student_balance = StudentBalance.objects.filter(student=student).last()
+
+    old_paid = remain_record.paid
+
+    if request.method == "POST":
+        form = StudentPaidRemainAmountForm(request.POST, instance=remain_record)
+        if form.is_valid():
+            new_paid = float(form.cleaned_data.get("paid") or 0)
+            diff = new_paid - old_paid
+
+            # Prevent over payment
+            if student_balance and diff > student_balance.remain:
+                messages.error(request, "مقدار پرداخت بیشتر از باقی‌مانده شاگرد است")
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+
+            # Update student balance
+            if student_balance:
+                student_balance.paid += diff
+                student_balance.remain -= diff
+
+                # prevent negative values
+                student_balance.paid = max(student_balance.paid, 0)
+                student_balance.remain = max(student_balance.remain, 0)
+
+                student_balance.save()
+
+            # Save record
+            instance = form.save(commit=False)
+            instance.student = student
+            instance.save()
+
+            # Update linked finance record
+            content_type = ContentType.objects.get_for_model(StudentPaidRemainAmount)
+            finance_record = FinanceRecord.objects.filter(
+                content_type=content_type,
+                object_id=remain_record.id
+            ).last()
+
+            if finance_record:
+                finance_record.amount = new_paid
+                finance_record.description = f"پرداخت باقی‌مانده توسط شاگرد {student.first_name}"
+                finance_record.date = instance.date
+                finance_record.save()
+
+            SystemLog.objects.create(
+                section="شاگردان",
+                action="تغییر پرداخت باقی‌مانده:",
+                description=f"پرداخت باقی‌مانده شاگرد {student.first_name} از {old_paid} به {new_paid} تغییر کرد.",
+                user=request.user if request.user.is_authenticated else None
+            )
+
+            messages.success(request, "پرداخت باقی‌مانده موفقانه ویرایش شد")
+            return redirect("students:student_detail", student_id=student.id)
+
+    else:
+        form = StudentPaidRemainAmountForm(instance=remain_record)
+
+    return render(request, "students/edit-student-paid-remain.html", {
+        "form": form,
+        "record": remain_record,
+        "student": student,
+    })

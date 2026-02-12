@@ -1,5 +1,4 @@
 from django.db import models
-from datetime import datetime
 from students.models import *
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -13,8 +12,8 @@ class Teacher(models.Model):
     name = models.CharField(max_length=100, blank=False)
     phone = models.CharField(max_length=10, blank=True)
     gender = models.CharField(max_length=120, choices=GENDER_CHOICES)
-    percentage = models.FloatField(blank=False)
     image = models.ImageField(upload_to="teacher/", blank=True)
+    percentage = models.FloatField(blank=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -25,58 +24,24 @@ class Teacher(models.Model):
 @receiver(post_save, sender=Teacher)
 def create_req_approve(sender, instance, created, **kwargs):
     if created:
-        TeacherRemainMoney.objects.create(teacher=instance, total_amount=0)
-        TeacherTotalLoan.objects.create(teacher=instance, total_loan_amount=0)
-        TotalPaidMoneyForTeacher.objects.create(teacher=instance, total_amount=0)
+        TeacherBalance.objects.create(teacher=instance, total_paid=0, total_remain=0, total_loan=0)
+    
 
 class TeacherPaidSalary(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True)
     date = models.CharField(max_length=14, blank=False)
-    amount_of_fees_bell = models.IntegerField()
     amount = models.FloatField()
     paid_salary = models.FloatField()
     remain_salary = models.FloatField(default=0)
     description = models.TextField(blank=True)
     loan_amount = models.FloatField(default=0)
-    
 
-class TeacherRemainMoney(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="teacher_remains")
-    total_amount = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        if self.total_amount < 0:
-            self.total_amount = 0  # automatically set negative values to 0
-        super().save(*args, **kwargs)
-
-class TeacherPaidRemainMoney(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    date = models.CharField(max_length=12, blank=False)
-    amount = models.IntegerField(blank=False)
-    description = models.TextField(blank=True)
 
 class TeacherLoan(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     date = models.CharField(max_length=12, blank=False)
     amount = models.IntegerField(blank=False)
     description = models.TextField(blank=True)
-
-class TeacherTotalLoan(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="teacher_loans")
-    total_loan_amount = models.FloatField()
-    def save(self, *args, **kwargs):
-        if self.total_loan_amount < 0:
-            self.total_loan_amount = 0  # automatically set negative values to 0
-        super().save(*args, **kwargs)
-
-class TotalPaidMoneyForTeacher(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    total_amount = models.FloatField()
-    def save(self, *args, **kwargs):
-        if self.total_amount < 0:
-            self.total_amount = 0  # automatically set negative values to 0
-        super().save(*args, **kwargs)
 
 
 class AttendanceAndLeaves(models.Model):
@@ -99,10 +64,21 @@ class AttendanceAndLeaves(models.Model):
 
     @property
     def days(self):
-        return self.number_of_day  # already stored
+        return self.number_of_day
+    
 
-class TeacherGiveLoanAmount(models.Model):
+class TeacherBalance(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    date = models.CharField(max_length=14, blank=False)
-    amount = models.IntegerField(blank=False)
-    description = models.TextField(blank=True)
+    total_paid = models.FloatField(default=0)
+    total_remain = models.FloatField(default=0)
+    total_loan = models.FloatField(default=0)
+
+    def save(self, *args, **kwargs):
+        # Prevent negative values
+        self.total_paid = max(0, self.total_paid)
+        self.total_remain = max(0, self.total_remain)
+        self.total_loan = max(0, self.total_loan)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.teacher.name}'

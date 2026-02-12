@@ -10,12 +10,7 @@ class SubClassForm(forms.ModelForm):
 
     class Meta:
         model = SubClass
-        fields = ["name","start_date","teacher","capacity","room","schedule","time","books","fees"]
-
-        widgets = {
-            'teacher': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
-            'books': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '2'}),
-        }
+        fields = ["name","start_date","capacity","room","schedule","time","fees"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,9 +20,6 @@ class SubClassForm(forms.ModelForm):
         )
         self.fields["start_date"].widget.attrs.update(
         {"class": "form-control", "placeholder": "تاریخ شروع"}
-        )
-        self.fields["teacher"].widget.attrs.update(
-        {"class": "form-control", "placeholder": "اساتید"}
         )
         self.fields["capacity"].widget.attrs.update(
         {"class": "form-control", "placeholder": "ظرفیت صنف"}

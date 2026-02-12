@@ -5,57 +5,397 @@
     <h4 class="py-3 mb-4">
         <span class="text-muted fw-light">داشبورد / </span> معلومات کامل استاد
     </h4>
-    
+
+    <style>
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .teacher-header {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            border-radius: 0.75rem 0.75rem 0 0;
+            padding: 1.5rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #4e73df;
+            border-top: none;
+            border-bottom: 2px solid #e3e6f0;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .badge {
+            font-size: 0.85em;
+            padding: 0.35em 0.65em;
+        }
+
+        .summary-card {
+            transition: transform 0.2s;
+            border-left: 4px solid;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        /* Button styling with gradient hover effects */
+        .btn-gradient {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
+            min-width: 140px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-gradient:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Specific button colors */
+        .btn-back {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        }
+
+        .btn-salary {
+            background: linear-gradient(135deg, #20c997 0%, #179b77 100%);
+        }
+
+        .btn-loan {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529 !important;
+        }
+
+        .btn-attendance {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        }
+
+        .btn-balance {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+        }
+
+        .btn-balance:hover {
+            background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%);
+        }
+
+        /* Icon animation */
+        .btn-gradient i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-gradient:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Modal styling */
+        .modal-header {
+            background-color: #4e73df;
+            color: white;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .modal-content {
+            border-radius: 0.75rem;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .btn-gradient {
+                min-width: 120px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+        {% endfor %}
+        {% endif %}
+    </script>
 
     <div class="card shadow-sm border rounded-3">
         <div class="card-body text-center">
 
-            <div class="row">
-
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Financial"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0" style="font-size: 13px;">پول داده شده</p>
-                                <p class="text-primary text-24 line-height-1 mb-2"> {{ total_paid_amount_for_teacher.total_amount }} </p>
+            <!-- Teacher Header -->
+            {% if system_permission and system_permission.view_teacher %}
+            <div class="card mb-4">
+                <div class="teacher-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="rounded-circle border border-4 border-white d-inline-flex align-items-center justify-content-center"
+                                style="width: 120px; height: 120px; background-color: white; color: #4e73df; font-size: 48px; font-weight: bold;">
+                                {{ teacher.name|first }}
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Checkout-Basket"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0">قرض</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">{{total_loan_amount.total_loan_amount}}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                        <div class="card-body text-center"><i class="i-Money-2"></i>
-                            <div class="content">
-                                <p class="text-muted mt-2 mb-0"> باقی مانده</p>
-                                <p class="text-primary text-24 line-height-1 mb-2">{{get_total_remain_money.total_amount}}</p>
-                            </div>
+                        <div class="col-md-9 text-right">
+                            <h3 class="mb-2">{{ teacher.name }} {{ teacher.last_name }}</h3>
+                            <p class="mb-1">
+                                <i class="fas fa-phone ml-2"></i>
+                                شماره تماس: {{ teacher.phone|default:"ثبت نشده" }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-venus-mars ml-2"></i>
+                                جنسیت:
+                                {% if teacher.gender == 'M' %}
+                                <span class="badge badge-primary">مرد</span>
+                                {% elif teacher.gender == 'F' %}
+                                <span class="badge badge-pink">زن</span>
+                                {% else %}
+                                <span class="badge badge-secondary">نامشخص</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-0 mt-2">
+                                <i class="fas fa-percentage ml-2"></i>
+                                فیصدی: <strong>{{ teacher.percentage }}%</strong>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- ✅ Student Image -->
-            <img 
-                src="{% static 'images/student/people-face-avatar-icon-cartoon-character-png.png' %}" 
-                alt="عکس استاد" 
-                class="rounded-circle mb-3" 
-                width="120" 
-                height="120"
-                style="object-fit: cover; border: 3px solid #ccc;"
-            >
+            {% endif %}
 
-            <h5 class="card-title mb-4 text-primary border-bottom pb-2">مشخصات استاد</h5>
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <!-- Total Paid -->
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card summary-card border-left-success h-100 position-relative overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-success font-weight-bold text-uppercase mb-1">مجموع پرداخت‌شده</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ teacher_balance.total_paid|default:"0" }}
+                                    </div>
+                                    <small class="text-muted">کل مبالغ پرداخت شده</small>
+                                </div>
+                                <div class="bg-success text-white rounded-circle p-3">
+                                    <i class="fas fa-money-check-alt fa-2x"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- محاسبه Button with Fade Styling -->
+                            <div class="text-left mt-3 fade-button-container">
+                                <a href="{% url 'teachers:teacher_remain_loan_caluculating' teacher.id %}" class="btn btn-calculate btn-calculate-success">
+                                    <span class="btn-text">محاسبه</span>
+                                    <span class="btn-icon"><i class="fas fa-calculator"></i></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="table-responsive">
+                <!-- Total Loan -->
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card summary-card border-left-info h-100 position-relative overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-info font-weight-bold text-uppercase mb-1">مجموع قرض</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ teacher_balance.total_loan|default:"0" }}
+                                    </div>
+                                    <small class="text-muted">مبلغ باقی مانده کورس بالای استاد</small>
+                                </div>
+                                <div class="bg-info text-white rounded-circle p-3">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Remaining -->
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card summary-card border-left-warning h-100 position-relative overflow-hidden">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-warning font-weight-bold text-uppercase mb-1">باقیمانده</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ teacher_balance.total_remain|default:"0" }}
+                                    </div>
+                                    <small class="text-muted">مبلغ باقی مانده استاد بالای کورس</small>
+                                </div>
+                                <div class="bg-warning text-white rounded-circle p-3">
+                                    <i class="fas fa-hand-holding-usd fa-2x"></i>
+                                </div>
+                            </div>
+                         
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                /* Button Base Styles */
+                .btn-calculate {
+                    position: relative;
+                    padding: 8px 20px;
+                    border: none;
+                    border-radius: 50px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    letter-spacing: 0.5px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    transition: all 0.3s ease;
+                    overflow: hidden;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                }
+                
+                /* Button Colors - Matching Card Borders */
+                .btn-calculate-success {
+                    background: linear-gradient(145deg, #28a745, #20c997);
+                    color: white;
+                    border-left: 4px solid #1e7e34;
+                }
+                
+                .btn-calculate-info {
+                    background: linear-gradient(145deg, #17a2b8, #138496);
+                    color: white;
+                    border-left: 4px solid #0f6674;
+                }
+                
+                .btn-calculate-warning {
+                    background: linear-gradient(145deg, #ffc107, #e0a800);
+                    color: #212529;
+                    border-left: 4px solid #ba8b00;
+                }
+                
+                /* Fade Effect on Hover */
+                .btn-calculate::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+                    transition: left 0.5s ease;
+                    z-index: 1;
+                }
+                
+                .btn-calculate:hover::before {
+                    left: 100%;
+                }
+                
+                .btn-calculate:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                }
+                
+                .btn-calculate:active {
+                    transform: translateY(1px);
+                }
+                
+                /* Icon Animation */
+                .btn-icon {
+                    transition: transform 0.3s ease;
+                }
+                
+                .btn-calculate:hover .btn-icon {
+                    transform: rotate(360deg);
+                }
+                
+                /* Text and Icon Spacing */
+                .btn-text {
+                    position: relative;
+                    z-index: 2;
+                }
+                
+                .btn-icon {
+                    position: relative;
+                    z-index: 2;
+                }
+                
+                /* Fade Button Container */
+                .fade-button-container {
+                    opacity: 0.9;
+                    transition: opacity 0.3s ease;
+                }
+                
+                .summary-card:hover .fade-button-container {
+                    opacity: 1;
+                }
+                
+                /* RTL Support */
+                .text-left {
+                    text-align: right !important;
+                }
+                
+                /* Responsive */
+                @media (max-width: 768px) {
+                    .btn-calculate {
+                        padding: 6px 16px;
+                        font-size: 12px;
+                    }
+                }
+            </style>
+
+
+            <!-- Teacher Details Table -->
+             {% if system_permission and system_permission.view_teacher %}
+            <div class="table-responsive mb-4">
                 <table class="table table-bordered table-striped">
                     <tbody>
                         <tr>
@@ -64,7 +404,7 @@
                         </tr>
                         <tr>
                             <th>تاریخ تولد</th>
-                            <td>{{ teacher.birth_date|default:"ندارد" }}</td>
+                            <td>{{ teacher.birth_date|date:"Y/m/d"|default:"ندارد" }}</td>
                         </tr>
                         <tr>
                             <th>شماره تماس</th>
@@ -74,7 +414,7 @@
                             <th>جنسیت</th>
                             <td>
                                 {% if teacher.gender == 'M' %}
-                                    <span class="badge bg-warning text-dark" style="font-size: 1rem;">مرد</span>
+                                    <span class="badge bg-primary" style="font-size: 1rem;">مرد</span>
                                 {% elif teacher.gender == 'F' %}
                                     <span class="badge bg-primary" style="font-size: 1rem;">زن</span>
                                 {% else %}
@@ -83,14 +423,12 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>فیصدی</th>
-                            <td>{{ teacher.percentage }}%</td>
-                        </tr>
-                        <tr>
                             <th>فایل</th>
                             <td>
                                 {% if teacher.file %}
-                                    <a href="{{ teacher.file.url }}" target="_blank" class="btn btn-sm btn-info">دانلود فایل</a>
+                                    <a href="{{ teacher.file.url }}" target="_blank" class="btn btn-sm btn-info">
+                                        <i class="fas fa-download ml-2"></i>دانلود فایل
+                                    </a>
                                 {% else %}
                                     ندارد
                                 {% endif %}
@@ -113,41 +451,63 @@
                     </tbody>
                 </table>
             </div>            
-
+            {% endif %}
+            <!-- Action Buttons -->
             <div class="text-center mt-4">
-                <div class="btn-group flex-wrap" role="group">
-                    <a href="{% url 'teachers:teacher_registration' %}" class="btn btn-outline-secondary me-2">بازگشت</a>
-                    <a href="{% url 'teachers:edit_teacher' teacher.id %}" class="btn btn-outline-warning me-2">تغیرات</a>
-                    <a href="{% url 'teachers:deactive_teacher' teacher.id %}" class="btn btn-outline-danger me-2"
-                       onclick="return confirm('آیا مطمئن هستید که می‌خواهید این استاد را حذف کنید؟')">
-                       غیر فعال
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'teachers:teacher_registration' %}" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right me-1"></i> بازگشت
                     </a>
-                    <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-outline-primary me-2">
-                        <i class="fas fa-money-bill-wave"></i> پرداخت ماش
-                    </a>
-                    <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn btn-outline-info me-2">
-                        <i class="fas fa-money-bill-wave"></i> گرفتن قرض
-                    </a>
-                    <a href="{% url 'teachers:add_attendance' teacher.id %}" class="btn btn-outline-dark me-2">
-                        <i class="fas fa-credit-card"></i> درخواست رخصتی
-                    </a>
-                    {% if get_total_remain_money.total_amount > 0 %}
-                    <a href="{% url 'teachers:teacher_paid_remain_money' teacher.id %}" class="btn btn-outline-success me-2">
-                        <i class="fas fa-credit-card"></i> پرداخت پول باقی مانده
+                    {% if system_permission and system_permission.edit_teacher %}
+                    <a href="{% url 'teachers:edit_teacher' teacher.id %}" class="btn btn-edit btn-gradient">
+                        <i class="fas fa-edit me-1"></i> تغییرات
                     </a>
                     {% endif %}
+                    {% if system_permission and system_permission.active_deactive_teacher %}
+                    {% if teacher.is_active == True %}
+                        <a href="{% url 'teachers:deactive_teacher' teacher.id %}" class="btn btn-delete btn-gradient">
+                            <i class="fas fa-user-slash me-1"></i> غیر فعال
+                        </a>
+                    {% else %}
+                        <a href="{% url 'teachers:active_teacher' teacher.id %}" class="btn btn-delete btn-gradient">
+                            <i class="fas fa-user-slash me-1"></i>  فعال
+                        </a>
+                    {% endif %}
+                    {% endif %}
+                    {% if system_permission and system_permission.add_paid_salary_teacher or system_permission.view_paid_salary_teacher or system_permission.edit_paid_salary_teacher or system_permission.delete_paid_salary_teacher %}
+                    <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-salary btn-gradient">
+                        <i class="fas fa-money-bill-wave me-1"></i> پرداخت معاش
+                    </a>
+                    {% endif %}
+                    {% if system_permission and system_permission.add_loan_teacher or system_permission.view_loan_teacher or system_permission.edit_loan_teacher or system_permission.delete_loan_teacher %}
+                    <a href="{% url 'teachers:teacher_loan' teacher.id %}" class="btn btn-loan btn-gradient">
+                        <i class="fas fa-hand-holding-usd me-1"></i> برداشت پول
+                    </a>
+                    {% endif %}
+                    {% if system_permission and system_permission.add_attendance_teacher or system_permission.view_attendance_teacher or system_permission.edit_attendance_teacher or system_permission.delete_attendance_teacher %}
+                    <a href="{% url 'teachers:add_attendance' teacher.id %}" class="btn btn-attendance btn-gradient">
+                        <i class="fas fa-calendar-alt me-1"></i> درخواست رخصتی
+                    </a>
+                    {% endif %}
+                    {% if get_total_remain_money.total_amount > 0 %}
+                    <a href="{% url 'teachers:teacher_paid_remain_money' teacher.id %}" class="btn btn-gradient" 
+                       style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+                        <i class="fas fa-credit-card me-1"></i> پرداخت باقی مانده
+                    </a>
+                    {% endif %}
+
                     {% if total_loan_amount.total_loan_amount > 0 %}
-                    <a href="{% url 'teachers:teacher_paid_loan_amount' teacher.id %}" class="btn btn-outline-danger me-2">
-                        <i class="fas fa-credit-card"></i> بازپسی قرض
+                    <a href="{% url 'teachers:teacher_paid_loan_amount' teacher.id %}" class="btn btn-gradient" 
+                       style="background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);">
+                        <i class="fas fa-credit-card me-1"></i> بازپسی قرض
                     </a>
                     {% endif %}
                 </div>
             </div>
-            
+
         </div>
     </div>
-
-
+</div>
 
 <!-- Search filter script -->
 <script>
@@ -162,9 +522,5 @@
     });
 </script>
 
-
 </div>
-
-
-
 {% endblock %}

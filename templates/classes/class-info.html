@@ -1,0 +1,520 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<style>
+    /* Main Styles */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .class-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+        border-radius: 0.5rem;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Student Card Styling */
+    .student-card {
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        height: 100%;
+        border: 1px solid #e3e6f0;
+    }
+    
+    .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+        border-color: #4e73df;
+    }
+    
+    .student-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #4e73df;
+        background-color: #f8f9fc;
+    }
+    
+    .student-avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        border: 3px solid white;
+    }
+    
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, #1cc88a 0%, #179b77 100%);
+        color: white;
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        color: white;
+    }
+    
+    /* Fees Status */
+    .fees-paid {
+        color: #1cc88a;
+        font-weight: 600;
+    }
+    
+    .fees-remaining {
+        color: #e74a3b;
+        font-weight: 600;
+    }
+    
+    .fees-complete {
+        background-color: rgba(28, 200, 138, 0.1);
+        border-left: 4px solid #1cc88a;
+    }
+    
+    .fees-pending {
+        background-color: rgba(231, 74, 59, 0.1);
+        border-left: 4px solid #e74a3b;
+    }
+    
+    /* Progress Bar */
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+    }
+    
+    /* Button Styling */
+    .btn-gradient {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-gradient:hover::before {
+        left: 100%;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-view {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        color: #4e73df;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .student-avatar, 
+        .student-avatar-placeholder {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+        
+        .btn-gradient {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    {% endfor %}
+    {% endif %}
+</script>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card border-left-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-primary font-weight-bold text-uppercase mb-1">کل شاگردان</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">
+                                {{ students|length }}
+                            </div>
+                            <small class="text-muted">تعداد کل شاگردان این صنف</small>
+                        </div>
+                        <div class="bg-primary text-white rounded-circle p-3">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card border-left-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-warning font-weight-bold text-uppercase mb-1">مجموع فیس پرداخت شده</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">
+                                {{ total_paid }}
+                            </div>
+                            <small class="text-muted">کل مبالغ پرداخت شده</small>
+                        </div>
+                        <div class="bg-warning text-white rounded-circle p-3">
+                            <i class="fas fa-money-check-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card border-left-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-info font-weight-bold text-uppercase mb-1">مجموع فیس باقی‌مانده</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">
+                                {{ total_remain }}
+                            </div>
+                            <small class="text-muted">کل مبالغ باقی‌مانده</small>
+                        </div>
+                        <div class="bg-info text-white rounded-circle p-3">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    {% endfor %}
+    {% endif %}
+    
+    // Highlight students with remaining fees
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the total remaining fees card
+        const totalRemainCard = document.querySelector('.card.summary-card.border-left-info');
+        
+        if (totalRemainCard) {
+            // Add click event listener
+            totalRemainCard.addEventListener('click', function() {
+                // Get all student cards
+                const studentCards = document.querySelectorAll('.student-card');
+                let hasRemainingStudents = false;
+                
+                // Toggle highlighting for students with remaining fees
+                studentCards.forEach(card => {
+                    // Check if this student has remaining fees
+                    const feesRemaining = card.querySelector('.fees-remaining');
+                    
+                    if (feesRemaining && parseFloat(feesRemaining.textContent) > 0) {
+                        hasRemainingStudents = true;
+                        // Toggle highlight class
+                        card.classList.toggle('highlight-remain');
+                        
+                        // Add stronger shadow for highlighted cards
+                        if (card.classList.contains('highlight-remain')) {
+                            card.style.boxShadow = '0 0 20px rgba(231, 74, 59, 0.5), 0 10px 20px rgba(0, 0, 0, 0.2)';
+                            card.style.transform = 'translateY(-8px) scale(1.02)';
+                            card.style.border = '2px solid #e74a3b';
+                            card.style.zIndex = '10';
+                        } else {
+                            card.style.boxShadow = '';
+                            card.style.transform = '';
+                            card.style.border = '';
+                            card.style.zIndex = '';
+                        }
+                    }
+                });
+              
+            });
+            
+            // Change cursor to pointer to indicate it's clickable
+            totalRemainCard.style.cursor = 'pointer';
+            
+            // Add hover effect to the card
+            totalRemainCard.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
+            });
+            
+            totalRemainCard.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('pulse-animation')) {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                }
+            });
+            
+            // Add tooltip to indicate functionality
+            totalRemainCard.title = 'برای هایلایت شاگردان با فیس باقی‌مانده کلیک کنید';
+        }
+        
+        // Add CSS for highlighting
+        const style = document.createElement('style');
+        style.textContent = `
+            .highlight-remain {
+                animation: glow 1.5s ease-in-out infinite alternate;
+            }
+            
+            @keyframes glow {
+                from {
+                    box-shadow: 0 0 10px rgba(231, 74, 59, 0.4), 0 5px 15px rgba(0, 0, 0, 0.15);
+                }
+                to {
+                    box-shadow: 0 0 25px rgba(231, 74, 59, 0.7), 0 10px 25px rgba(0, 0, 0, 0.2);
+                }
+            }
+            
+            .pulse-animation {
+                animation: pulse 0.5s ease-in-out;
+            }
+            
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+    <!-- Student Cards Section -->
+    <div class="card">
+        <div class="card-body">
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-0 text-primary">
+                        <i class="fas fa-user-graduate ml-2"></i>
+                        لیست شاگردان صنف {{ sub_class.name }}
+                    </h5>
+                </div>
+                <div>
+                    <a href="" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت به صنف‌ها
+                    </a>
+                </div>
+            </div>
+
+            <!-- Students Grid (5 cards per row) -->
+            {% if students %}
+            <div class="row">
+                {% for student_info in students %}
+                <div class="col-xl-2-4 col-md-3 col-sm-4 col-6 mb-4">
+                    <div class="student-card {% if student_info.not_remain %}fees-complete{% else %}fees-pending{% endif %}">
+                        <div class="card-body text-center p-3">
+                            <!-- Status Badge -->
+                            <div class="status-badge {% if student_info.student.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if student_info.student.is_active %}
+                                    فعال
+                                {% else %}
+                                    غیرفعال
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Student Avatar -->
+                            <div class="mb-3">
+                                {% if student_info.student.image %}
+                                <img src="{{ student_info.student.image.url }}" 
+                                     alt="{{ student_info.student.first_name }}" 
+                                     class="student-avatar">
+                                {% else %}
+                                <div class="student-avatar-placeholder mx-auto">
+                                    {{ student_info.student.first_name|first }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Student Name -->
+                            <h6 class="mb-2">
+                                {{ student_info.student.first_name }}
+                                {% if student_info.student.father_name %}
+                                <small class="d-block text-muted">پدر: {{ student_info.student.father_name }}</small>
+                                {% endif %}
+                            </h6>
+                            
+                            <!-- Fees Information -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">فیس اصلی:</small>
+                                    <small class="font-weight-bold">{{ student_info.orginal_fees }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">پرداخت شده:</small>
+                                    <small class="fees-paid">{{ student_info.give_fees }}</small>
+                                </div>
+                                {% if student_info.remain_fees %}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <small class="text-muted">باقی‌مانده:</small>
+                                    <small class="fees-remaining">{{ student_info.remain_fees }}</small>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Progress Bar -->
+                                <!-- <div class="progress mb-2">
+                                    {% widthratio student_info.give_fees student_info.orginal_fees 100 as progress %}
+                                    <div class="progress-bar bg-success" 
+                                         role="progressbar" 
+                                         style="width: {{ progress }}%"
+                                         aria-valuenow="{{ progress }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ progress }}% پرداخت شده</small> -->
+                            </div>
+                            
+                            <!-- Registration Date -->
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt ml-1"></i>
+                                    {{ student_info.created_at|date:"Y/m/d" }}
+                                </small>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <a href="{% url 'students:student_detail' student_info.student.id %}" 
+                               class="btn btn-view btn-gradient w-100">
+                                <i class="fas fa-eye ml-2"></i> مشاهده کامل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+              
+                
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h5 class="text-muted mb-3">هیچ شاگردی در این صنف ثبت نشده است</h5>
+                <p class="text-muted mb-4">هنوز هیچ شاگردی برای این صنف ثبت نام نکرده است</p>
+                <a href="{% url 'students:students_registration' %}" class="btn btn-primary btn-gradient">
+                    <i class="fas fa-plus-circle ml-2"></i> ثبت شاگرد جدید
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Custom column width for 5 cards per row on xl screens -->
+<style>
+    @media (min-width: 1200px) {
+        .col-xl-2-4 {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+    }
+</style>
+
+{% endblock %}

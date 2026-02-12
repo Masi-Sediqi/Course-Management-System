@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Main Styles */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .logs-header {
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    /* Table Styling */
+    .table thead {
+        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        color: white;
+    }
+    
+    .table th {
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        transition: all 0.3s ease;
+        padding: 0.75rem;
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(76, 175, 80, 0.05);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(76, 175, 80, 0.1);
+    }
+    
+    /* Section Badges */
+    .badge-section {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-block;
+        text-align: center;
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        min-width: 80px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Action Badge Styling */
+    .action-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        min-width: 80px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .action-badge:hover::before {
+        opacity: 1;
+    }
+    
+    .action-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Action Type Colors */
+    .action-create {
+        background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+        color: white;
+        border: 1px solid #4CAF50;
+    }
+    
+    .action-update {
+        background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+        color: white;
+        border: 1px solid #2196F3;
+    }
+    
+    .action-delete {
+        background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
+        color: white;
+        border: 1px solid #F44336;
+    }
+    
+    .action-login {
+        background: linear-gradient(135deg, #9C27B0 0%, #6A1B9A 100%);
+        color: white;
+        border: 1px solid #9C27B0;
+    }
+    
+    .action-logout {
+        background: linear-gradient(135deg, #FF9800 0%, #EF6C00 100%);
+        color: white;
+        border: 1px solid #FF9800;
+    }
+    
+    .action-default {
+        background: linear-gradient(135deg, #757575 0%, #424242 100%);
+        color: white;
+        border: 1px solid #757575;
+    }
+    
+    /* User Info */
+    .user-info {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(33, 150, 243, 0.1);
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(33, 150, 243, 0.2);
+        font-size: 0.85rem;
+    }
+    
+    .user-info i {
+        color: #2196F3;
+        margin-left: 8px;
+        font-size: 0.9rem;
+    }
+    
+    /* Timestamp Styling */
+    .timestamp {
+        font-family: 'Vazirmatn', sans-serif;
+        font-size: 0.85rem;
+        color: #666;
+        background: rgba(0, 0, 0, 0.03);
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .timestamp i {
+        margin-left: 8px;
+        font-size: 0.9rem;
+        color: #4CAF50;
+    }
+    
+    /* Description Tooltip */
+    .description-cell {
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: help;
+        font-size: 0.9rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 1rem;
+        text-align: center;
+        animation: fadeIn 0.8s ease-in;
+    }
+    
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.2;
+        color: #4CAF50;
+    }
+    
+    .empty-state h5 {
+        color: #666;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .empty-state p {
+        color: #888;
+        max-width: 400px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+    }
+    
+    /* Table row number */
+    .row-number {
+        background: rgba(76, 175, 80, 0.1);
+        color: #2E7D32;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    /* Animation for new logs */
+    @keyframes highlight {
+        0% { background-color: rgba(255, 235, 59, 0.3); }
+        100% { background-color: transparent; }
+    }
+    
+    .new-log {
+        animation: highlight 1.5s ease-out;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .table-responsive {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .description-cell {
+            max-width: 150px;
+        }
+        
+        .badge-section, .action-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            min-width: 70px;
+        }
+        
+        .user-info, .timestamp {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+        }
+        
+        .table th, .table td {
+            padding: 0.5rem;
+        }
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    <!-- Header Card -->
+    <div class="card">
+        <div class="logs-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title mb-1">
+                        <i class="fas fa-history ml-2"></i>
+                        تاریخچه سیستم
+                    </h5>
+                    <p class="mb-0 opacity-75">
+                        <small>نمایش تمامی فعالیت‌های انجام شده در سیستم</small>
+                    </p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-white text-success mr-2" style="font-size: 1rem;">
+                        <i class="fas fa-database ml-2"></i>
+                        {{ logs.count }} رکورد
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Logs Table -->
+            <div class="table-responsive">
+                {% if logs %}
+                <table class="table table-hover table-striped" id="logsTable">
+                    <thead>
+                        <tr>
+                            <th class="text-center" width="5%">#</th>
+                            <th width="15%">بخش</th>
+                            <th width="15%">عملیات</th>
+                            <th width="30%">توضیحات</th>
+                            <th width="15%">کاربر</th>
+                            <th width="20%">زمان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="row-number">{{ forloop.counter }}</span>
+                            </td>
+                            <td>
+                                <span class="badge-section">{{ log.section }}</span>
+                            </td>
+                            <td>
+                                {% with action_lower=log.action|lower %}
+                                <span class="action-badge">
+                                    {{ log.action }}
+                                </span>
+                                {% endwith %}
+                            </td>
+                            <td class="description-cell" title="{{ log.description }}">
+                                {% if log.description %}
+                                    {{ log.description|truncatechars:40 }}
+                                {% else %}
+                                    <span class="text-muted">بدون توضیح</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if log.user %}
+                                <div class="user-info">
+                                    <i class="fas fa-user"></i>
+                                    {{ log.user.name }}
+                                </div>
+                                {% else %}
+                                <span class="text-muted">سیستم</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="timestamp">
+                                    <i class="fas fa-clock ml-2"></i>
+                                    {{ log.timestamp|date:"Y/m/d H:i" }}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">هیچ لاگی ثبت نشده است</h5>
+                    <p class="text-muted mb-4">هنوز فعالیتی در سیستم ثبت نشده است</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effect to description cells
+        const descriptionCells = document.querySelectorAll('.description-cell');
+        descriptionCells.forEach(cell => {
+            cell.addEventListener('mouseenter', function() {
+                const title = this.getAttribute('title');
+                if (title && title !== 'بدون توضیح') {
+                    // You can add a custom tooltip here if needed
+                }
+            });
+        });
+        
+        // Add animation to new rows (if you want to highlight new logs)
+        const rows = document.querySelectorAll('#logsTable tbody tr');
+        if (rows.length > 0) {
+            rows[0].classList.add('new-log');
+        }
+    });
+</script>
+
+{% endblock %}

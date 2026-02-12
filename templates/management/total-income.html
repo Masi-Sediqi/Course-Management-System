@@ -135,77 +135,6 @@
         {% endif %}
     </script>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <!-- Income Summary -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card summary-card border-left-success h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-success font-weight-bold text-uppercase mb-1">کل عواید</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_income|default:"0" }}</div>
-                        </div>
-                        <div class="income-bg rounded-circle p-3">
-                            <i class="fas fa-arrow-up fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expense Summary -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card summary-card border-left-danger h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-danger font-weight-bold text-uppercase mb-1">کل مصارف</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_expenses|default:"0" }}</div>
-                        </div>
-                        <div class="expense-bg rounded-circle p-3">
-                            <i class="fas fa-arrow-down fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Loan Summary -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card summary-card border-left-warning h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-warning font-weight-bold text-uppercase mb-1">کل قرض</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_receivable|default:"0" }}</div>
-                        </div>
-                        <div class="loan-bg rounded-circle p-3">
-                            <i class="fas fa-hand-holding-usd fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Balance Summary -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card summary-card border-left-info h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-info font-weight-bold text-uppercase mb-1">مانده</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{total_balance.total_payable|default:"0" }}</div>
-                        </div>
-                        <div class="other-bg rounded-circle p-3">
-                            <i class="fas fa-balance-scale fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content Card -->
     <div class="card">
         <div class="card-body">
@@ -213,10 +142,12 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="card-title mb-0">رکوردهای مالی</h5>
                 <div>
+                    {% if system_permission and system_permission.add_income_expenses %}
                     <button class="btn btn-finance ml-2" type="button" data-toggle="modal" data-target="#financeModal">
                         <i class="fas fa-plus ml-2"></i>
                         عواید و مصارف
                     </button>
+                    {% endif %}
                     <style>
                         .btn-finance {
                             background: linear-gradient(135deg, #198754, #dc3545);
@@ -263,91 +194,516 @@
                 </div>
             </div>
 
-            <!-- Tab Content -->
-            <div class="tab-content" id="financialTabsContent">
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col" width="50">#</th>
-                                    <th scope="col">تاریخ</th>
-                                    <th scope="col">مقدار</th>
-                                    <th scope="col">حالت</th>
-                                    <th scope="col">توضیحات</th>
-                                    <th scope="col" width="100">عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in incomes_and_expenses %}
-                                <tr>
-                                    <th scope="row">{{ forloop.counter }}</th>
-                                    <td>{{ item.date }}</td>
-                                    <td class="text-success font-weight-bold">{{ item.amount }}</td>
-                                    <td class="text-dark font-weight-bold">{{ item.get_type_display }}</td>
-                                    <td>{{ item.description|truncatechars:30|default:"-" }}</td>
-                                    <td class="text-center">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                <a class="dropdown-item"
-                                                    href="{% url 'management:edit_record' item.id %}">
-                                                    <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
-                                                </a>
-                                                <a class="dropdown-item text-danger" data-toggle="modal"
-                                                    data-target="#deleteConfirmModal{{ item.id }}">
-                                                    <i class="fas fa-trash ml-2"></i>حذف
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
+            <!-- Add this CSS for better tab styling -->
+            <style>
+                /* Tab Styling */
+                .nav-tabs {
+                    border-bottom: 2px solid #dee2e6;
+                    background: #f8f9fa;
+                    border-radius: 8px 8px 0 0;
+                }
+                
+                .nav-tabs .nav-link {
+                    border: none;
+                    color: #6c757d;
+                    font-weight: 500;
+                    padding: 12px 24px;
+                    position: relative;
+                    transition: all 0.3s ease;
+                }
+                
+                .nav-tabs .nav-link:hover {
+                    color: #495057;
+                    background-color: #fff;
+                }
+                
+                .nav-tabs .nav-link.active {
+                    color: #fff;
+                    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+                    border: none;
+                    border-radius: 6px;
+                    box-shadow: 0 4px 6px rgba(78, 115, 223, 0.25);
+                }
+                
+                .nav-tabs .nav-link.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+                }
+                
+                /* Tab Content Animation */
+                .tab-content {
+                    position: relative;
+                }
+                
+                .tab-pane {
+                    animation: fadeIn 0.5s ease-out;
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                /* Summary Cards */
+                .summary-card {
+                    border-radius: 10px;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    transition: transform 0.3s ease;
+                }
+                
+                .summary-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+                }
+                
+                .summary-card.income {
+                    background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+                    color: white;
+                }
+                
+                .summary-card.expense {
+                    background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+                    color: white;
+                }
+                
+                .summary-card.balance {
+                    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+                    color: white;
+                }
+                
+                /* Table Styling */
+                .table-income tbody tr:hover {
+                    background-color: rgba(28, 200, 138, 0.1);
+                }
+                
+                .table-expense tbody tr:hover {
+                    background-color: rgba(231, 74, 59, 0.1);
+                }
+                
+                /* Status Badges */
+                .badge-income {
+                    background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+                    color: white;
+                    padding: 5px 12px;
+                    border-radius: 20px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                }
+                
+                .badge-expense {
+                    background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+                    color: white;
+                    padding: 5px 12px;
+                    border-radius: 20px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                }
+            </style>
 
-                                <!-- Delete Income Modal -->
-                                <div class="modal fade" id="deleteConfirmModal{{ item.id }}" tabindex="-1"
-                                    role="dialog">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">تأیید حذف</h5>
-                                                <button type="button" class="close" data-dismiss="modal"
-                                                    aria-label="بستن">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>آیا مطمئن هستید که می‌خواهید این عاید را حذف کنید؟</p>
-                                                <p class="text-muted small">این عملیات قابل بازگشت نیست.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-dismiss="modal">انصراف</button>
-                                                <a href="{% url 'management:delete_record' item.id %}"
-                                                    class="btn btn-danger">
-                                                    حذف
-                                                </a>
+            <div class="row mb-4">
+                <!-- Summary Statistics -->
+                 {% if system_permission and system_permission.collect_income %}
+                <div class="col-xl-6 col-md-6 mb-4">
+                    <div class="summary-card income">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-uppercase font-weight-bold mb-1">مجموع عواید</div>
+                                <div class="h2 mb-0">{{total_income|default:"0" }}</div>
+                            </div>
+                            <div class="rounded-circle bg-white p-3">
+                                <i class="fas fa-money-bill-wave text-success fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if system_permission and system_permission.collect_expenses %}
+                <div class="col-xl-6 col-md-6 mb-4">
+                    <div class="summary-card expense">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-uppercase font-weight-bold mb-1">مجموع مصارف</div>
+                                <div class="h2 mb-0">{{total_expense|default:"0" }}</div>
+                            </div>
+                            <div class="rounded-circle bg-white p-3">
+                                <i class="fas fa-shopping-cart text-danger fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tabs Navigation -->
+             {% if system_permission and system_permission.view_income_expenses %}
+            <ul class="nav nav-tabs justify-content-center mb-4" id="financialTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="income-tab" data-toggle="tab" href="#income" role="tab" 
+                    aria-controls="income" aria-selected="true">
+                    <i class="fas fa-money-bill-wave ml-2"></i>عواید
+                    <span class="badge badge-light ml-2">{{ income_records.count }}</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="expense-tab" data-toggle="tab" href="#expense" role="tab" 
+                    aria-controls="expense" aria-selected="false">
+                    <i class="fas fa-shopping-cart ml-2"></i>مصارف
+                    <span class="badge badge-light ml-2">{{ expense_records.count }}</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content" id="financialTabsContent">
+                
+                <!-- Income Tab -->
+                <div class="tab-pane fade show active" id="income" role="tabpanel" aria-labelledby="income-tab">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-money-bill-wave ml-2"></i>لیست عواید
+                            </h6>
+                            <span class="badge badge-light">{{ income_records.count }} ریکارد</span>
+                        </div>
+                        <div class="card-body">
+                            {% if income_records %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-income">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col" width="50">#</th>
+                                            <th scope="col">تاریخ</th>
+                                            <th scope="col">مقدار</th>
+                                            <th scope="col">حالت</th>
+                                            <th scope="col">منبع</th>
+                                            <th scope="col">توضیحات</th>
+                                            
+                                            <th scope="col" width="150">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in income_records %}
+                                        <tr {% if item.content_type %}class="table-secondary"{% endif %}>
+                                            <th scope="row">
+                                                {% if item.content_type %}
+                                                <i class="fas fa-lock text-muted" data-toggle="tooltip" 
+                                                title="غیرقابل ویرایش (از منبع دیگر آمده)"></i>
+                                                {% endif %}
+                                                {{ forloop.counter }}
+                                            </th>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                   
+                                                    {{ item.date }}
+                                                </div>
+                                            </td>
+                                            <td class="font-weight-bold text-success">
+                                                <i class="fas fa-plus-circle ml-2"></i>{{ item.amount }}
+                                            </td>
+                                            <td>
+                                                <span class="badge-income">{{ item.get_type_display }}</span>
+                                            </td>
+                                            <td>
+                                                {% if item.content_type %}
+                                                <span class="badge badge-info" data-toggle="tooltip" 
+                                                    title="از {{ item.content_type.name }} آمده است">
+                                                    <i class="fas fa-link ml-1"></i> متصل شده
+                                                </span>
+                                                {% else %}
+                                                <span class="badge badge-primary">
+                                                    <i class="fas fa-hand-paper ml-1"></i> دستی
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if item.description %}
+                                                <span data-toggle="tooltip" title="{{ item.description }}">
+                                                    {{ item.description|truncatechars:30 }}
+                                                </span>
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+
+                                            <td class="text-center">
+                                                {% if not item.content_type %}
+                                                <!-- Manual record - editable -->
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    {% if system_permission and system_permission.edit_income_expenses %}
+                                                    <a href="{% url 'management:edit_record' item.id %}" 
+                                                    class="btn btn-outline-warning" title="ویرایش">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                    {% if system_permission and system_permission.delete_income_expenses %}
+                                                    <button class="btn btn-outline-danger" 
+                                                            data-toggle="modal" 
+                                                            data-target="#deleteIncomeModal{{ item.id }}"
+                                                            title="حذف">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                                {% else %}
+                                                <!-- External record - locked -->
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button class="btn btn-outline-secondary disabled" 
+                                                            data-toggle="tooltip" 
+                                                            title="این ریکارد از منبع دیگری آمده و قابل ویرایش نیست">
+                                                        <i class="fas fa-lock ml-1"></i> قفل شده
+                                                    </button>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!-- Delete Income Modal (only for manual records) -->
+                                        {% if not item.content_type %}
+                                        <div class="modal fade" id="deleteIncomeModal{{ item.id }}" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">
+                                                            <i class="fas fa-exclamation-triangle ml-2"></i>تأیید حذف عاید
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body text-center py-4">
+                                                        <div class="mb-3">
+                                                            <i class="fas fa-trash-alt fa-3x text-danger"></i>
+                                                        </div>
+                                                        <h5 class="mb-3">آیا مطمئن هستید؟</h5>
+                                                        <div class="alert alert-warning text-right">
+                                                            <div class="d-flex align-items-start">
+                                                                <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                                                                <div>
+                                                                    <strong class="d-block mb-1">جزئیات عاید:</strong>
+                                                                    <p class="mb-1">تاریخ: {{ item.date }}</p>
+                                                                    <p class="mb-1">مقدار: {{ item.amount }}</p>
+                                                                    <p class="mb-1">حالت: {{ item.get_type_display }}</p>
+                                                                    <p class="mb-1">منبع: دستی (اداری)</p>
+                                                                    {% if item.description %}
+                                                                    <p class="mb-0">توضیحات: {{ item.description }}</p>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer justify-content-center">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                            <i class="fas fa-times ml-2"></i>انصراف
+                                                        </button>
+                                                        <a href="{% url 'management:delete_record' item.id %}" 
+                                                        class="btn btn-danger">
+                                                            <i class="fas fa-trash ml-2"></i>حذف عاید
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="empty-state text-center py-5">
+                                <div class="empty-state-icon mb-3">
+                                    <i class="fas fa-money-bill-wave fa-3x text-muted"></i>
                                 </div>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center py-5">
-                                        <div class="empty-state">
-                                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                            <h6 class="text-muted">هیچ عاید یا مصرف یافت نشد</h6>
+                                <h5 class="text-muted mb-3">هیچ عایدی ثبت نشده است</h5>
+                                <p class="text-muted mb-4">اولین عاید خود را ثبت کنید</p>
+                                <button class="btn btn-success" data-toggle="modal" data-target="#financeModal">
+                                    <i class="fas fa-plus-circle ml-2"></i>افزودن عاید
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expense Tab -->
+                <div class="tab-pane fade" id="expense" role="tabpanel" aria-labelledby="expense-tab">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-shopping-cart ml-2"></i>لیست مصارف
+                            </h6>
+                            <span class="badge badge-light">{{ expense_records.count }} ریکارد</span>
+                        </div>
+                        <div class="card-body">
+                            {% if expense_records %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-expense">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col" width="50">#</th>
+                                            <th scope="col">تاریخ</th>
+                                            <th scope="col">مقدار</th>
+                                            <th scope="col">حالت</th>
+                                            <th scope="col">منبع</th>
+                                            <th scope="col">توضیحات</th>
+                                            
+                                            <th scope="col" width="150">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in expense_records %}
+                                        <tr {% if item.content_type %}class="table-secondary"{% endif %}>
+                                            <th scope="row">
+                                                {% if item.content_type %}
+                                                <i class="fas fa-lock text-muted" data-toggle="tooltip" 
+                                                title="غیرقابل ویرایش (از منبع دیگر آمده)"></i>
+                                                {% endif %}
+                                                {{ forloop.counter }}
+                                            </th>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                   
+                                                    {{ item.date }}
+                                                </div>
+                                            </td>
+                                            <td class="font-weight-bold text-danger">
+                                                <i class="fas fa-minus-circle ml-2"></i>{{ item.amount }}
+                                            </td>
+                                            <td>
+                                                <span class="badge-expense">{{ item.get_type_display }}</span>
+                                            </td>
+                                            <td>
+                                                {% if item.content_type %}
+                                                <span class="badge badge-info" data-toggle="tooltip" 
+                                                    title="از {{ item.content_type.name }} آمده است">
+                                                    <i class="fas fa-link ml-1"></i> متصل شده
+                                                </span>
+                                                {% else %}
+                                                <span class="badge badge-primary">
+                                                    <i class="fas fa-hand-paper ml-1"></i> دستی
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if item.description %}
+                                                <span data-toggle="tooltip" title="{{ item.description }}">
+                                                    {{ item.description|truncatechars:30 }}
+                                                </span>
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                      
+                                            <td class="text-center">
+                                                {% if not item.content_type %}
+                                                <!-- Manual record - editable -->
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    {% if system_permission and system_permission.edit_income_expenses %}
+                                                    <a href="{% url 'management:edit_record' item.id %}" 
+                                                    class="btn btn-outline-warning" title="ویرایش">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                    {% if system_permission and system_permission.delete_income_expenses %}
+                                                    <button class="btn btn-outline-danger" 
+                                                            data-toggle="modal" 
+                                                            data-target="#deleteExpenseModal{{ item.id }}"
+                                                            title="حذف">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                                {% else %}
+                                                <!-- External record - locked -->
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button class="btn btn-outline-secondary disabled" 
+                                                            data-toggle="tooltip" 
+                                                            title="این ریکارد از منبع دیگری آمده و قابل ویرایش نیست">
+                                                        <i class="fas fa-lock ml-1"></i> قفل شده
+                                                    </button>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!-- Delete Expense Modal (only for manual records) -->
+                                        {% if not item.content_type %}
+                                        <div class="modal fade" id="deleteExpenseModal{{ item.id }}" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">
+                                                            <i class="fas fa-exclamation-triangle ml-2"></i>تأیید حذف مصرف
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body text-center py-4">
+                                                        <div class="mb-3">
+                                                            <i class="fas fa-trash-alt fa-3x text-danger"></i>
+                                                        </div>
+                                                        <h5 class="mb-3">آیا مطمئن هستید؟</h5>
+                                                        <div class="alert alert-warning text-right">
+                                                            <div class="d-flex align-items-start">
+                                                                <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                                                                <div>
+                                                                    <strong class="d-block mb-1">جزئیات مصرف:</strong>
+                                                                    <p class="mb-1">تاریخ: {{ item.date }}</p>
+                                                                    <p class="mb-1">مقدار: {{ item.amount }}</p>
+                                                                    <p class="mb-1">حالت: {{ item.get_type_display }}</p>
+                                                                    <p class="mb-1">منبع: دستی (اداری)</p>
+                                                                    {% if item.description %}
+                                                                    <p class="mb-0">توضیحات: {{ item.description }}</p>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer justify-content-center">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                            <i class="fas fa-times ml-2"></i>انصراف
+                                                        </button>
+                                                        <a href="{% url 'management:delete_record' item.id %}" 
+                                                        class="btn btn-danger">
+                                                            <i class="fas fa-trash ml-2"></i>حذف مصرف
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="empty-state text-center py-5">
+                                <div class="empty-state-icon mb-3">
+                                    <i class="fas fa-shopping-cart fa-3x text-muted"></i>
+                                </div>
+                                <h5 class="text-muted mb-3">هیچ مصرفی ثبت نشده است</h5>
+                                <p class="text-muted mb-4">اولین مصرف خود را ثبت کنید</p>
+                                <button class="btn btn-danger" data-toggle="modal" data-target="#financeModal">
+                                    <i class="fas fa-plus-circle ml-2"></i>افزودن مصرف
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
     <!-- Income Modal -->
@@ -380,6 +736,14 @@
                             <label class="col-sm-4 col-form-label">حالت<span class="text-danger">*</span></label>
                             <div class="col-sm-8">
                                 {{ form.type }}
+                            </div>
+                        </div>
+
+                        <!-- مقدار -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">عنوان<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ form.title }}
                             </div>
                         </div>
 

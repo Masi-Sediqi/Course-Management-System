@@ -1,247 +1,630 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<style>
+    /* Main Styles */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .salary-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .teacher-info-card {
+        background: linear-gradient(135deg, #36b9cc 0%, #2c9faf 100%);
+        color: white;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Summary Cards */
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+        border-radius: 0.5rem;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .remaining-money-card {
+        border-left-color: #1cc88a;
+        background: linear-gradient(135deg, rgba(28, 200, 138, 0.1) 0%, rgba(28, 200, 138, 0.05) 100%);
+    }
+    
+    .total-loan-card {
+        border-left-color: #f6c23e;
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1) 0%, rgba(246, 194, 62, 0.05) 100%);
+    }
+    
+    .total-salary-card {
+        border-left-color: #4e73df;
+        background: linear-gradient(135deg, rgba(78, 115, 223, 0.1) 0%, rgba(78, 115, 223, 0.05) 100%);
+    }
+    
+    /* Table Styling */
+    .table thead {
+        background-color: #4e73df;
+        color: white;
+    }
+    
+    .table th {
+        border: none;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
+    
+    /* Badge Styling for Table */
+    .badge-salary {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .badge-info {
+        background: linear-gradient(135deg, #36b9cc 0%, #2c9faf 100%) !important;
+        color: white;
+    }
+    
+    .badge-success {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%) !important;
+        color: white;
+    }
+    
+    .badge-warning {
+        background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%) !important;
+        color: white;
+    }
+    
+    .badge-danger {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%) !important;
+        color: white;
+    }
+    
+    /* Button Styling */
+    .btn-gradient {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        min-width: 140px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-gradient:hover::before {
+        left: 100%;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-new-salary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+    }
+    
+    /* Modal Styling */
+    .modal-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    
+    .modal-content {
+        border-radius: 0.75rem;
+        border: none;
+    }
+    
+    /* Form Styling */
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #e3e6f0;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    /* Loan Info Card Styling */
+    .loan-info-card {
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1) 0%, rgba(246, 194, 62, 0.05) 100%);
+        border: 1px solid #f6c23e;
+        border-radius: 0.75rem;
+        padding: 1rem;
+    }
+    
+    /* Amount Styling */
+    .amount-display {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .amount-positive {
+        color: #1cc88a;
+    }
+    
+    .amount-negative {
+        color: #e74a3b;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    /* Table Footer */
+    .table-footer-total {
+        background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-gradient {
+            min-width: 120px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .d-flex.gap-3 {
+            gap: 10px !important;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    {% endfor %}
+    {% endif %}
+    
+    // Initialize datepicker
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker12').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+    
+    // Salary calculation script
+    document.addEventListener("DOMContentLoaded", function () {
+        const amountInput = document.getElementById("id_amount");
+        const loanInput = document.getElementById("loan_amount");
+        const paidSalaryInput = document.getElementById("id_paid_salary");
+        const loanErrorDiv = document.getElementById("loan-error");
+
+        // Maximum loan available
+        const maxLoan = parseFloat(loanInput.value) || 0;
+
+        function calculatePaidSalary() {
+            let amount = parseFloat(amountInput.value) || 0;
+            let loan = parseFloat(loanInput.value) || 0;
+
+            // Check if entered loan exceeds maximum
+            if (loan > maxLoan) {
+                loanErrorDiv.style.display = "block";
+                loanInput.value = maxLoan; // reset to maximum
+                loan = maxLoan;
+            } else {
+                loanErrorDiv.style.display = "none";
+            }
+
+            // Calculate paid salary
+            let result = amount - loan;
+            paidSalaryInput.value = result >= 0 ? result : 0;
+        }
+
+        amountInput.addEventListener("input", calculatePaidSalary);
+        loanInput.addEventListener("input", calculatePaidSalary);
+    });
+</script>
+
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
-    <div class="main-content pt-4">
-        <div class="row">
-            <div class="col-md-12">
-  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-  <script src="{% static 'js/sweet.js' %}"></script>
-                    <script>
-                        {% if messages %}
-                            {% for message in messages %}
-                                Swal.fire({
-                                    toast: true,
-                                    position: 'top-end',
-                                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                                    title: "{{ message|escapejs }}",
-                                    showConfirmButton: false,
-                                    timer: 4000,
-                                    timerProgressBar: true,
-                                    didOpen: (toast) => {
-                                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                    }
-                                });
-                            {% endfor %}
-                        {% endif %}
-                    </script>
-                <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" id="invoice-tab" data-toggle="tab" href="#invoice" role="tab" aria-controls="invoice" aria-selected="true">
-                        <button class="btn btn-dark ripple m-1" type="button"  data-toggle="modal"
-                        data-target="#exampleModal">ماش جدید</button>
-                    </a></li>
-                    <li class="nav-item"><a href="{% url 'teachers:teacher_detail' teacher.id %}" class="nav-link">
-                        <button class="btn btn-dark ripple m-1">برگشت</button>
-                    </a></li>
-            
-                </ul>
-                <div class="card">
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
-                            <div class="d-sm-flex mb-5" data-view="print"><span class="m-auto"></span>
-                            </div>
-                            <!-- -===== Print Area =======-->
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">تاریخ</th>
-                                            <th scope="col">مقدار بل</th>
-                                            <th scope="col">مقدار</th>
-                                            <th scope="col">مقدار پرداخت شده</th>
-                                            <th scope="col">مقدار باقی مانده</th>
-                                            <th scope="col">عملیات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for i in paid_records %}
-                                        <tr>
-                                            <th scope="row">{{ forloop.counter }}</th>
-                                            <td>{{ i.date }}</td>
-                                            <td>{{ i.amount_of_fees_bell }}</td>
-                                            <td><span class="badge badge-info">{{ i.amount }}</span></td>
-                                            <td><span class="badge badge-success">{{ i.paid_salary }}</span></td>
-                                            <td><span class="badge badge-warning">{{ i.remain_salary }}</span></td>
-                                            <td>
-                                                <!-- Actions like edit/delete buttons go here -->
-                                                <a href="{% url 'teachers:edit_teacher_salary_record' i.id %}" class="btn btn-dark text-info">تغییرات</a>
-                                                <button class="btn btn-light text-danger"
-                                                data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                                    حذف
-                                                </button> 
-                                            </td>
-                                        </tr>
-                                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                              <div class="modal-content text-center">
-                                                <div class="modal-header">
-                                                  <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                  </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                  <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                                  <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                                  <div class="d-flex justify-content-center gap-2">
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                                    <a href="{% url 'teachers:delete_teacher_salary_record' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="5" class="text-right font-weight-bold">مجموع مقدار باقی مانده:</td>
-                                            <td><span class="badge badge-danger">{{ total_remain_salary.total_amount }}</span></td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            
-                            <!-- ==== / Print Area =====-->
-                        </div>
-                    </div>
+
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / مدیریت معاشات /</span> 
+        <span class="text-primary">معاشات استاد</span>
+    </h4>
+
+    <div class="card">
+        <div class="card-body">
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-0 text-primary">
+                        <i class="fas fa-money-check-alt ml-2"></i>
+                        لیست معاشات پرداخت شده
+                    </h5>
+                </div>
+                <div class="d-flex gap-3">
+                    {% if system_permission and system_permission.add_paid_salary_teacher %}
+                    <button class="btn btn-new-salary btn-gradient" type="button" data-toggle="modal"
+                        data-target="#exampleModal">
+                        <i class="fas fa-plus-circle ml-2"></i> پرداخت معاش جدید
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'teachers:teacher_detail' teacher.id %}" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت
+                    </a>
                 </div>
             </div>
-        </div><!-- end of main-content -->
+
+            <!-- Salary Records Table -->
+            {% if system_permission and system_permission.view_paid_salary_teacher %}
+            <div class="table-responsive">
+                {% if paid_records %}
+                <table class="table table-hover table-striped" id="salaryTable">
+                    <thead>
+                        <tr class="bg-gradient-primary text-white">
+                            <th scope="col">#</th>
+                            <th scope="col">تاریخ</th>
+                            <th scope="col">مقدار</th>
+                            <th scope="col">مقدار پرداخت شده</th>
+                            <th scope="col">مقدار قرض شده</th>
+                            <th scope="col">مقدار باقی مانده</th>
+                            <th scope="col">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in paid_records %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ i.date }}</td>
+                            <td>
+                                <span class="badge badge-salary badge-info">{{ i.amount }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-salary badge-success">{{ i.paid_salary }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-salary badge-dark">{{ i.loan_amount }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-salary badge-warning">{{ i.remain_salary }}</span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if system_permission and system_permission.edit_paid_salary_teacher %}
+                                    <a href="{% url 'teachers:edit_teacher_salary_record' i.id %}" 
+                                       class="btn btn-sm btn-edit" title="ویرایش">
+                                        <i class="fas fa-edit ml-1"></i> تغییرات
+                                    </a>
+                                    {% endif %}
+                                    {% if system_permission and system_permission.delete_paid_salary_teacher %}
+                                    <button class="btn btn-sm btn-delete" 
+                                            data-toggle="modal" 
+                                            data-target="#deleteConfirmModal{{ i.id }}"
+                                            title="حذف">
+                                        <i class="fas fa-trash ml-1"></i> حذف
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" 
+                             aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content text-center">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" 
+                                                aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
+                                        <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
+                                        <div class="d-flex justify-content-center gap-2 mt-3">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
+                                            <a href="{% url 'teachers:delete_teacher_salary_record' i.id %}" 
+                                               class="btn btn-danger">
+                                                بلی، حذف کن
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-footer-total">
+                        <tr>
+                            <td colspan="5" class="text-right font-weight-bold">مجموع مقدار باقی مانده:</td>
+                            <td>
+                                <span class="badge badge-salary badge-danger">{{ total_remain_salary.total_amount }}</span>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-money-check-alt"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">هیچ پرداخت معاش ثبت نشده است</h5>
+                    <p class="text-muted mb-4">اولین پرداخت معاش استاد را ثبت کنید</p>
+                    <button class="btn btn-new-salary btn-gradient" type="button" data-toggle="modal"
+                        data-target="#exampleModal">
+                        <i class="fas fa-plus-circle ml-2"></i> ثبت اولین پرداخت معاش
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
     </div>
+</div>
+
+<!-- Add Salary Payment Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
+    aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">پرداخت معاش استاد</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="بستن">
-                    <span aria-hidden="true">×</span>
+                <h5 class="modal-title" id="exampleModalLabel">
+                    <i class="fas fa-money-check-alt ml-2"></i>
+                    ثبت پرداخت معاش جدید
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate action="{% url 'teachers:teacher_paid_salary' id=teacher.id %}" method="post">
+                <!-- Loan Info Card -->
+                <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'teachers:teacher_paid_salary' id=teacher.id %}">
                     {% csrf_token %}
 
-                    <!-- Display teacher's current loan at top -->
-                    <!-- <div class="mb-3">
-                        <p class="text-info fw-bold">
-                            مقدار قرض این استاد: 
-                            {{ total_teacher_loan.total_loan_amount|default:"0" }}
-                        </p>
-                    </div> -->
-
-                 <div class="d-flex justify-content-center">
-  <div class="col-lg-6 col-md-12 mb-4">
-    <div class="p-4 border border-light rounded d-flex align-items-center justify-content-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 512 512"><path fill="currentColor" d="m210.6 44.39l-7-4.39c-13.7-8.4-30.8-13.28-45.5-8.7c-15.8 4.92-28.4 17.09-35 35.37l-9.4-4.84c-16.2-8.34-24.68-8.47-31.71-5.31c-5.61 2.51-11.46 8.55-18.09 17.37l82.4 63.71c12.9 4.2 31.8 4.1 50.7-.8c19-4.9 37.9-14.5 51.7-27.4l31.1-76.9c-27.4-21.65-52.4-9.11-69.2 11.89m53.1 76.51c-17 17.2-42.3 28.8-62 34c-6.9 1.8-13.8 3.1-20.5 3.8c-3.7 6.1-6.8 12.3-9.2 18.5c4.8 24.4 13.8 44.4 27.3 60.8l-14.4 12c-8.3-10-15.7-20.8-21.3-32.8c-.9 23.2 4.3 47.2 12.8 72.2l-17.7 6c-15.6-45.6-20.9-92.3 1-136.3c-7.4-.6-14.4-2-20.9-4.3l-.3-.1q-6.45 6.15-12.3 12.9c-31.57 36.6-48.96 85.3-39.86 123.2c4.87 20.3 13.6 39.5 26.16 55.9c18.4-.4 35.8 0 51.6 6c7.5-.8 15.2-1.3 23.2-1.3c28.5 0 54.3 5.3 73.8 14.5c7.6 3.6 14.5 7.9 20 12.8c0-5.3.8-11 2.4-15.2c-8.9-8.4-14.5-18.6-14.5-30.2c0-16.1 10.7-29.4 26.2-39c0-4.6.9-9 2.5-13.2c-10.1-8.7-16.6-19.5-16.6-32.1c0-7.9 2.6-15.1 7-21.6c-4.4-6.4-7-13.6-7-21.5c0-3.9.6-7.5 1.7-11c-9.7-8.6-15.8-19.2-15.8-31.4c0-12.1 6-22.6 15.6-31.1c-5.9-4.6-12.2-8.5-18.9-11.5m111.4 2.3c-26 0-49.5 5.5-65.6 13.6c-16.2 8.1-23.8 18.1-23.8 26.7c0 8.7 7.6 18.7 23.8 26.8c16.1 8.1 39.6 13.6 65.6 13.6c11.3 0 22-1.1 31.9-2.9v-17c13.9-2.1 25.4-5.9 32.8-10.8v17.6c12.5-3.6 24.5-16.9 24.8-27.3c0-8.6-7.6-18.6-23.8-26.7s-39.6-13.6-65.7-13.6m96.5 67.7c-3.3 3.5-7.2 6.8-11.6 9.8l.2 29c12.6-7.5 18.5-16.2 18.5-23.8c0-4.8-2.3-10-7.1-15m-171.8 15.4c.3 8.6 7.9 18.3 23.8 26.3c16.2 8.2 39.6 13.6 65.7 13.6c16.3 0 31.6-2.2 44.7-5.8l.7-27.2c-17.2 6-37.6 9.3-59.6 9.3c-28.5 0-54.4-5.7-74-15.5c-.5-.2-.9-.5-1.3-.7m2 34.8c-1.4 2.7-2 5.4-2 7.9c0 8.7 7.6 18.7 23.8 26.8s39.6 13.5 65.7 13.5c13.2 0 25.7-1.3 37-3.8v-24c-11.6 2.2-24 3.3-37 3.3c-28.6 0-54.5-5.6-74.1-15.5c-4.9-2.4-9.4-5.2-13.4-8.2m174.9 0c-6.1 4.3-11.4 7.5-17.6 10.2v22.3c13.3-7.7 19.6-16.7 19.6-24.6c0-2.5-.6-5.2-2-7.9m7.5 36.8c-2 2-4.2 3.9-6.6 5.8v32.4c10.3-7 15.3-14.7 15.3-21.7c0-5.3-2.9-11-8.7-16.5m-170.1 14c-.1.9-.2 1.7-.2 2.5c0 8.7 7.6 18.6 23.8 26.7c16.2 8.2 39.7 13.6 65.7 13.6c14.9 0 29.1-1.8 41.4-4.8V300c-16.3 5.2-35.2 8-55.5 8c-28.6 0-54.5-5.7-74.1-15.5c-.4-.2-.7-.4-1.1-.6m-13.6 21.4c-8.7 6.5-12.8 13.6-12.8 20c0 8.7 7.6 18.6 23.8 26.8c16.2 8.1 39.6 13.5 65.7 13.5c9.5 0 18.7-.7 27.3-2v-18.2h-1.1c-28.6 0-54.5-5.7-74.1-15.6c-12.5-6.2-22.9-14.5-28.8-24.5M463 343.9c-7.9 2.8-16.5 5.1-25.7 6.6v12.1c1.9-.8 3.8-1.6 5.6-2.5c9.8-5 16.4-10.6 20.1-16.2m9.2 18.2c-3.8 3.8-8.2 7.2-13.1 10.3V401c13.3-7.6 19.6-16.6 19.6-24.5c0-4.6-2.1-9.6-6.5-14.4m-348.7 2.8c-10.2.1-21.2 1.4-32.6 4.1c-22.81 5.3-42.42 15-55.22 25.7c-12.8 10.6-17.8 21.4-16.3 29.1s9.4 14.8 24.8 18.9c15.35 4 36.82 4.2 59.62-1.1c9.2-2.2 17.8-5 25.7-8.3v-20.7c14.6-6.5 25.5-14.3 30.4-21.9v24.4c12.1-10.4 16.8-20.8 15.4-28.4c-1.4-7.7-9.4-14.8-24.8-18.8c-7.7-2-16.9-3.1-27-3m64.6 5.2c2.7 3.9 4.6 8.3 5.6 13.2c1.1 6 .6 11.8-1.2 17.5c9.9 2.6 18.9 6.1 26.7 10.5c4.4 2.4 8.5 5.3 12.1 8.3c9-2.1 16.6-5.1 22-8.7v20.6c16.1-7.6 23.5-16.9 23.5-24.3c0-7.5-7.4-16.8-23.6-24.4c-16.1-7.5-39.3-12.6-65.1-12.7m111.8 5c-.1.4-.1.9-.1 1.4c0 8.7 7.6 18.6 23.8 26.8c16.2 8.1 39.6 13.5 65.7 13.5c13.2 0 25.7-1.4 37-3.8v-26.9c-14.8 4-31.5 6.2-49.1 6.2c-28.6 0-54.5-5.7-74.1-15.5c-1.1-.6-2.2-1.2-3.2-1.7m2.8 37.3c-2 3.3-2.9 6.5-2.9 9.6c0 8.7 7.6 18.6 23.8 26.8c16.2 8.1 39.6 13.5 65.7 13.5c13.2 0 25.7-1.4 37-3.8v-26.4c-11.6 2.2-24 3.4-37 3.4c-28.6 0-54.5-5.7-74.1-15.6c-4.5-2.2-8.7-4.7-12.5-7.5m173.1 0c-5.8 3.9-10.9 7-16.7 9.5v24.6c13.3-7.6 19.6-16.6 19.6-24.5c0-3.1-.9-6.3-2.9-9.6m-292.6 5.4c-3.5 4.4-7.6 8.6-12.2 12.4c-15.6 13.1-37.6 23.7-63 29.6c-9.06 2.1-18.06 3.4-26.7 4.1c3.2 5.3 8.83 10.5 17.07 15.1c13.63 7.7 33.63 12.9 55.83 12.9c10.1 0 19.7-1.1 28.5-3v-20.8c13.8-2.1 25.4-5.9 32.8-10.8v18.4c10-7 14.8-14.9 14.8-22.4c0-8.7-6.5-18-20.2-25.7c-7.4-4.1-16.6-7.5-26.9-9.8"/></svg>
-      <div>
-        <h4 class="text-18 mb-1">مقدار قرض این استاد:</h4>
-        <span>{{ total_teacher_loan.total_loan_amount|default:"0" }}</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-                    <div class="row p-3">
-                        <!-- تاریخ -->
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="lastName1">تاریخ<span style="color: red;">*</span></label>
-                            {{ form.date }}
-                        </div>
-
-                        <!-- تعداد فیس بل -->
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="firstName1">تعداد فیس بل<span style="color: red;">*</span></label>
-                            {{ form.amount_of_fees_bell }}
-                        </div>
-
-                        <!-- مقدار -->
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="id_amount">مقدار<span style="color: red;">*</span></label>
-                            {{ form.amount }}
-                        </div>
-
-                        <!-- قرض -->
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="loan_amount">قرض استاد<span style="color: red;">*</span></label>
-                            <input type="number" step="0.01" min="0" id="loan_amount" name="loan_amount"
-                                   class="form-control"
-                                   value="{{ total_teacher_loan.total_loan_amount|default:"0" }}">
-                            <div id="loan-error" style="color:red; display:none; font-size: 0.9em;">
-                                مقدار قرض بیشتر از قرض گرفته شده است
+                    {% if teacher_balance.total_loan > 0 %}
+                        <div class="col-sm-12">
+                                <div class="d-flex justify-content-end mb-4">
+                                <div class="col-lg-8 col-md-12">
+                                    <div class="p-4 border border-warning rounded d-flex align-items-center justify-content-center loan-info-card">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 512 512">
+                                            <path fill="currentColor" d="m210.6 44.39l-7-4.39c-13.7-8.4-30.8-13.28-45.5-8.7c-15.8 4.92-28.4 17.09-35 35.37l-9.4-4.84c-16.2-8.34-24.68-8.47-31.71-5.31c-5.61 2.51-11.46 8.55-18.09 17.37l82.4 63.71c12.9 4.2 31.8 4.1 50.7-.8c19-4.9 37.9-14.5 51.7-27.4l31.1-76.9c-27.4-21.65-52.4-9.11-69.2 11.89m53.1 76.51c-17 17.2-42.3 28.8-62 34c-6.9 1.8-13.8 3.1-20.5 3.8c-3.7 6.1-6.8 12.3-9.2 18.5c4.8 24.4 13.8 44.4 27.3 60.8l-14.4 12c-8.3-10-15.7-20.8-21.3-32.8c-.9 23.2 4.3 47.2 12.8 72.2l-17.7 6c-15.6-45.6-20.9-92.3 1-136.3c-7.4-.6-14.4-2-20.9-4.3l-.3-.1q-6.45 6.15-12.3 12.9c-31.57 36.6-48.96 85.3-39.86 123.2c4.87 20.3 13.6 39.5 26.16 55.9c18.4-.4 35.8 0 51.6 6c7.5-.8 15.2-1.3 23.2-1.3c28.5 0 54.3 5.3 73.8 14.5c7.6 3.6 14.5 7.9 20 12.8c0-5.3.8-11 2.4-15.2c-8.9-8.4-14.5-18.6-14.5-30.2c0-16.1 10.7-29.4 26.2-39c0-4.6.9-9 2.5-13.2c-10.1-8.7-16.6-19.5-16.6-32.1c0-7.9 2.6-15.1 7-21.6c-4.4-6.4-7-13.6-7-21.5c0-3.9.6-7.5 1.7-11c-9.7-8.6-15.8-19.2-15.8-31.4c0-12.1 6-22.6 15.6-31.1c-5.9-4.6-12.2-8.5-18.9-11.5m111.4 2.3c-26 0-49.5 5.5-65.6 13.6c-16.2 8.1-23.8 18.1-23.8 26.7c0 8.7 7.6 18.7 23.8 26.8c16.1 8.1 39.6 13.6 65.6 13.6c11.3 0 22-1.1 31.9-2.9v-17c13.9-2.1 25.4-5.9 32.8-10.8v17.6c12.5-3.6 24.5-16.9 24.8-27.3c0-8.6-7.6-18.6-23.8-26.7s-39.6-13.6-65.7-13.6m96.5 67.7c-3.3 3.5-7.2 6.8-11.6 9.8l.2 29c12.6-7.5 18.5-16.2 18.5-23.8c0-4.8-2.3-10-7.1-15m-171.8 15.4c.3 8.6 7.9 18.3 23.8 26.3c16.2 8.2 39.6 13.6 65.7 13.6c16.3 0 31.6-2.2 44.7-5.8l.7-27.2c-17.2 6-37.6 9.3-59.6 9.3c-28.5 0-54.4-5.7-74-15.5c-.5-.2-.9-.5-1.3-.7m2 34.8c-1.4 2.7-2 5.4-2 7.9c0 8.7 7.6 18.7 23.8 26.8s39.6 13.5 65.7 13.5c13.2 0 25.7-1.3 37-3.8v-24c-11.6 2.2-24 3.3-37 3.3c-28.6 0-54.5-5.6-74.1-15.5c-4.9-2.4-9.4-5.2-13.4-8.2m174.9 0c-6.1 4.3-11.4 7.5-17.6 10.2v22.3c13.3-7.7 19.6-16.7 19.6-24.6c0-2.5-.6-5.2-2-7.9m7.5 36.8c-2 2-4.2 3.9-6.6 5.8v32.4c10.3-7 15.3-14.7 15.3-21.7c0-5.3-2.9-11-8.7-16.5m-170.1 14c-.1.9-.2 1.7-.2 2.5c0 8.7 7.6 18.6 23.8 26.7c16.2 8.2 39.7 13.6 65.7 13.6c14.9 0 29.1-1.8 41.4-4.8V300c-16.3 5.2-35.2 8-55.5 8c-28.6 0-54.5-5.7-74.1-15.5c-.4-.2-.7-.4-1.1-.6m-13.6 21.4c-8.7 6.5-12.8 13.6-12.8 20c0 8.7 7.6 18.6 23.8 26.8c16.2 8.1 39.6 13.5 65.7 13.5c9.5 0 18.7-.7 27.3-2v-18.2h-1.1c-28.6 0-54.5-5.7-74.1-15.6c-12.5-6.2-22.9-14.5-28.8-24.5M463 343.9c-7.9 2.8-16.5 5.1-25.7 6.6v12.1c1.9-.8 3.8-1.6 5.6-2.5c9.8-5 16.4-10.6 20.1-16.2m9.2 18.2c-3.8 3.8-8.2 7.2-13.1 10.3V401c13.3-7.6 19.6-16.6 19.6-24.5c0-4.6-2.1-9.6-6.5-14.4m-348.7 2.8c-10.2.1-21.2 1.4-32.6 4.1c-22.81 5.3-42.42 15-55.22 25.7c-12.8 10.6-17.8 21.4-16.3 29.1s9.4 14.8 24.8 18.9c15.35 4 36.82 4.2 59.62-1.1c9.2-2.2 17.8-5 25.7-8.3v-20.7c14.6-6.5 25.5-14.3 30.4-21.9v24.4c12.1-10.4 16.8-20.8 15.4-28.4c-1.4-7.7-9.4-14.8-24.8-18.8c-7.7-2-16.9-3.1-27-3m64.6 5.2c2.7 3.9 4.6 8.3 5.6 13.2c1.1 6 .6 11.8-1.2 17.5c9.9 2.6 18.9 6.1 26.7 10.5c4.4 2.4 8.5 5.3 12.1 8.3c9-2.1 16.6-5.1 22-8.7v20.6c16.1-7.6 23.5-16.9 23.5-24.3c0-7.5-7.4-16.8-23.6-24.4c-16.1-7.5-39.3-12.6-65.1-12.7m111.8 5c-.1.4-.1.9-.1 1.4c0 8.7 7.6 18.6 23.8 26.8c16.2 8.1 39.6 13.5 65.7 13.5c13.2 0 25.7-1.4 37-3.8v-26.9c-14.8 4-31.5 6.2-49.1 6.2c-28.6 0-54.5-5.7-74.1-15.5c-1.1-.6-2.2-1.2-3.2-1.7m2.8 37.3c-2 3.3-2.9 6.5-2.9 9.6c0 8.7 7.6 18.6 23.8 26.8c16.2 8.1 39.6 13.5 65.7 13.5c13.2 0 25.7-1.4 37-3.8v-26.4c-11.6 2.2-24 3.4-37 3.4c-28.6 0-54.5-5.7-74.1-15.6c-4.5-2.2-8.7-4.7-12.5-7.5m173.1 0c-5.8 3.9-10.9 7-16.7 9.5v24.6c13.3-7.6 19.6-16.6 19.6-24.5c0-3.1-.9-6.3-2.9-9.6m-292.6 5.4c-3.5 4.4-7.6 8.6-12.2 12.4c-15.6 13.1-37.6 23.7-63 29.6c-9.06 2.1-18.06 3.4-26.7 4.1c3.2 5.3 8.83 10.5 17.07 15.1c13.63 7.7 33.63 12.9 55.83 12.9c10.1 0 19.7-1.1 28.5-3v-20.8c13.8-2.1 25.4-5.9 32.8-10.8v18.4c10-7 14.8-14.9 14.8-22.4c0-8.7-6.5-18-20.2-25.7c-7.4-4.1-16.6-7.5-26.9-9.8"/>
+                                        </svg>
+                                        <div class="text-right mr-3">
+                                            <h4 class="text-18 mb-1">مقدار قرض این استاد:</h4>
+                                            <span class="font-weight-bold">{{ teacher_balance.total_loan|default:"0" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- مقدار برای پرداخت -->
-                        <div class="col-md-3 form-group mb-3">
-                            <label for="id_paid_salary">مقدار برای پرداخت<span style="color: red;">*</span></label>
-                            {{ form.paid_salary }}
-                        </div>
-
-                        <!-- توضیحات -->
-                        <div class="col-md-12 form-group mb-3">
-                            <label for="email">توضیحات</label>
-                            {{ form.description }}
-                        </div>
-
-                        <!-- Submit Buttons -->
-                        <div class="col-12 modal-footer">
-                            <input type="hidden" name="form_type" value="class">
-                            <button class="btn btn-secondary" type="button" data-dismiss="modal">برگشت</button>
-                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                    {% endif %}
+             
+                    <!-- Total Paid -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">تاریخ</label>
+                        <div class="col-sm-8">
+                             {{ form.date }}
                         </div>
                     </div>
+
+                    <!-- Remaining Balance -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label"> مقدار کل
+                            </label>
+                        <div class="col-sm-8">
+                            {{ form.amount }}
+                        </div>
+                    </div>
+                    {% if teacher_balance.total_loan > 0 %}
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">مقدار قرض
+                            </label>
+                        <div class="col-sm-8">
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="loan_amount"
+                                max="{{ teacher_balance.total_loan }}"
+                            >
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!-- Remaining Balance -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">مقدار پرداخت شده
+                            </label>
+                        <div class="col-sm-8">
+                            {{ form.paid_salary }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">مقدار باقی مانده
+                            </label>
+                        <div class="col-sm-8">
+                            <input type="number" class="form-control" name="remain" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Remaining Balance -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">توضیحات</label>
+                        <div class="col-sm-8">
+                            {{ form.description }}
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                            بستن
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-submit ml-2"></i>ارسال
+                        </button>
+                    </div>
                 </form>
+                <script>
+                document.addEventListener("DOMContentLoaded", function() {
+
+                    const totalInput = document.querySelector('#id_amount');
+                    const paidInput = document.querySelector('#id_paid_salary');
+                    const loanInput = document.querySelector('input[name="loan_amount"]');
+                    const remainInput = document.querySelector('input[name="remain"]');
+
+                    const maxLoan = {{ teacher_balance.total_loan|default:0 }};
+
+                    function calculateRemain() {
+                        let total = parseFloat(totalInput.value) || 0;
+                        let paid = parseFloat(paidInput.value) || 0;
+                        let loan = parseFloat(loanInput ? loanInput.value : 0) || 0;
+
+                        // قرض بیشتر از قرض اصلی نشود
+                        if (loan > maxLoan) {
+                            loan = maxLoan;
+                            loanInput.value = maxLoan;
+                        }
+
+                        // مجموع پرداخت + قرض از amount بیشتر نشود
+                        if ((paid + loan) > total) {
+                            paid = total - loan;
+                            if (paid < 0) paid = 0;
+                            paidInput.value = paid;
+                        }
+
+                        let remain = total - paid - loan;
+                        remainInput.value = remain >= 0 ? remain.toFixed(2) : 0;
+                    }
+
+                    totalInput.addEventListener("input", calculateRemain);
+                    paidInput.addEventListener("input", calculateRemain);
+                    if (loanInput) loanInput.addEventListener("input", calculateRemain);
+
+                    calculateRemain();
+                });
+                </script>
+
+
+
             </div>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const amountInput = document.getElementById("id_amount");
-    const loanInput = document.getElementById("loan_amount");
-    const paidSalaryInput = document.getElementById("id_paid_salary");
-    const loanErrorDiv = document.getElementById("loan-error");
-
-    // Maximum loan available
-    const maxLoan = parseFloat(loanInput.value) || 0;
-
-    function calculatePaidSalary() {
-        let amount = parseFloat(amountInput.value) || 0;
-        let loan = parseFloat(loanInput.value) || 0;
-
-        // Check if entered loan exceeds maximum
-        if (loan > maxLoan) {
-            loanErrorDiv.style.display = "block";
-            loanInput.value = maxLoan; // reset to maximum
-            loan = maxLoan;
-        } else {
-            loanErrorDiv.style.display = "none";
-        }
-
-        // Calculate paid salary
-        let result = amount - loan;
-        paidSalaryInput.value = result >= 0 ? result : 0;
-    }
-
-    amountInput.addEventListener("input", calculatePaidSalary);
-    loanInput.addEventListener("input", calculatePaidSalary);
-});
-</script>
-
-
-<script>
     document.addEventListener('DOMContentLoaded', function () {
+
+        // Date pickers
         $('#datepicker3').datepicker({});
+        $('#datepicker4').datepicker({});
     });
 </script>
 
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // Add some animation to table rows
+        $('#salaryTable tbody tr').hover(
+            function() {
+                $(this).css('transform', 'scale(1.01)');
+                $(this).css('transition', 'transform 0.2s ease');
+            },
+            function() {
+                $(this).css('transform', 'scale(1)');
+            }
+        );
+        
+        // Form validation
+        $('form.needs-validation').on('submit', function(event) {
+            if (this.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            $(this).addClass('was-validated');
+        });
+    });
+</script>
 
-</div>
 {% endblock %}

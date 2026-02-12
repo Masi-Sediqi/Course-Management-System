@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<style>
+    /* Main Styles - Green Theme */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .payment-header {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .student-info-card {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        color: white;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Summary Cards */
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+        border-radius: 0.5rem;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .remaining-money-card {
+        border-left-color: #f6c23e;
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1) 0%, rgba(246, 194, 62, 0.05) 100%);
+    }
+    
+    .total-paid-card {
+        border-left-color: #1cc88a;
+        background: linear-gradient(135deg, rgba(28, 200, 138, 0.1) 0%, rgba(28, 200, 138, 0.05) 100%);
+    }
+    
+    .current-remain-card {
+        border-left-color: #e74a3b;
+        background: linear-gradient(135deg, rgba(231, 74, 59, 0.1) 0%, rgba(231, 74, 59, 0.05) 100%);
+    }
+    
+    /* Table Styling */
+    .table thead {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+    }
+    
+    .table th {
+        border: none;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(28, 200, 138, 0.05);
+    }
+    
+    /* Button Styling */
+    .btn-gradient {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        min-width: 140px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-gradient:hover::before {
+        left: 100%;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-new-payment {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+    }
+    
+    /* Modal Styling */
+    .modal-header {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    
+    .modal-content {
+        border-radius: 0.75rem;
+        border: none;
+    }
+    
+    /* Form Styling */
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #e3e6f0;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus {
+        border-color: #1cc88a;
+        box-shadow: 0 0 0 0.2rem rgba(28, 200, 138, 0.25);
+    }
+    
+    /* Badge Styling */
+    .badge-payment {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    /* Amount Styling */
+    .amount-display {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    
+    .amount-positive {
+        color: #1cc88a;
+    }
+    
+    .amount-warning {
+        color: #f6c23e;
+    }
+    
+    .amount-negative {
+        color: #e74a3b;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-gradient {
+            min-width: 120px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .d-flex.gap-3 {
+            gap: 10px !important;
+        }
+    }
+</style>
+
+<script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    {% endfor %}
+    {% endif %}
+
+      document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker21').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+  
+</script>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+
+    <div class="card">
+        <div class="card-body">
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-0 text-success">
+                        <i class="fas fa-money-check-alt ml-2"></i>
+                        لیست پرداخت‌های مبلغ باقی‌مانده
+                    </h5>
+                </div>
+                <div class="d-flex gap-3">
+                    {% if system_permission and system_permission.add_paid_remain_student %}
+                    <button class="btn btn-new-payment btn-gradient" type="button" data-toggle="modal"
+                        data-target="#paymentModal">
+                        <i class="fas fa-plus-circle ml-2"></i> ثبت پرداخت جدید
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'students:student_detail' student.id %}" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right ml-2"></i> برگشت به صفحه شاگرد
+                    </a>
+                </div>
+            </div>
+
+            <!-- Payment Records Table -->
+             {% if system_permission and system_permission.view_paid_remain_student %}
+            <div class="table-responsive">
+                {% if paid_remain_records %}
+                <table class="table table-hover table-striped" id="paymentTable">
+                    <thead>
+                        <tr class="bg-gradient-success text-white">
+                            <th width="60" class="text-center">#</th>
+                            <th width="120">تاریخ</th>
+                            <th width="150">مقدار پرداختی</th>
+                            <th>توضیحات</th>
+                            <th width="150">تاریخ ثبت</th>
+                            <th width="130" class="text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in paid_remain_records %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge bg-success rounded-circle px-2 py-1 text-white">{{ forloop.counter }}</span>
+                            </td>
+                            <td>
+                                <div class="text-center">
+                                    <span class="badge bg-light text-dark border px-3 py-1 rounded-pill">
+                                        <i class="fas fa-calendar-alt ml-1"></i>
+                                        {{ record.date }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="amount-display text-success font-weight-bold">
+                                    <i class="fas fa-money-bill-wave ml-2"></i>
+                                    {{ record.paid }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if record.description %}
+                                <div class="text-truncate" style="max-width: 200px;" title="{{ record.description }}">
+                                    {{ record.description }}
+                                </div>
+                                {% else %}
+                                <span class="text-muted font-italic">بدون توضیح</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border px-3 py-1">
+                                    <i class="fas fa-clock ml-1"></i>
+                                    {{ record.created_at|date:"Y/m/d H:i" }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    {% if system_permission and system_permission.edit_paid_remain_student %}
+                                    <a href="{% url 'students:edit_student_paid_remain' record.id %}" class="btn btn-outline-warning border-warning" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if system_permission and system_permission.delete_paid_remain_student %}
+                                    <button class="btn btn-outline-danger border-danger" 
+                                            data-toggle="modal" 
+                                            data-target="#deletePaymentModal{{ record.id }}"
+                                            title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deletePaymentModal{{ record.id }}" tabindex="-1" role="dialog" 
+                            aria-labelledby="deleteModalLabel{{ record.id }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title" id="deleteModalLabel{{ record.id }}">
+                                            <i class="fas fa-exclamation-triangle ml-2"></i>
+                                            تأیید حذف پرداخت
+                                        </h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" 
+                                                aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <i class="fas fa-trash-alt text-danger" style="font-size: 4rem;"></i>
+                                        <h5 class="mt-3">آیا از حذف این پرداخت مطمئن هستید؟</h5>
+                                        <p class="text-danger small mt-3">
+                                            <i class="fas fa-exclamation-circle ml-1"></i>
+                                            پس از حذف، مبلغ این پرداخت دوباره به باقی‌مانده اضافه خواهد شد.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                            <i class="fas fa-times ml-2"></i> انصراف
+                                        </button>
+                                        <a href="{% url 'students:delete_student_paid_remain' record.id %}" class="btn btn-danger">
+                                            <i class="fas fa-trash ml-2"></i> حذف پرداخت
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-money-check-alt"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">هیچ پرداختی ثبت نشده است</h5>
+                    <p class="text-muted mb-4">اولین پرداخت مبلغ باقی‌مانده را ثبت کنید</p>
+                    <button class="btn btn-success btn-gradient" type="button" data-toggle="modal"
+                        data-target="#paymentModal">
+                        <i class="fas fa-plus-circle ml-2"></i> ثبت اولین پرداخت
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
+    aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="fas fa-money-check-alt ml-2"></i>
+                    ثبت پرداخت جدید مبلغ باقی‌مانده
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle fa-lg ml-2"></i>
+                        <div>
+                            <strong>مبلغ باقی‌مانده فعلی:</strong> 
+                            <span class="font-weight-bold">{{ current_remain }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="row g-3 needs-validation" novalidate method="post" id="paymentForm">
+                    {% csrf_token %}
+   
+                    <!-- Date -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">
+                            تاریخ <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-8">
+                             {{ form.date }}
+                        </div>
+                    </div>
+
+                    <!-- Payment Amount -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">
+                            مقدار پرداختی <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-8">
+                            {{ form.paid }}
+                            <small class="form-text text-muted">
+                                حداکثر مبلغ قابل پرداخت: {{ current_remain }}
+                            </small>
+                            <div class="invalid-feedback" id="amount-error" style="display: none;">
+                                مبلغ نمی‌تواند بیشتر از {{ current_remain }} باشد
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">توضیحات</label>
+                        <div class="col-sm-8">
+                            {{ form.description }}
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                            انصراف
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitPaymentBtn">
+                            <i class="fas fa-check ml-2"></i>ثبت پرداخت
+                        </button>
+                    </div>
+                </form>
+                <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const paidInput = document.getElementById("id_paid");
+                    const submitBtn = document.getElementById("submitPaymentBtn");
+                    const errorBox = document.getElementById("amount-error");
+
+                    const maxRemain = parseFloat("{{ current_remain|default:0 }}");
+
+                    function validateAmount() {
+                        let value = parseFloat(paidInput.value || 0);
+
+                        if (value > maxRemain) {
+                            submitBtn.disabled = true;
+                            errorBox.style.display = "block";
+                            paidInput.classList.add("is-invalid");
+                        } else {
+                            submitBtn.disabled = false;
+                            errorBox.style.display = "none";
+                            paidInput.classList.remove("is-invalid");
+                        }
+                    }
+
+                    paidInput.addEventListener("input", validateAmount);
+                });
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

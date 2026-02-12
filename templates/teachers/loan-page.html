@@ -3,187 +3,498 @@
 
 {% block content %}
 
-  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-  <script src="{% static 'js/sweet.js' %}"></script>
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
 
-  <script>
+<style>
+    /* Main Styles */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .loan-header {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .teacher-info-card {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Summary Cards */
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+        border-radius: 0.5rem;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .remaining-money-card {
+        border-left-color: #1cc88a;
+        background: linear-gradient(135deg, rgba(28, 200, 138, 0.1) 0%, rgba(28, 200, 138, 0.05) 100%);
+    }
+    
+    .total-loan-card {
+        border-left-color: #e74a3b;
+        background: linear-gradient(135deg, rgba(231, 74, 59, 0.1) 0%, rgba(231, 74, 59, 0.05) 100%);
+    }
+    
+    /* Table Styling */
+    .table thead {
+        background-color: #4e73df;
+        color: white;
+    }
+    
+    .table th {
+        border: none;
+        font-weight: 600;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
+    
+    /* Button Styling */
+    .btn-gradient {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        min-width: 140px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-gradient:hover::before {
+        left: 100%;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-new-loan {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+    }
+    
+    /* Modal Styling */
+    .modal-header {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    
+    .modal-content {
+        border-radius: 0.75rem;
+        border: none;
+    }
+    
+    /* Form Styling */
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #e3e6f0;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus {
+        border-color: #e74a3b;
+        box-shadow: 0 0 0 0.2rem rgba(231, 74, 59, 0.25);
+    }
+    
+    /* Badge Styling */
+    .badge-loan {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    /* Amount Styling */
+    .amount-display {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    
+    .amount-positive {
+        color: #1cc88a;
+    }
+    
+    .amount-negative {
+        color: #e74a3b;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-gradient {
+            min-width: 120px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .d-flex.gap-3 {
+            gap: 10px !important;
+        }
+    }
+</style>
+
+<script>
     {% if messages %}
     {% for message in messages %}
     Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-      title: "{{ message|escapejs }}",
-      showConfirmButton: false,
-      timer: 4000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
     });
     {% endfor %}
     {% endif %}
-  </script>
+    
+    // Initialize datepicker
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker12').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+</script>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+
+
     <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش قرض 
+        <span class="text-muted fw-light">داشبورد / مدیریت قرض /</span> 
+        <span class="text-danger">قرض‌های استاد</span>
     </h4>
 
-
-    <div class="card">
-        <div class="card-body">
-            <div class="col-lg-12 text-right">
-                        
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal">
-                    قرض جدید
-                </button>
-        
-                 
-  <a href="{% url 'teachers:teacher_detail' teacher.id %}" class="btn btn-secondary btn-lg m-1">
-    بازگشت
-  </a>
-            </div>
-
-    
-            <!-- Tabs Content -->
-            <div class="tab-content mt-4" id="incomeTabsContent">
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive">
-                        <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>تاریخ</th>
-                                    <th>مقدار</th>
-                                    <th>توضیحات</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                {% for i in records %}
-                                <tr>
-                                    <td>{{ i.id }}</td>
-                                    <td>{{ i.date }}</td>
-                                    <td>{{ i.amount }}</td>
-                                    <td>{{ i.description|slice:":30" }}{% if i.description|length > 30 %}...{% endif %}</td>
-                                    <td>
-                                        <!-- Actions like edit/delete buttons go here -->
-                                        <a href="{% url 'teachers:edit_loan_request' i.id %}" class="btn btn-sm btn-primary">ویرایش</a>
-                                        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">حذف</button>
-                                    </td>
-                                </tr>
-                                <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                      <div class="modal-content text-center">
-                                        <div class="modal-header">
-                                          <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                          </button>
-                                        </div>
-                                        <div class="modal-body">
-                                          <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                          <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                          <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                            <a href="{% url 'teachers:delete_loan_request' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
+    <!-- Summary Cards -->
+    {% if teacher_balance.total_remain > 0 %}
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card summary-card remaining-money-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-success font-weight-bold text-uppercase mb-1">پول باقی مانده استاد</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">
+                                {{ teacher_balance.total_remain|default:"0" }}
+                            </div>
+                        </div>
+                        <div class="bg-success text-white rounded-circle p-3">
+                            <i class="fas fa-coins fa-2x"></i>
+                        </div>
                     </div>
                 </div>
-    
-        
             </div>
         </div>
     </div>
-    
- 
-    
+    {% endif %}
+    <div class="alert alert-card alert-danger" role="alert"><strong class="text-capitalize">توجه!</strong> در صورت بودن مقدار استاد بالای کورس، ابتدا از آن کسر خواهد شد، بعد در مقدار قرض استاد جمع خواهد شد.
+        <button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-0 text-danger">
+                        <i class="fas fa-file-invoice-dollar ml-2"></i>
+                        لیست قرض‌های استاد
+                    </h5>
+                </div>
+                <div class="d-flex gap-3">
+                    {% if system_permission and system_permission.add_loan_teacher %}
+                    <button class="btn btn-new-loan btn-gradient" type="button" data-toggle="modal"
+                        data-target="#exampleModal">
+                        <i class="fas fa-plus-circle ml-2"></i> قرض جدید
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'teachers:teacher_detail' teacher.id %}" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت
+                    </a>
+                </div>
+            </div>
+
+            <!-- Loan Records Table -->
+            {% if system_permission and system_permission.view_loan_teacher %}
+            <div class="table-responsive">
+                {% if records %}
+                <table class="table table-hover table-striped" id="loanTable">
+                    <thead>
+                        <tr class="bg-gradient-danger text-white">
+                            <th class="text-center">#</th>
+                            <th>تاریخ</th>
+                            <th>مقدار</th>
+                            <th>توضیحات</th>
+                            <th class="text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in records %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge-loan">{{ forloop.counter }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar-alt text-primary ml-2"></i>
+                                    {{ i.date }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="amount-display amount-negative">
+                                    <i class="fas fa-money-bill-wave ml-2"></i>
+                                    {{ i.amount }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-comment-alt text-info ml-2"></i>
+                                    {% if i.description %}
+                                        <span data-toggle="tooltip" title="{{ i.description }}">
+                                            {{ i.description|truncatechars:40 }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">بدون توضیح</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    {% if system_permission and system_permission.edit_loan_teacher %}
+                                    <a href="{% url 'teachers:edit_loan_request' i.id %}" 
+                                       class="btn btn-sm btn-edit" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if system_permission and system_permission.delete_loan_teacher %}
+                                    <button class="btn btn-sm btn-delete" 
+                                            data-toggle="modal" 
+                                            data-target="#deleteConfirmModal{{ i.id }}"
+                                            title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" 
+                             aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title" id="deleteModalLabel{{ i.id }}">
+                                            <i class="fas fa-exclamation-triangle ml-2"></i>
+                                            تأیید حذف قرض
+                                        </h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" 
+                                                aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <i class="fas fa-trash-alt text-danger" style="font-size: 4rem;"></i>
+                                        <h5 class="mt-3">آیا از حذف این قرض مطمئن هستید؟</h5>
+                                        <div class="alert alert-warning mt-3">
+                                            <div class="d-flex align-items-start">
+                                                <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                                                <div class="text-right">
+                                                    <strong class="d-block mb-1">جزئیات قرض:</strong>
+                                                    <p class="mb-1">تاریخ: {{ i.date }}</p>
+                                                    <p class="mb-1">مبلغ: {{ i.amount }}</p>
+                                                    {% if i.description %}
+                                                    <p class="mb-0">توضیحات: {{ i.description }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                            <i class="fas fa-times ml-2"></i> انصراف
+                                        </button>
+                                        <a href="{% url 'teachers:delete_loan_request' i.id %}" 
+                                           class="btn btn-danger">
+                                            <i class="fas fa-trash ml-2"></i> حذف قرض
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">هیچ قرضی ثبت نشده است</h5>
+                    <p class="text-muted mb-4">اولین قرض استاد را ثبت کنید</p>
+                    <button class="btn btn-new-loan btn-gradient" type="button" data-toggle="modal"
+                        data-target="#exampleModal">
+                        <i class="fas fa-plus-circle ml-2"></i> ثبت اولین قرض
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
-<!--  Modal -->
+<!-- Add Loan Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت قرض</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
+                <h5 class="modal-title" id="exampleModalLabel">
+                    <i class="fas fa-hand-holding-usd ml-2"></i>
+                    ثبت قرض جدید
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'teachers:teacher_loan' teacher.id %}" method="POST">
+
+                <form class="row g-3 needs-validation" novalidate method="post">
                     {% csrf_token %}
-                    
-                    {% if total_remain_money.total_amount > 0 %}
-                    <div class="col-lg-12 col-md-6 col-sm-6">
-                        <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                            <div class="card-body text-center"><i class="i-Money-2"></i>
-                                <div class="content">
-                                    <p class="text-muted mt-2 mb-0">مقدار پول باقی مانده</p>
-                                    <p class="text-primary text-24 line-height-1 mb-2"> {{ total_remain_money.total_amount }} </p>
-                                </div>
-                            </div>
+   
+                    <!-- Total Paid -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">تاریخ</label>
+                        <div class="col-sm-8">
+                             {{ form.date }}
                         </div>
                     </div>
-                    {% endif %}
 
-                        <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom01">تاریخ</label>
-                            {{ form.date }}
-                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
-                            <div class="valid-feedback">
-
-                            </div>
-                        </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker12').datepicker({
-                            
-                                });
-                            });
-                        </script>
-                       
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom02">مقدار</label>
+                    <!-- Remaining Balance -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">مقدار قرض
+                            </label>
+                        <div class="col-sm-8">
                             {{ form.amount }}
-                            <div class="valid-feedback">
-
-                            </div>
                         </div>
                     </div>
-                
-                    <div class="form-row">
-        
-                        <div class="col-md-12 mb-3">
-                            <label for="validationCustom03">تفصیل</label>
+
+                    <!-- Remaining Balance -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label class="col-sm-4 col-form-label">توضیحات</label>
+                        <div class="col-sm-8">
                             {{ form.description }}
-                            <div class="invalid-feedback">
-
-                            </div>
                         </div>
                     </div>
-                    <input type="hidden" name="form_type" value="expense">
-                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                            بستن
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-submit ml-2"></i>ارسال
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // Add some animation to table rows
+        $('#loanTable tbody tr').hover(
+            function() {
+                $(this).css('transform', 'scale(1.01)');
+                $(this).css('transition', 'transform 0.2s ease');
+            },
+            function() {
+                $(this).css('transform', 'scale(1)');
+            }
+        );
+        
+        // Form validation
+        $('form.needs-validation').on('submit', function(event) {
+            if (this.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            $(this).addClass('was-validated');
+        });
+    });
+</script>
 
 {% endblock %}

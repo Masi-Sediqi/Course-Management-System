@@ -233,6 +233,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-center gap-3">
                 <!-- Balance Button -->
+                {% if system_permission and system_permission.add_balance_supplier %}
                 {% if not supplier_colculation %}
                 <button class="btn btn-primary" data-toggle="modal" data-target="#balanceModal">
                     <i class="fas fa-chart-line ml-2"></i> بیلانس
@@ -242,20 +243,24 @@
                     <i class="fas fa-chart-line ml-2"></i> بیلانس
                 </button>
                 {% endif %}
-
+                {% endif %}
+                {% if system_permission and system_permission.paid_money_supplier %}
                 <button class="btn btn-success" data-toggle="modal" data-target="#paymentModal">
                     <i class="fas fa-chart-line ml-2"></i> پرداخت
                 </button>
-
+                {% endif %}
+                {% if system_permission and system_permission.edit_supplier %}
                 <!-- Edit Button -->
                 <a href="{% url 'home:edit_supplier' supplier.id %}" class="btn btn-warning">
                     <i class="fas fa-edit ml-2"></i>ویرایش
                 </a>
-
+                 {% endif %}
+                {% if system_permission and system_permission.delete_supplier %}
                 <!-- Delete Button with Modal -->
                 <button class="btn btn-danger" data-toggle="modal" data-target="#deleteSupplierModal">
                     <i class="fas fa-trash ml-2"></i>حذف
                 </button>
+                 {% endif %}
 
                 <!-- Back Button -->
                 <a href="" class="btn btn-secondary">
@@ -266,6 +271,7 @@
     </div>
 
     <!-- Combined Table -->
+     {% if system_permission and system_permission.paid_money_supplier %}
     <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -507,6 +513,7 @@
             </style>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <!-- Balance Modal -->
@@ -571,7 +578,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">بیلانس تامین‌کننده</h5>
+                <h5 class="modal-title">پرداخت برای تامین‌کننده</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -581,19 +588,26 @@
                     action="{% url 'home:supplier_detail' supplier.id %}">
                     {% csrf_token %}
                     <div class="col-12">
-                        <h5>معلومات بیلانس</h5>
+                        <h5>معلومات پرداخت</h5>
                     </div>
 
                     <!-- مجموع پرداخت‌شده -->
                     <div class="col-md-12 d-flex align-items-center mb-3">
-                        <label class="col-sm-4 col-form-label">آخرین مقدار پرداخت‌شده</label>
+                        <label class="col-sm-4 col-form-label">تاریخ</label>
                         <div class="col-sm-8">
-                            {{ jdate_form.date }}
+                            {{ jdate_form1.date }}
                         </div>
                     </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             $('#datepicker3').datepicker({
+
+                            });
+                        });
+                    </script>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            $('#datepicker4').datepicker({
 
                             });
                         });

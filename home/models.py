@@ -1,5 +1,6 @@
 from django.db import models
 import jdatetime
+from django.conf import settings
 # Create your models here.
 
 class suppliers(models.Model):
@@ -31,3 +32,18 @@ class ColculationWithSupplier(models.Model):
     purchase_item = models.ForeignKey('library.Purchase', on_delete=models.CASCADE, blank=True, null=True)
     date = models.CharField(max_length=14, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class SystemLog(models.Model):
+    section = models.CharField(max_length=100)
+    action = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    
+    def __str__(self):
+        return f"{self.action} at {self.timestamp}"

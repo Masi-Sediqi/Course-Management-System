@@ -93,15 +93,17 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="card-title mb-0">مدیریت کتابها</h5>
                 <div>
+                    {% if system_permission and system_permission.add_book %}
                     <button class="btn btn-primary ml-2" data-toggle="modal" data-target="#exampleModal">
                         <i class="fas fa-plus ml-2"></i> کتاب جدید
                     </button>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- SweetAlert2 -->
-  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-  <script src="{% static 'js/sweet.js' %}"></script>
+            <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+            <script src="{% static 'js/sweet.js' %}"></script>
 
             <script>
                 {% if messages %}
@@ -123,6 +125,7 @@
                 {% endif %}
             </script>
 
+            {% if system_permission and system_permission.view_book %}
             <!-- Search Input -->
             <div class="mb-3">
                 <input type="text" id="searchInput" class="form-control" placeholder="جستجو بر اساس نام آیتم...">
@@ -136,9 +139,10 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th scope="col" width="50" class="text-center">#</th>
-                                    <th scope="col">📝 نام</th>
-                                    <th scope="col">📅 تاریخ</th>
-                                    <th scope="col">📋 توضیحات</th>
+                                    <th scope="col" width="80"> تصویر</th>
+                                    <th scope="col"> نام</th>
+                                    <th scope="col">تاریخ</th>
+                                    <th scope="col"> توضیحات</th>
                                     <th scope="col" width="120" class="text-center">⚙️ عملیات</th>
                                 </tr>
                             </thead>
@@ -150,6 +154,22 @@
                                             {{ forloop.counter }}
                                         </span>
                                     </th>
+                                 <td>
+                                    {% if item.image and item.image.url %}
+                                    <div class="image-thumbnail" style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6;">
+                                        <img src="{{ item.image.url }}" 
+                                            alt="{{ item.name }}" 
+                                            class="img-fluid w-100 h-100 object-fit-cover"
+                                            style="cursor: pointer;"
+                                            onclick="openImageModal('{{ item.image.url }}', '{{ item.name }}')">
+                                    </div>
+                                    {% else %}
+                                    <div class="avatar-circle d-flex align-items-center justify-content-center" 
+                                        style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; font-size: 1.2rem;">
+                                        {{ item.name|slice:":1"|upper }}
+                                    </div>
+                                    {% endif %}
+                                </td>
                                     <td>
                                         <a href="{% url 'library:item_info' item.id %}"
                                             class="text-decoration-none text-primary d-flex align-items-center">
@@ -188,24 +208,66 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
+                                            {% if system_permission and system_permission.edit_book %}
                                             <a href="{% url 'library:edit_item' item.id %}"
                                                 class="btn btn-sm btn-outline-warning border-warning"
                                                 data-toggle="tooltip" title="ویرایش">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            {% endif %}
+                                            {% if system_permission and system_permission.delete_book %}
                                             <button type="button" class="btn btn-sm btn-outline-danger border-danger"
                                                 data-toggle="modal" data-target="#deleteConfirmModal{{ item.id }}"
                                                 data-toggle="tooltip" title="حذف">
                                                 <i class="fas fa-trash"></i>
                                             </button>
+                                            {% endif %}
+                                            {% if system_permission and system_permission.purchase_book %}
                                             <a href="{% url 'library:purchase_item' item.id %}"
                                                 class="btn btn-sm btn-outline-primary border-primary"
                                                 data-toggle="tooltip" title="خرید مجدد">
                                                 <i class="fas fa-shopping-cart"></i>
                                             </a>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
+
+                                {% if item.image and item.image.url %}
+                                <!-- Image Modal -->
+                                <div class="modal fade" id="imageModal{{ item.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-light">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-image ml-2"></i>
+                                                    {{ item.name }}
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body text-center p-0">
+                                                <img src="{{ item.image.url }}" 
+                                                    alt="{{ item.name }}" 
+                                                    class="img-fluid w-100" 
+                                                    style="max-height: 70vh; object-fit: contain;">
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <a href="{{ item.image.url }}" 
+                                                class="btn btn-outline-primary" 
+                                                target="_blank" 
+                                                download="{{ item.name|slugify }}">
+                                                    <i class="fas fa-download ml-1"></i> دانلود
+                                                </a>
+                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                                    <i class="fas fa-times ml-1"></i> بستن
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
 
                                 <!-- Delete Modal -->
                                 <div class="modal fade" id="deleteConfirmModal{{ item.id }}" tabindex="-1"
@@ -224,14 +286,23 @@
                                             </div>
                                             <div class="modal-body text-center">
                                                 <div class="mb-3">
+                                                    <!-- Show item image in delete confirmation -->
+                                                    {% if item.image %}
+                                                    <div class="mb-3">
+                                                        <img src="{{ item.image.url }}" 
+                                                            alt="{{ item.name }}" 
+                                                            class="img-fluid rounded" 
+                                                            style="max-height: 150px;">
+                                                    </div>
+                                                    {% endif %}
+                                                    
                                                     <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto mb-3"
                                                         style="width: 60px; height: 60px;">
                                                         <i class="fas fa-trash fa-2x"></i>
                                                     </div>
                                                     <h6 class="mb-2">آیا از حذف این آیتم مطمئن هستید؟</h6>
                                                     <p class="mb-1"><strong>"{{ item.name }}"</strong></p>
-                                                    <p class="text-muted small mb-0">نوع: {{ item.get_item_type_display
-                                                        }}</p>
+                                                    <p class="text-muted small mb-0">نوع: {{ item.get_item_type_display}}</p>
                                                 </div>
                                                 <div class="alert alert-warning alert-dismissible fade show py-2 mb-0"
                                                     role="alert">
@@ -255,7 +326,7 @@
 
                                 {% empty %}
                                 <tr>
-                                    <td colspan="6" class="text-center py-5">
+                                    <td colspan="7" class="text-center py-5">
                                         <div class="empty-state">
                                             <div class="icon-circle bg-light text-muted mx-auto mb-3"
                                                 style="width: 80px; height: 80px;">
@@ -273,6 +344,97 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
+
+            <!-- JavaScript for image modal -->
+            <script>
+            // Function to open image modal
+            function openImageModal(imageUrl, title) {
+                // Create a temporary modal for image viewing
+                const modalHtml = `
+                    <div class="modal fade" id="imageViewerModal" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content border-0">
+                                <div class="modal-header bg-dark text-white border-0">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-image ml-2"></i>
+                                        ${title}
+                                    </h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="بستن">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body p-0 text-center">
+                                    <img src="${imageUrl}" 
+                                        alt="${title}" 
+                                        class="img-fluid w-100" 
+                                        style="max-height: 70vh; object-fit: contain;">
+                                </div>
+                                <div class="modal-footer bg-dark border-0">
+                                    <a href="${imageUrl}" 
+                                    class="btn btn-outline-light" 
+                                    target="_blank" 
+                                    download="${title.replace(/\s+/g, '-')}">
+                                        <i class="fas fa-download ml-1"></i> دانلود
+                                    </a>
+                                    <button type="button" class="btn btn-outline-light" data-dismiss="modal">
+                                        <i class="fas fa-times ml-1"></i> بستن
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Remove existing modal if any
+                const existingModal = document.getElementById('imageViewerModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Add new modal to body
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Show the modal
+                $('#imageViewerModal').modal('show');
+                
+                // Remove modal from DOM after hiding
+                $('#imageViewerModal').on('hidden.bs.modal', function () {
+                    $(this).remove();
+                });
+            }
+            </script>
+
+            <!-- Add some CSS for better image display -->
+            <style>
+            .image-thumbnail:hover {
+                transform: scale(1.05);
+                transition: transform 0.3s ease;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+            .image-placeholder:hover {
+                background: #e9ecef;
+                transition: background-color 0.3s ease;
+            }
+
+            .object-fit-cover {
+                object-fit: cover;
+            }
+
+            .icon-circle {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .bg-primary-light {
+                background-color: rgba(13, 110, 253, 0.1);
+            }
+            </style>
 
             <style>
                 /* Custom styling for the table */
@@ -420,6 +582,14 @@
                             <label class="col-sm-4 col-form-label">نام کتاب<span class="text-danger">*</span></label>
                             <div class="col-sm-8">
                                 {{ form.name }}
+                            </div>
+                        </div>
+
+                        <!-- نام -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">عکس کتاب</label>
+                            <div class="col-sm-8">
+                                {{ form.image }}
                             </div>
                         </div>
 

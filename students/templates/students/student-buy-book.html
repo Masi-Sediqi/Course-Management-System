@@ -180,9 +180,11 @@
                     <a href="{% url 'students:student_detail' student.id %}" class="btn back-btn flex-fill mr-2">
                         <i class="fas fa-arrow-right ml-2"></i>بازگشت به پروفایل
                     </a>
+                    {% if system_permission and system_permission.view_buybook_student or system_permission.edit_buybook_student or system_permission.delete_buybook_student %}
                     <a href="{% url 'students:student_purchased' student.id %}" class="btn back-btn flex-fill">
                         <i class="fas fa-shopping-bag ml-2"></i>تمام خریداری ها
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -230,6 +232,7 @@
         <p class="text-muted">در حال حاضر هیچ کتابی برای خرید موجود نیست</p>
     </div>
     {% endif %}
+    
 </div>
 
 {% endblock %}

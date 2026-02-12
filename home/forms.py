@@ -30,5 +30,13 @@ class JDateForm(forms.Form):
         required=True
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class JDateForm1(forms.Form):
+    date = forms.CharField(
+        label='تاریخ',
+        widget=AdminJalaliDateWidget(attrs={
+            "placeholder": "0/0/0000", 
+            "id": "datepicker4",
+            'class': 'form-control'
+        }),
+        required=True
+    )

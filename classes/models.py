@@ -8,7 +8,6 @@ class SubClass(models.Model):
     start_date = models.CharField(max_length=15)  # تاریخ شروع کلاس
     teacher = models.ManyToManyField(Teacher)  # مدرس
     books = models.ManyToManyField(Item)
-    # subjects = models.ManyToManyField(Subjects)
     fees = models.IntegerField(blank=False)
     capacity = models.PositiveIntegerField(default=30)  # ظرفیت کلاس
     room = models.CharField(max_length=50, blank=True)  # شماره یا نام اتاق

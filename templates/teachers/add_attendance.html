@@ -3,180 +3,510 @@
 
 {% block content %}
 
-  <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
-  <script src="{% static 'js/sweet.js' %}"></script>
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
 
-    <script>
-        {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{{ message|escapejs }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            {% endfor %}
-        {% endif %}
-    </script>
+<style>
+    /* Main Styles */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .attendance-header {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .teacher-info-card {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Summary Cards */
+    .summary-card {
+        transition: transform 0.2s;
+        border-left: 4px solid;
+        border-radius: 0.5rem;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .total-days-card {
+        border-left-color: #36b9cc;
+        background: linear-gradient(135deg, rgba(54, 185, 204, 0.1) 0%, rgba(54, 185, 204, 0.05) 100%);
+    }
+    
+    .active-leave-card {
+        border-left-color: #f6c23e;
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1) 0%, rgba(246, 194, 62, 0.05) 100%);
+    }
+    
+    /* Table Styling */
+    .table thead {
+        background-color: #36b9cc;
+        color: white;
+    }
+    
+    .table th {
+        border: none;
+        font-weight: 600;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(54, 185, 204, 0.05);
+    }
+    
+    /* Button Styling */
+    .btn-gradient {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        min-width: 140px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-gradient:hover::before {
+        left: 100%;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-new-attendance {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #1cc88a 0%, #179b77 100%);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+    }
+    
+    /* Modal Styling */
+    .modal-header {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    
+    .modal-content {
+        border-radius: 0.75rem;
+        border: none;
+    }
+    
+    /* Form Styling */
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #e3e6f0;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus {
+        border-color: #36b9cc;
+        box-shadow: 0 0 0 0.2rem rgba(54, 185, 204, 0.25);
+    }
+    
+    /* Badge Styling */
+    .badge-attendance {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    /* Status Indicators */
+    .status-active {
+        color: #1cc88a;
+        font-weight: 600;
+    }
+    
+    .status-ended {
+        color: #6c757d;
+        font-weight: 600;
+    }
+    
+    /* Calendar Icon Styling */
+    .calendar-icon {
+        color: #36b9cc;
+        font-size: 1.2rem;
+    }
+    
+    /* Days Counter */
+    .days-counter {
+        background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        color: #36b9cc;
+    }
+    
+    /* Date Range Display */
+    .date-range {
+        background: linear-gradient(135deg, rgba(54, 185, 204, 0.1) 0%, rgba(54, 185, 204, 0.05) 100%);
+        border-radius: 0.5rem;
+        padding: 10px 15px;
+        border: 1px dashed #36b9cc;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-gradient {
+            min-width: 120px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .d-flex.gap-3 {
+            gap: 10px !important;
+        }
+    }
+</style>
+
+<script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    {% endfor %}
+    {% endif %}
+    
+    // Initialize datepickers
+    document.addEventListener('DOMContentLoaded', function () {
+        $('#datepicker9').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true,
+            startDate: new Date()
+        });
+        
+        // Initialize all tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // Add some animation to table rows
+        $('#attendanceTable tbody tr').hover(
+            function() {
+                $(this).css('transform', 'scale(1.01)');
+                $(this).css('transition', 'transform 0.2s ease');
+            },
+            function() {
+                $(this).css('transform', 'scale(1)');
+            }
+        );
+    });
+</script>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+
     <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش ثبت رخصتی 
+        <span class="text-muted fw-light">داشبورد / مدیریت رخصتی /</span> 
+        <span style="color: #36b9cc;">رخصتی‌های استاد</span>
     </h4>
 
-
+    <!-- Main Card -->
     <div class="card">
         <div class="card-body">
-            <div class="col-lg-12 text-right">
-                        
-                <button class="btn btn-info btn-lg m-1" type="button" data-toggle="modal"
-                    data-target="#exampleModal">
-                    ثبت روزهای رخصتی   
-                </button>
-        
-                <a href="{% url 'teachers:teacher_detail' teacher.id %}" class="btn btn-secondary btn-lg m-1">
-                    بازگشت
-                </a>
-            </div>
-
-    
-            <!-- Tabs Content -->
-            <div class="tab-content mt-4" id="incomeTabsContent">
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive mt-4">
-                        <table class="display table table-striped table-bordered" id="attendance_table" style="width:100%">
-                         <thead class="thead-dark">
-                             <tr>
-                                 <th>#</th>
-                                 <th>تاریخ شروع</th>
-                                 <th>تاریخ پایان</th>
-                                 <th>روزهای رخصتی</th>
-                                 <th>توضیحات</th>
-                                 <th>عملیات</th>
-                                
-                             </tr>
-                         </thead>
-                         <tbody id="table-body">
-                             {% for record in records %}
-                             <tr>
-                                 <td>{{ record.id }}</td>
-                                 <td>{{ record.start_date }}</td>
-                                 <td>{{ record.end_date }}</td>
-                                 <td>{{ record.number_of_day }}</td>
-                                 <td>{{ record.description|slice:":30" }}{% if record.description|length > 30 %}...{% endif %}</td>
-                                
-
-                                 <td>
-                                    <div class="dropdown">
-                                      <button class="btn btn-sm btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                      </button>
-                                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 150px; overflow-y: auto;">
-                                        <a class="dropdown-item text-info" href="{% url 'teachers:edit_attendance' record.id %}">تغییرات</a>
-                                        <a class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteConfirmModal{{ i.id }}">
-                                            حذف
-                                          </a>                                
-                                    </div>
-                                    </div>
-                                  </td>
-                               
-                             </tr>
-
-                             <div class="modal fade" id="deleteConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                  <div class="modal-content text-center">
-                                    <div class="modal-header">
-                                      <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">حذف کردن</h5>
-                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                      </button>
-                                    </div>
-                                    <div class="modal-body">
-                                      <p class="fs-5">آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                      <div class="text-danger font-weight-bold mb-3">در حال حذف ...</div>
-                                      <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                        <a href="{% url 'teachers:delete_attendance' record.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            
-                             {% endfor %}
-                         </tbody>
-                     </table>
-                     </div>
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="card-title mb-0" style="color: #36b9cc;">
+                        <i class="fas fa-calendar-alt ml-2"></i>
+                        لیست رخصتی‌های استاد
+                    </h5>
                 </div>
-    
-        
+                <div class="d-flex gap-3">
+                    {% if system_permission and system_permission.add_attendance_teacher %}
+                    <button class="btn btn-new-attendance btn-gradient" type="button" data-toggle="modal"
+                        data-target="#exampleModal">
+                        <i class="fas fa-plus-circle ml-2"></i> ثبت رخصتی جدید
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'teachers:teacher_detail' teacher.id %}" class="btn btn-back btn-gradient">
+                        <i class="fas fa-arrow-right ml-2"></i> بازگشت
+                    </a>
+                </div>
             </div>
+
+            <!-- Attendance Records Table -->
+             {% if system_permission and system_permission.view_attendance_teacher %}
+            <div class="table-responsive">
+                {% if records %}
+                <table class="table table-hover table-striped" id="attendanceTable">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #36b9cc 0%, #258391 100%); color: white;">
+                            <th class="text-center">#</th>
+                            <th>تاریخ شروع</th>
+                            <th>تاریخ پایان</th>
+                            <th>روزهای رخصتی</th>
+                            <th>توضیحات</th>
+                            <th class="text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge-attendance">{{ forloop.counter }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {{ record.start_date }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {{ record.end_date|default:"--" }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="days-counter mr-2">{{ record.number_of_day }}</div>
+                                    <span>روز</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if record.description %}
+                                        <span data-toggle="tooltip" title="{{ record.description }}">
+                                            {{ record.description|truncatechars:30 }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">بدون توضیح</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    {% if system_permission and system_permission.edit_attendance_teacher %}
+                                    <a href="{% url 'teachers:edit_attendance' record.id %}" 
+                                       class="btn btn-sm btn-edit" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if system_permission and system_permission.delete_attendance_teacher %}
+                                    <button class="btn btn-sm btn-delete" 
+                                            data-toggle="modal" 
+                                            data-target="#deleteConfirmModal{{ record.id }}"
+                                            title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteConfirmModal{{ record.id }}" tabindex="-1" role="dialog" 
+                             aria-labelledby="deleteModalLabel{{ record.id }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title" id="deleteModalLabel{{ record.id }}">
+                                            <i class="fas fa-exclamation-triangle ml-2"></i>
+                                            تأیید حذف رخصتی
+                                        </h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" 
+                                                aria-label="بستن">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <i class="fas fa-trash-alt text-danger" style="font-size: 4rem;"></i>
+                                        <h5 class="mt-3">آیا از حذف این رخصتی مطمئن هستید؟</h5>
+                                        <div class="alert alert-warning mt-3">
+                                            <div class="d-flex align-items-start">
+                                                <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                                                <div class="text-right">
+                                                    <strong class="d-block mb-1">جزئیات رخصتی:</strong>
+                                                    <p class="mb-1">تاریخ شروع: {{ record.start_date }}</p>
+                                                    <p class="mb-1">روزهای رخصتی: {{ record.number_of_day }} روز</p>
+                                                    {% if record.description %}
+                                                    <p class="mb-0">توضیحات: {{ record.description }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                            <i class="fas fa-times ml-2"></i> انصراف
+                                        </button>
+                                        <a href="{% url 'teachers:delete_attendance' record.id %}" 
+                                           class="btn btn-danger">
+                                            <i class="fas fa-trash ml-2"></i> حذف رخصتی
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">هیچ رخصتی ثبت نشده است</h5>
+                    <p class="text-muted mb-4">اولین رخصتی استاد را ثبت کنید</p>
+                    <button class="btn btn-new-attendance btn-gradient" type="button" data-toggle="modal"
+                        data-target="#exampleModal">
+                        <i class="fas fa-plus-circle ml-2"></i> ثبت اولین رخصتی
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
     </div>
-    
- 
-    
 </div>
 
-<!--  Modal -->
+<!-- Add Attendance/Leave Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true" style="font-family: 'Vazirmatn', sans-serif;">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">بخش ثبت مصارف</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true"></span></button>
+                <h5 class="modal-title" id="exampleModalLabel">
+                    <i class="fas fa-calendar-plus ml-2"></i>
+                    ثبت رخصتی جدید
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate="novalidate" action="{% url 'teachers:add_attendance' teacher.id %}" method="POST">
-                    {% csrf_token %}
-                    <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom01">تاریخ شروع</label>
-                            {{ form.start_date }}
-                            <!-- <input class="form-control" id="validationCustom01" type="text" placeholder="First name" value="Mark" required="required" /> -->
-                            
-                        </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                $('#datepicker9').datepicker({
-                            
-                                });
-                            });
-                        </script>
-          
-                       
-                        <div class="col-md-6 mb-3">
-                            <label for="validationCustom02">تعداد روز ها</label>
-                            {{ form.number_of_day }}
-                        </div>
-                    </div>
-                
-                    <div class="form-row">
-        
-                        <div class="col-md-12 mb-3">
-                            <label for="validationCustom03">تفصیل</label>
-                            {{ form.description }}
-                            <div class="invalid-feedback">
 
+                <form class="needs-validation" novalidate method="POST" action="{% url 'teachers:add_attendance' teacher.id %}" id="attendanceForm">
+                    {% csrf_token %}
+                    
+                    <div class="col-12">
+                        <h5>معلومات رخصتی</h5>
+                    </div>
+
+                    <!-- تاریخ شروع رخصتی -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label for="start_date" class="col-sm-4 col-form-label">
+                            تاریخ شروع رخصتی <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-calendar"></i>
+                                </span>
+                                {{ form.start_date }}
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+
+                    <!-- تعداد روزهای رخصتی -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label for="number_of_day" class="col-sm-4 col-form-label">
+                            تعداد روزهای رخصتی <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-sort-numeric-up"></i>
+                                </span>
+                                {{ form.number_of_day }}
+                                <span class="input-group-text">روز</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- علت رخصتی -->
+                    <div class="col-md-12 d-flex align-items-center mb-3">
+                        <label for="description" class="col-sm-4 col-form-label">علت رخصتی</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-pen"></i>
+                                </span>
+                                {{ form.description }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                            <i class="fas fa-times ml-2"></i> انصراف
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save ml-2"></i> ثبت رخصتی
+                        </button>
+                    </div>
                 </form>
+
             </div>
         </div>
     </div>

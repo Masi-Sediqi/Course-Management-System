@@ -90,7 +90,6 @@
     <div class="card shadow-sm border rounded-3">
         <div class="card-body text-center">
 
-            <!-- Student Header -->
             <div class="card mb-4">
                 <div class="student-header">
                     <div class="row align-items-center">
@@ -133,6 +132,14 @@
                                 <i class="far fa-clock me-1"></i>
                                 {{ student.registered_at|date:"H:i" }}
                             </span>
+                            
+                            {% if not student.is_active and student.deactivated_at %}
+                                <p class="mt-2 text-danger">
+                                    <i class="fas fa-ban me-1"></i>
+                                    غیر فعال شده در تاریخ: {{ student.deactivated_at }}
+                                </p>
+                            {% endif %}
+                            
                         </div>
                     </div>
                 </div>
@@ -188,7 +195,7 @@
                     <a href="{% url 'students:students_registration' %}" class="btn btn-back btn-gradient">
                         <i class="fas fa-arrow-right me-1"></i> بازگشت
                     </a>
-
+                    {% if system_permission and system_permission.active_deactive_student %}
                     {% if student.is_active == False %}
                     <a href="{% url 'students:student_activate_on' student.id %}" class="btn btn-activate btn-gradient">
                         <i class="fas fa-toggle-off me-1"></i> فعال
@@ -198,14 +205,18 @@
                         <i class="fas fa-toggle-on me-1"></i> غیر فعال
                     </a>
                     {% endif %}
+                    {% endif %}
 
+                    {% if system_permission and system_permission.edit_student %}
                     <a href="{% url 'students:edit_students' student.id %}" class="btn btn-edit btn-gradient">
                         <i class="fas fa-edit me-1"></i> تغییرات
                     </a>
-
+                    {% endif %}
+                    {% if system_permission and system_permission.delete_student %}
                     <button class="btn btn-delete btn-gradient" data-toggle="modal" data-target="#deleteStudentModal">
                         <i class="fas fa-trash ml-2"></i> حذف شاگرد
                     </button>
+                    {% endif %}
 
                     <div class="modal fade" id="deleteStudentModal" tabindex="-1" role="dialog">
                         <div class="modal-dialog" role="document">
@@ -248,84 +259,27 @@
                             </div>
                         </div>
                     </div>
-
+                    {% if system_permission and system_permission.add_registeration_student or system_permission.view_registeration_student or system_permission.edit_registeration_student or system_permission.delete_registeration_student %}
                     <a href="{% url 'students:student_fees_detail' student.id %}" class="btn btn-fees btn-gradient">
                         <i class="fas fa-money-bill-wave me-1"></i> ثبت نام
                     </a>
-
-                    {% if remain_amount.amount > 0 %}
-                    <a href="{% url 'students:student_paid_Remain_money' student.id %}"
-                        class="btn btn-remain btn-gradient">
-                        <i class="fas fa-coins me-1"></i> پرداخت باقیمانده
-                    </a>
                     {% endif %}
-
+                    {% if system_permission and system_permission.add_buybook_student or system_permission.view_buybook_student or system_permission.edit_buybook_student or system_permission.delete_buybook_student %}
                     <a href="{% url 'students:buy_book' student.id %}" class="btn btn-book btn-gradient">
                         <i class="fas fa-shopping-cart me-1"></i> خرید کتاب
                     </a>
-
+                    {% endif %}
+                    {% if system_permission and system_permission.add_improving_student or system_permission.view_improving_student or system_permission.edit_improving_student or system_permission.delete_improving_student %}
                     <a href="{% url 'students:student_improvment' student.id %}" class="btn btn-promote btn-gradient">
                         <i class="fas fa-level-up-alt me-1"></i> ارتقا شاگرد
                     </a>
-
-                    <!-- Balance Button -->
-                    <a href="#"
-                    class="btn btn-balance btn-gradient {% if has_balance %}disabled{% endif %}"
-                    {% if not has_balance %}
-                        data-toggle="modal" data-target="#balanceModal"
-                    {% endif %}>
-                        <i class="fas fa-chart-line ml-2"></i> آخرین بیلانس
+                    {% endif %}
+                    {% if system_permission and system_permission.add_paid_remain_student or system_permission.view_paid_remain_student or system_permission.edit_paid_remain_student or system_permission.delete_paid_remain_student %}
+                    <a href="{% url 'students:student_paid_remain_money' student.id %}"
+                        class="btn btn-remain btn-gradient">
+                        <i class="fas fa-coins me-1"></i> پرداخت باقیمانده
                     </a>
-
-                    <!-- Balance Modal -->
-                    <div class="modal fade" id="balanceModal" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-lg" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">آخرین بیلانس {{ student.first_name }}</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="بستن">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form class="row g-3 needs-validation" novalidate method="post">
-                                        {% csrf_token %}
-                                        <div class="col-12">
-                                            <h6 class="text-primary mb-3">معلومات بیلانس</h6>
-                                        </div>
-
-                                        <!-- Total Paid -->
-                                        <div class="col-md-12 d-flex align-items-center mb-3">
-                                            <label class="col-sm-4 col-form-label">مجموع پرداخت شده</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control" name="paid_amount" required>
-                                            </div>
-                                        </div>
-
-                                        <!-- Remaining Balance -->
-                                        <div class="col-md-12 d-flex align-items-center mb-3">
-                                            <label class="col-sm-4 col-form-label">مقدار باقی‌مانده کورس بالای
-                                                شاگرد</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control" name="remain_amount" required>
-                                            </div>
-                                        </div>
-
-                                        <!-- Submit Buttons -->
-                                        <div class="col-12 d-flex justify-content-end mt-3">
-                                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
-                                                بستن
-                                            </button>
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-submit ml-2"></i>ارسال
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                     {% endif %}
                     <style>
                         .btn-balance {
                             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

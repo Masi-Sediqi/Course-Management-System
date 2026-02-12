@@ -35,9 +35,11 @@
   <div class="row mb-4">
     <div class="col-12">
       <div class="d-flex justify-content-between">
-        <button class="btn btn-info" type="button" data-toggle="modal" data-target="#exampleModal">
-          <i class="fas fa-user-plus ml-2"></i>شاگرد جدید
-        </button>
+        {% if system_permission and system_permission.add_student %}
+          <button class="btn btn-info" type="button" data-toggle="modal" data-target="#exampleModal">
+            <i class="fas fa-user-plus ml-2"></i>شاگرد جدید
+          </button>
+        {% endif %}
         <a href="{% url 'home:dashboard' %}" class="btn btn-secondary">
           <i class="fas fa-arrow-right ml-2"></i>بازگشت
         </a>
@@ -46,6 +48,7 @@
   </div>
 
   <!-- Students Table Card -->
+  {% if system_permission and system_permission.view_student %}
   <div class="card">
     <div class="card-body">
       <h5 class="card-title mb-4">لیست شاگردان</h5>
@@ -73,6 +76,7 @@
               <th scope="col">نام پدر</th>
               <th scope="col">شماره تماس</th>
               <th scope="col">جنسیت</th>
+              <th scope="col">حالت</th>
               <th scope="col" width="120" class="text-center">عملیات</th>
             </tr>
           </thead>
@@ -118,6 +122,14 @@
                 {% endif %}
               </td>
               
+              <td>
+                {% if student.is_active == True %}
+                <span class="badge badge-info">فعال</span>
+                {% else %}
+                <span class="badge badge-danger">غیرفعال</span>
+                {% endif %}
+              </td>
+              
               <!-- Actions -->
               <td class="text-center">
                 <div class="dropdown">
@@ -131,14 +143,18 @@
                     <a class="dropdown-item" href="{% url 'students:student_detail' student.id %}">
                       <i class="fas fa-eye ml-2 text-info"></i>مشاهده
                     </a>
+                    {% if system_permission and system_permission.edit_student %}
                     <a class="dropdown-item" href="{% url 'students:edit_students' student.id %}">
                       <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
                     </a>
+                    {% endif %}
                     <div class="dropdown-divider"></div>
+                    {% if system_permission and system_permission.delete_student %}
                     <a class="dropdown-item text-danger" data-toggle="modal"
                        data-target="#deleteConfirmModal{{ student.id }}">
                       <i class="fas fa-trash ml-2"></i>حذف
                     </a>
+                    {% endif %}
                   </div>
                 </div>
               </td>
@@ -183,6 +199,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">

@@ -17,8 +17,6 @@ def statndart(request):
 
 
 def students_reports(request):
-
-
     form = StudentFilterForm(request.GET or None)
     students = Student.objects.filter(is_active=True)
     filter_type = request.GET.get('filter_type', 'active_students')
@@ -33,28 +31,28 @@ def students_reports(request):
         start_date = start_date or None
         end_date = end_date or None
 
-        # 🔹 Active Students
-        if filter_type == "active_students":
-            students = Student.objects.filter(is_active=True)
-            if start_date and end_date:
-                students = students.filter(
-                    date_of_registration__gte=start_date,
-                    date_of_registration__lte=end_date
-                )
-                title = f"فلتر شاگردان فعال از تاریخ {start_date} الی {end_date}"
-            else:
-                title = "تمام شاگردان فعال"
-
-            filter_active = True
-
         # 🔹 Deactive Students
-        elif filter_type == "deactive_students":
+        if filter_type == "deactive_students":
             students = Student.objects.filter(is_active=False)
+
             if start_date and end_date:
-                students = students.filter(
-                    date_of_registration__gte=start_date,
-                    date_of_registration__lte=end_date
-                )
+                # پیدا کردن دانش‌آموزانی که در بازه تاریخ غیر فعال شده‌اند
+                from datetime import datetime
+
+                # تبدیل تاریخ فرم (d/m/Y) به date
+                start_dt = datetime.strptime(start_date, "%d/%m/%Y").date()
+                end_dt = datetime.strptime(end_date, "%d/%m/%Y").date()
+
+                filtered_students = []
+                for student in students:
+                    if student.deactivated_at:
+                        # تبدیل deactivated_at به date
+                        student_dt = datetime.strptime(student.deactivated_at, "%d/%m/%Y").date()
+                        if start_dt <= student_dt <= end_dt:
+                            filtered_students.append(student.id)
+
+                students = students.filter(id__in=filtered_students)
+
                 title = f"فلتر شاگردان غیر فعال از تاریخ {start_date} الی {end_date}"
             else:
                 title = "تمام شاگردان غیر فعال"
@@ -63,53 +61,80 @@ def students_reports(request):
 
         # 🔹 Loan Students
         elif filter_type == "loan_students":
-            students_with_loans = StudentRemailMoney.objects.filter(
-                student__is_active=True,
-                amount__gt=0
-            )
-            if start_date:
-                students_with_loans = students_with_loans.filter(student__date_of_registration__gte=start_date)
-            if end_date:
-                students_with_loans = students_with_loans.filter(student__date_of_registration__lte=end_date)
+            # تمام رکوردهای StudentBalance که باقیمانده دارند
+            balances_with_remain = StudentBalance.objects.filter(remain__gt=0)
 
-            students = Student.objects.filter(student_remains__in=students_with_loans).distinct()
-            title = f"شاگردان قرضدار {f'از تاریخ {start_date} الی {end_date}' if start_date and end_date else ''}"
+            # فقط دانش‌آموزان مرتبط
+            students = Student.objects.filter(id__in=balances_with_remain.values_list('student_id', flat=True))
 
+            title = "شاگردانی که باقیمانده فیس دارند"
             filter_active = True
 
-        # 🔹 Students Without Class
-        elif filter_type == "students_withoutclass":
-            students = StudentWithoutClass.objects.all()
+
+        elif filter_type == "finish_fees":
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+
+            students_finish_feeses = Student_fess_info.objects.all()
+
             if start_date and end_date:
-                students = students.filter(
-                    date__gte=start_date,
-                    date__lte=end_date
-                )
-                title = f"شاگردان بدون صنف از تاریخ {start_date} الی {end_date}"
+                from datetime import datetime
+
+                # فرمت جدید: روز/ماه/سال
+                start_dt = datetime.strptime(start_date, "%d/%m/%Y").date()
+                end_dt = datetime.strptime(end_date, "%d/%m/%Y").date()
+
+                # فقط فیس‌هایی که end_date بین start و end هستند
+                filtered_fees = []
+                for fee in students_finish_feeses:
+                    if fee.end_date:
+                        fee_end_dt = datetime.strptime(fee.end_date, "%d/%m/%Y").date()
+                        if start_dt <= fee_end_dt <= end_dt:
+                            filtered_fees.append(fee.id)
+                
+                students_finish_feeses = students_finish_feeses.filter(id__in=filtered_fees)
+                title = f"شاگردانی که فیس آن‌ها بین {start_date} تا {end_date} تکمیل شده"
             else:
-                title = "تمام شاگردان بدون صنف"
+                # اگر start یا end نبود، همه فیس‌های تمام شده
+                students_finish_feeses = students_finish_feeses.exclude(end_date__isnull=True).exclude(end_date__exact='')
+                title = "تمام شاگردانی که فیس آن‌ها تکمیل شده"
 
             filter_active = True
 
-        if filter_type == "students_complete_fess":
-            selected_date = start_date or end_date  # prefer start_date if both filled
+            # فقط دانش‌آموزان مرتبط
+            students = Student.objects.filter(id__in=students_finish_feeses.values_list('student_id', flat=True))
 
-            # Start with all fee records
-            qs = Student_fess_info.objects.all()
+        elif filter_type == "improving":
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
 
-            if selected_date:
-                # Filter by selected end_date
-                qs = qs.filter(end_date=selected_date)
+            # همه رکوردهای StudentImporvment
+            improvements = StudentImporvment.objects.all()
 
-            # Only keep completed fees if needed
-            # qs = qs.filter(remain_fees=0)  # optional if you want only fully paid
+            if start_date and end_date:
+                from datetime import datetime
 
-            # Get the latest record per student
-            latest_ids = qs.values('student').annotate(latest_id=Max('id')).values_list('latest_id', flat=True)
-            students = Student_fess_info.objects.filter(id__in=latest_ids).order_by('student__first_name')
+                start_dt = datetime.strptime(start_date, "%d/%m/%Y").date()
+                end_dt = datetime.strptime(end_date, "%d/%m/%Y").date()
 
-            title = f"شاگردانی که فیس شان پوره شده - تاریخ: {selected_date}" if selected_date else "شاگردانی که فیس شان پوره شده"
+                filtered_improvements = []
+                for imp in improvements:
+                    if imp.date:
+                        imp_dt = datetime.strptime(imp.date, "%d/%m/%Y").date()
+                        if start_dt <= imp_dt <= end_dt:
+                            filtered_improvements.append(imp.id)
+
+                improvements = improvements.filter(id__in=filtered_improvements)
+                title = f"شاگردانی که در بازه {start_date} تا {end_date} به کلاس ارتقاء یافته‌اند"
+            else:
+                # اگر تاریخ نبود، همه رکوردها
+                title = "تمام شاگردانی که ارتقاء یافته‌اند"
+
             filter_active = True
+
+            # فقط دانش‌آموزان مرتبط
+            students = Student.objects.filter(id__in=improvements.values_list('student_id', flat=True))
+
 
     context = {
         'students': students,

@@ -1,0 +1,18 @@
+<div class="percentage-input mt-3" id="percentage-{{ teacher.id }}">
+    <label class="form-label small">فیصدی معاش برای این کلاس</label>
+    <div class="input-group">
+        <input type="number" 
+               class="form-control form-control-sm" 
+               name="teacher_percentage_{{ teacher.id }}"
+               min="0" 
+               max="100" 
+               step="0.1"
+               placeholder="مثال: 40"
+               hx-post="{% url 'calculate_salary_preview' teacher.id %}"
+               hx-trigger="change"
+               hx-target="#salary-preview-{{ teacher.id }}">
+        <span class="input-group-text">%</span>
+    </div>
+    <div id="salary-preview-{{ teacher.id }}"></div>
+    <small class="text-muted">فیصدی که استاد از این کلاس دریافت می‌کند</small>
+</div>

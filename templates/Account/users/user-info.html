@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<style>
+    :root {
+        --primary-color: #4e73df;
+        --primary-dark: #2e59d9;
+        --success-color: #1cc88a;
+        --danger-color: #e74a3b;
+        --warning-color: #f6c23e;
+        --info-color: #36b9cc;
+        --dark-color: #5a5c69;
+        --light-color: #f8f9fc;
+    }
+    
+    /* Main Styles */
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 0.3rem 1.5rem rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border-radius: 1rem 1rem 0 0;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(30deg);
+    }
+    
+    /* User Info Card */
+    .user-info-card {
+        background: linear-gradient(135deg, #f8f9fc 0%, #e3e6f0 100%);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e3e6f0;
+    }
+    
+    .user-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--success-color) 0%, #17a673 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 0 auto;
+        border: 5px solid white;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Info Cards */
+    .info-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+        box-shadow: 0 0.15rem 0.75rem rgba(0, 0, 0, 0.08);
+    }
+    
+    .info-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.12);
+    }
+    
+    .info-card-email { border-left-color: var(--primary-color); }
+    .info-card-mobile { border-left-color: var(--info-color); }
+    .info-card-status { border-left-color: var(--success-color); }
+    .info-card-date { border-left-color: var(--warning-color); }
+    .info-card-role { border-left-color: var(--danger-color); }
+    
+    /* Badge Styling */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .badge-active { 
+        background: linear-gradient(135deg, var(--success-color) 0%, #17a673 100%);
+        color: white;
+    }
+    
+    .badge-inactive { 
+        background: linear-gradient(135deg, #858796 0%, #6c757d 100%);
+        color: white;
+    }
+    
+    .role-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        margin: 0.2rem;
+    }
+    
+    .badge-teacher { background-color: #4e73df; color: white; }
+    .badge-staff { background-color: #1cc88a; color: white; }
+    .badge-employee { background-color: #f6c23e; color: #212529; }
+    
+    /* Button Styling */
+    .btn-action {
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-action:hover::before {
+        left: 100%;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #be2617 100%);
+        color: white;
+    }
+    
+    .btn-change-password {
+        background: linear-gradient(135deg, var(--warning-color) 0%, #dda20a 100%);
+        color: #212529;
+    }
+    
+    .btn-permission {
+        background: linear-gradient(135deg, var(--info-color) 0%, #258391 100%);
+        color: white;
+    }
+    
+    /* Icon Styling */
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 1rem;
+    }
+    
+    .icon-email { background-color: rgba(78, 115, 223, 0.1); color: var(--primary-color); }
+    .icon-mobile { background-color: rgba(54, 185, 204, 0.1); color: var(--info-color); }
+    .icon-status { background-color: rgba(28, 200, 138, 0.1); color: var(--success-color); }
+    .icon-date { background-color: rgba(246, 194, 62, 0.1); color: var(--warning-color); }
+    .icon-role { background-color: rgba(231, 74, 59, 0.1); color: var(--danger-color); }
+    
+    /* Permission Table */
+    .permission-table th {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .permission-table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+        border-color: #e3e6f0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+        
+        .btn-action {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+        
+        .profile-header {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+        title: "{{ message|escapejs }}",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    {% endfor %}
+    {% endif %}
+</script>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">داشبورد / مدیریت کاربران /</span> 
+        <span class="text-primary">جزئیات حساب کاربری</span>
+    </h4>
+
+    <!-- Profile Header -->
+    <div class="card">
+        <div class="profile-header">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="user-avatar">
+                        {{ account.name|slice:":1"|upper }}
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <h1 class="h2 mb-2">{{ account.name }}</h1>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-user-tag ml-2"></i>
+                        حساب کاربری {{ account.get_role_display }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Action Buttons -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'account:edit_accounts' account.id %}" class="btn btn-edit btn-action">
+                            <i class="fas fa-edit ml-2"></i> ویرایش اطلاعات
+                        </a>
+                        
+                        <a href="{% url 'account:change_account_password' account.id %}" class="btn btn-change-password btn-action">
+                            <i class="fas fa-key ml-2"></i> تغییر رمز عبور
+                        </a>
+                        
+                        <a href="{% url 'account:assign_permission_for_user' account.id %}" class="btn btn-permission btn-action">
+                            <i class="fas fa-user-shield ml-2"></i> مدیریت دسترسی‌ها
+                        </a>
+                        
+                        <button class="btn btn-delete btn-action" data-toggle="modal" data-target="#deleteModal">
+                            <i class="fas fa-trash ml-2"></i> حذف کاربر
+                        </button>
+                        
+                        <a href="" class="btn btn-secondary btn-action">
+                            <i class="fas fa-arrow-right ml-2"></i> بازگشت به لیست
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Information -->
+            <div class="row">
+                <!-- Basic Information Column -->
+                <div class="col-md-6">
+                    <div class="user-info-card">
+                        <h5 class="text-dark mb-4">
+                            <i class="fas fa-info-circle ml-2"></i>
+                            اطلاعات پایه
+                        </h5>
+                        
+                        <!-- Email -->
+                        <div class="info-card info-card-email">
+                            <div class="d-flex align-items-center">
+                                <div class="info-icon icon-email">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block">آدرس ایمیل</small>
+                                    <strong>{{ account.email }}</strong>
+                                </div>
+                            </div>
+                        </div>
+               
+                        <!-- Status -->
+                        <div class="info-card info-card-status">
+                            <div class="d-flex align-items-center">
+                                <div class="info-icon icon-status">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="status-badge {% if account.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                                        {% if not account.is_active %}
+                                        <a href="{% url 'account:activate_employee' account.id %}">
+                                            <i class="fas fa-check-circle ml-1"></i> فعال </a>
+                                        {% else %}
+                                        <a href="{% url 'account:diactivate_employee' account.id %}">
+                                            <i class="fas fa-times-circle ml-1"></i> غیرفعال </a>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Information Column -->
+                <div class="col-md-6">
+                    <div class="user-info-card">
+                        <h5 class="text-dark mb-4">
+                            <i class="fas fa-cog ml-2"></i>
+                            تنظیمات و اطلاعات اضافی
+                        </h5>
+                        
+                        <!-- Roles -->
+                        <div class="info-card info-card-role">
+                            <div class="d-flex align-items-center">
+                                <div class="info-icon icon-role">
+                                    <i class="fas fa-user-tag"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block">نقش‌های کاربر</small>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        {% if account.is_teacher %}
+                                        <span class="role-badge badge-teacher">
+                                            <i class="fas fa-chalkboard-teacher ml-1"></i> استاد
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if account.is_staff %}
+                                        <span class="role-badge badge-staff">
+                                            <i class="fas fa-user-tie ml-1"></i> کارمند
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if account.is_employee %}
+                                        <span class="role-badge badge-employee">
+                                            <i class="fas fa-briefcase ml-1"></i> پرسنل
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dates -->
+                        <div class="info-card info-card-date">
+                            <div class="d-flex align-items-center">
+                                <div class="info-icon icon-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block">تاریخ‌های ثبت</small>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">تاریخ ثبت</small>
+                                            <strong>{{ account.created|date:"Y/m/d H:i" }}</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">آخرین به‌روزرسانی</small>
+                                            <strong>{{ account.updated|date:"Y/m/d H:i" }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle ml-2"></i>
+                    تأیید حذف کاربر
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="بستن">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-4">
+                    <div class="user-avatar" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ account.name|slice:":1"|upper }}
+                    </div>
+                </div>
+                <h5 class="mb-3">آیا از حذف این کاربر مطمئن هستید؟</h5>
+                <div class="alert alert-danger">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-circle mt-1 ml-2"></i>
+                        <div class="text-right">
+                            <strong class="d-block mb-1">این عملیات غیرقابل بازگشت است!</strong>
+                            <p class="mb-0">تمام اطلاعات مرتبط با کاربر {{ account.name }} حذف خواهد شد.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times ml-2"></i> انصراف
+                </button>
+                <form method="post" action="{% url 'account:delete_account' account.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash ml-2"></i> حذف کاربر
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

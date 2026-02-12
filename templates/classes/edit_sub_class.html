@@ -12,98 +12,789 @@
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
                  
-                        <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'classes:edit_sub_class' pk=instance.id %}">
-                            {% csrf_token %}
-                            <div class="col-12">
-                                <h5>معلومات صنف جدید</h5>
+                    <form class="row g-3 needs-validation" novalidate method="post"
+                        action="{% url 'classes:edit_sub_class' instance.id %}">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <h5>معلومات صنف جدید</h5>
+                        </div>
+
+                        <!-- نام صنف -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">نام صنف<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.name }}
                             </div>
-                            
-                            <!-- نام صنف -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">نام صنف<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.name }}
+                        </div>
+
+                        <!-- تاریخ آغاز -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تاریخ آغاز</label>
+                            <div class="col-sm-8">
+                                {{ sub_form.start_date }}
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-4">
+                            <!-- Teacher Selection Container with Border -->
+                            <div class="teachers-border-container">
+                                <div
+                                    class="teachers-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                                    <div>
+                                        <i class="fas fa-user-tie text-primary ms-2"></i>
+                                        <span class="fw-medium">لیست اساتید</span>
+                                    </div>
+                                    <div class="selected-counter-badge" id="selected-counter">
+                                        <span class="badge bg-primary">0 انتخاب شده</span>
+                                    </div>
+                                </div>
+
+                                <!-- Teacher Selection Cards (Compact) -->
+                                <div class="compact-teachers-container">
+                                    {% for teacher in teachers %}
+                                    <div class="teacher-compact-card border-hover"
+                                        onclick="toggleTeacherSelection({{ teacher.id }})"
+                                        id="teacher-card-{{ teacher.id }}">
+                                        <div class="d-flex align-items-center justify-content-between p-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="teacher-avatar me-2">
+                                                    {% if teacher.image %}
+                                                    <img src="{{ teacher.image.url }}" alt="{{ teacher.name }}"
+                                                        class="teacher-profile-img"
+                                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                    <div class="teacher-avatar-initial" style="display: none;">
+                                                        {{ teacher.name|slice:":1" }}
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="teacher-avatar-initial">
+                                                        {{ teacher.name|slice:":1" }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-medium">{{ teacher.name }}</h6>
+                                                    <small class="text-muted d-flex align-items-center">
+                                                        <i class="fas fa-phone ms-1 fa-xs"></i>
+                                                        {{ teacher.phone|default:"-" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="teacher-selection-indicator">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Percentage Input (Hidden by default) -->
+                                        <div class="teacher-percentage-input mt-2" id="percentage-{{ teacher.id }}"
+                                            style="display: none;">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="fas fa-percent fa-xs ms-1"></i>
+                                                    فیصدی:
+                                                </span>
+                                                <input type="number" class="form-control border-start-0 border-end-0"
+                                                    name="teacher_percentage_{{ teacher.id }}" min="0" max="100"
+                                                    step="0.1" placeholder="40">
+                                                <span class="input-group-text bg-light border-start-0">%</span>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="fas fa-info-circle fa-xs ms-1"></i>
+                                                فیصدی که این استاد از این کلاس دریافت می‌کند
+                                            </small>
+                                        </div>
+
+                                        <!-- Hidden Checkbox -->
+                                        <input type="checkbox" class="d-none" id="teacher_{{ teacher.id }}"
+                                            name="selected_teachers" value="{{ teacher.id }}">
+                                    </div>
+                                    {% empty %}
+                                    <div class="empty-state p-4 text-center">
+                                        <i class="fas fa-user-slash text-muted mb-2" style="font-size: 2rem;"></i>
+                                        <p class="text-muted mb-0">هیچ استاد فعالی یافت نشد.</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="teachers-footer p-3 border-top bg-light">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle ms-1"></i>
+                                        برای انتخاب استاد روی آن کلیک کنید. فیصدی معاش باید بین 0 تا 100 باشد.
+                                    </small>
                                 </div>
                             </div>
-                            
-                            <!-- تاریخ آغاز -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">تاریخ آغاز</label>
-                                <div class="col-sm-8">
-                                    {{ form.start_date }}
-                                </div>
+                        </div>
+
+                        <!-- Rest of the form fields remain the same -->
+                        <!-- کتابها -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">کتابها<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.books }}
                             </div>
-                            
-                            <!-- اساتید -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">اساتید<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.teacher }}
-                                </div>
+                        </div>
+
+                        <!-- تایم -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تایم</label>
+                            <div class="col-sm-8">
+                                {{ sub_form.time }}
                             </div>
-                            
-                            <!-- کتابها -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">کتابها<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.books }}
-                                </div>
+                        </div>
+
+                        <!-- ضرفیت صنف -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">ضرفیت صنف<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.capacity }}
                             </div>
-                            
-                            <!-- تایم -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">تایم</label>
-                                <div class="col-sm-8">
-                                    {{ form.time }}
-                                </div>
+                        </div>
+
+                        <!-- مقدار فیس -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">مقدار فیس<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.fees }}
                             </div>
-                            
-                            <!-- ضرفیت صنف -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">ضرفیت صنف<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.capacity }}
-                                </div>
+                        </div>
+
+                        <!-- صنف -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">صنف<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.room }}
                             </div>
-                            
-                            <!-- مقدار فیس -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">مقدار فیس<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.fees }}
-                                </div>
+                        </div>
+
+                        <!-- تقسیم اوقات -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تقسیم اوقات<span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                {{ sub_form.schedule }}
                             </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <input type="hidden" name="form_type" value="class">
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">انصراف</button>
+                            <button class="btn btn-primary" type="submit">ذخیره کردن</button>
+                        </div>
+                    </form>
+
+                    <style>
+                        /* Teacher Avatar Container */
+                        .teacher-avatar {
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 50%;
+                            position: relative;
+                            overflow: hidden;
+                            border: 2px solid #fff;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+
+                        /* Profile Image */
+                        .teacher-profile-img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            transition: all 0.3s ease;
+                        }
+
+                        .teacher-compact-card:hover .teacher-profile-img {
+                            transform: scale(1.1);
+                        }
+
+                        /* Avatar Initial (fallback) */
+                        .teacher-avatar-initial {
+                            width: 100%;
+                            height: 100%;
+                            border-radius: 50%;
+                            background: linear-gradient(135deg, #333 0%, #666 100%);
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 15px;
+                            font-weight: 600;
+                        }
+
+                        .teacher-compact-card.selected .teacher-avatar-initial {
+                            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+                            box-shadow: 0 2px 6px rgba(78, 115, 223, 0.3);
+                        }
+
+                        .teacher-compact-card.selected .teacher-profile-img {
+                            border: 2px solid #4e73df;
+                            box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.3);
+                        }
+
+                        /* Loading state for images */
+                        .teacher-profile-img.loading {
+                            opacity: 0.7;
+                            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                            background-size: 200% 100%;
+                            animation: loading 1.5s infinite;
+                        }
+
+                        @keyframes loading {
+                            0% {
+                                background-position: 200% 0;
+                            }
+
+                            100% {
+                                background-position: -200% 0;
+                            }
+                        }
+
+                        /* Add hover effect for avatar */
+                        .teacher-compact-card:hover .teacher-avatar {
+                            transform: scale(1.05);
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                        }
+
+                        .teacher-compact-card.selected .teacher-avatar {
+                            transform: scale(1.05);
+                            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25);
+                        }
+
+                        /* Rest of the CSS remains the same as before */
+                        .teachers-border-container {
+                            border: 2px solid #333;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                            transition: all 0.3s ease;
+                        }
+
+                        .teachers-border-container:hover {
+                            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+                            border-color: #000;
+                        }
+
+                        .teachers-header {
+                            background: linear-gradient(135deg, #f8f9fe 0%, #ffffff 100%);
+                            border-bottom: 2px solid #333 !important;
+                        }
+
+                        .teachers-header i {
+                            font-size: 1.2rem;
+                        }
+
+                        .teachers-footer {
+                            background: linear-gradient(135deg, #f8f9fe 0%, #f1f3f9 100%);
+                            border-top: 1px solid #ddd !important;
+                        }
+
+                        .selected-counter-badge .badge {
+                            font-size: 0.8rem;
+                            padding: 5px 12px;
+                            border-radius: 20px;
+                            animation: badge-pulse 2s infinite;
+                        }
+
+                        @keyframes badge-pulse {
+                            0% {
+                                box-shadow: 0 0 0 0 rgba(78, 115, 223, 0.4);
+                            }
+
+                            70% {
+                                box-shadow: 0 0 0 6px rgba(78, 115, 223, 0);
+                            }
+
+                            100% {
+                                box-shadow: 0 0 0 0 rgba(78, 115, 223, 0);
+                            }
+                        }
+
+                        .teacher-compact-card {
+                            background: white;
+                            border: 1px solid #e3e6f0;
+                            border-left: 4px solid transparent;
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            position: relative;
+                            margin: 6px 12px;
+                        }
+
+                        .teacher-compact-card.border-hover:hover {
+                            border-color: #4e73df;
+                            border-left-color: #4e73df;
+                            background-color: #f8f9fe;
+                            transform: translateX(5px);
+                        }
+
+                        .teacher-compact-card.selected {
+                            border-color: #4e73df;
+                            border-left-color: #1cc88a;
+                            background-color: rgba(78, 115, 223, 0.05);
+                            box-shadow: 0 2px 8px rgba(78, 115, 223, 0.1);
+                        }
+
+                        .teacher-selection-indicator {
+                            color: #e3e6f0;
+                            font-size: 20px;
+                            transition: all 0.3s ease;
+                            opacity: 0;
+                            transform: scale(0.8);
+                        }
+
+                        .teacher-compact-card.selected .teacher-selection-indicator {
+                            color: #1cc88a;
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+
+                        .teacher-compact-card h6 {
+                            font-size: 14px;
+                            font-weight: 600;
+                            margin-bottom: 2px;
+                            color: #333;
+                        }
+
+                        .teacher-compact-card small {
+                            font-size: 11px;
+                        }
+
+                        .teacher-percentage-input {
+                            animation: slideDown 0.3s ease;
+                            border-top: 1px dashed #e3e6f0;
+                            padding-top: 10px;
+                            margin-top: 10px;
+                        }
+
+                        @keyframes slideDown {
+                            from {
+                                opacity: 0;
+                                transform: translateY(-10px);
+                                max-height: 0;
+                            }
+
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                                max-height: 100px;
+                            }
+                        }
+
+                        .teacher-percentage-input .input-group {
+                            border-radius: 6px;
+                            overflow: hidden;
+                            border: 1px solid #ddd;
+                        }
+
+                        .teacher-percentage-input .input-group-text {
+                            font-size: 12px;
+                            padding: 6px 10px;
+                            background: #f8f9fa;
+                            color: #333;
+                            font-weight: 500;
+                        }
+
+                        .teacher-percentage-input .form-control {
+                            font-size: 13px;
+                            padding: 6px 10px;
+                            height: 34px;
+                            border-color: #ddd;
+                        }
+
+                        .teacher-percentage-input .form-control:focus {
+                            border-color: #4e73df;
+                            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+                        }
+
+                        .compact-teachers-container {
+                            max-height: 280px;
+                            overflow-y: auto;
+                            padding: 10px;
+                        }
+
+                        .compact-teachers-container::-webkit-scrollbar {
+                            width: 8px;
+                        }
+
+                        .compact-teachers-container::-webkit-scrollbar-track {
+                            background: #f1f1f1;
+                            border-radius: 10px;
+                            margin: 5px;
+                        }
+
+                        .compact-teachers-container::-webkit-scrollbar-thumb {
+                            background: #888;
+                            border-radius: 10px;
+                            border: 2px solid #f1f1f1;
+                        }
+
+                        .compact-teachers-container::-webkit-scrollbar-thumb:hover {
+                            background: #555;
+                        }
+
+                        .empty-state {
+                            color: #6c757d;
+                        }
+
+                        .teachers-border-container:focus-within {
+                            border-color: #4e73df;
+                            box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+                        }
+                    </style>
+
+                    <script>
+                        // Function to toggle teacher selection
+                        function toggleTeacherSelection(teacherId) {
+                            const card = document.getElementById(`teacher-card-${teacherId}`);
+                            const checkbox = document.getElementById(`teacher_${teacherId}`);
+                            const percentageDiv = document.getElementById(`percentage-${teacherId}`);
                             
-                            <!-- صنف -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">صنف<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.room }}
-                                </div>
-                            </div>
+                            // Toggle selection
+                            if (card.classList.contains('selected')) {
+                                // Deselect
+                                card.classList.remove('selected');
+                                checkbox.checked = false;
+                                percentageDiv.style.display = 'none';
+                                // Clear the percentage value
+                                const percentageInput = percentageDiv.querySelector('input[type="number"]');
+                                if (percentageInput) percentageInput.value = '';
+                            } else {
+                                // Select
+                                card.classList.add('selected');
+                                checkbox.checked = true;
+                                percentageDiv.style.display = 'block';
+                                
+                                // Focus on percentage input
+                                setTimeout(() => {
+                                    const percentageInput = percentageDiv.querySelector('input[type="number"]');
+                                    if (percentageInput) {
+                                        percentageInput.focus();
+                                        percentageInput.select();
+                                    }
+                                }, 50);
+                            }
                             
-                            <!-- تقسیم اوقات -->
-                            <div class="col-md-12 d-flex align-items-center mb-3">
-                                <label class="col-sm-4 col-form-label">تقسیم اوقات<span class="text-danger">*</span></label>
-                                <div class="col-sm-8">
-                                    {{ form.schedule }}
-                                </div>
-                            </div>
+                            // Update selected counter and total percentage
+                            updateSelectedCounter();
+                            updateTotalPercentage();
+                        }
+                        
+                        // Calculate total percentage
+                        function calculateTotalPercentage() {
+                            let total = 0;
+                            const selectedTeachers = document.querySelectorAll('.teacher-compact-card.selected');
                             
-                            <!-- Submit Buttons -->
-                            <div class="col-12 d-flex justify-content-end mt-3">
-                                <input type="hidden" name="form_type" value="class">
-                                <button type="button" class="btn btn-secondary ml-2" onclick="window.history.back()">برگشت</button>
-                                <button class="btn btn-primary" type="submit">ذخیره کردن</button>
-                            </div>
-                        </form>
-                               
-    
-                        <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                        $('#datepicker3').datepicker({});
+                            selectedTeachers.forEach(card => {
+                                const teacherId = card.id.split('-')[2];
+                                const percentageInput = document.querySelector(`input[name="teacher_percentage_${teacherId}"]`);
+                                
+                                if (percentageInput && percentageInput.value.trim() !== '') {
+                                    const value = parseFloat(percentageInput.value);
+                                    if (!isNaN(value)) {
+                                        total += value;
+                                    }
+                                }
+                            });
+                            
+                            return total;
+                        }
+                        
+                        // Update total percentage display
+                        function updateTotalPercentage() {
+                            const total = calculateTotalPercentage();
+                            const totalElement = document.getElementById('total-percentage-display');
+                            
+                            if (totalElement) {
+                                totalElement.textContent = `مجموع فیصدی‌ها: ${total.toFixed(1)}%`;
+                                
+                                // Change color based on total
+                                if (total > 100) {
+                                    totalElement.className = 'total-percentage text-danger fw-bold';
+                                } else if (total === 100) {
+                                    totalElement.className = 'total-percentage text-success fw-bold';
+                                } else {
+                                    totalElement.className = 'total-percentage text-warning fw-bold';
+                                }
+                            }
+                        }
+                        
+                        // Update selected teachers counter
+                        function updateSelectedCounter() {
+                            const selectedCount = document.querySelectorAll('.teacher-compact-card.selected').length;
+                            const counterElement = document.getElementById('selected-counter');
+                            const badge = counterElement.querySelector('.badge');
+                            
+                            if (badge) {
+                                badge.textContent = `${selectedCount} انتخاب شده`;
+                                
+                                // Change badge color based on count
+                                if (selectedCount === 0) {
+                                    badge.className = 'badge bg-secondary';
+                                } else if (selectedCount <= 2) {
+                                    badge.className = 'badge bg-success';
+                                } else if (selectedCount <= 5) {
+                                    badge.className = 'badge bg-primary';
+                                } else {
+                                    badge.className = 'badge bg-warning';
+                                }
+                            }
+                        }
+                        
+                        // Initialize on page load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Add total percentage display to header
+                            const teachersHeader = document.querySelector('.teachers-header');
+                            if (teachersHeader) {
+                                const totalPercentageDiv = document.createElement('div');
+                                totalPercentageDiv.id = 'total-percentage-display';
+                                totalPercentageDiv.className = 'total-percentage text-warning fw-bold small';
+                                totalPercentageDiv.textContent = 'مجموع فیصدی‌ها: 0%';
+                                teachersHeader.appendChild(totalPercentageDiv);
+                            }
+                            
+                            // Add event listeners to percentage inputs
+                            document.addEventListener('input', function(e) {
+                                if (e.target.name && e.target.name.startsWith('teacher_percentage_')) {
+                                    // Validate single input
+                                    const value = parseFloat(e.target.value) || 0;
+                                    
+                                    if (value < 0) {
+                                        e.target.value = 0;
+                                    } else if (value > 100) {
+                                        e.target.value = 100;
+                                    }
+                                    
+                                    // Update total percentage
+                                    updateTotalPercentage();
+                                }
+                            });
+                            
+                            // Form validation - SIMPLIFIED
+                            const form = document.querySelector('form');
+                            
+                            form.addEventListener('submit', function(e) {
+                                console.log("Form submit event triggered"); // Debug
+                                
+                                // Check if at least one teacher is selected
+                                const selectedTeachers = document.querySelectorAll('.teacher-compact-card.selected');
+                                if (selectedTeachers.length === 0) {
+                                    e.preventDefault();
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'توجه',
+                                        text: 'حداقل یک استاد باید انتخاب شود',
+                                        confirmButtonText: 'متوجه شدم'
+                                    });
+                                    return false;
+                                }
+                                
+                                // Validate percentage for selected teachers
+                                let invalidTeachers = [];
+                                let totalPercentage = 0;
+                                
+                                selectedTeachers.forEach(card => {
+                                    const teacherId = card.id.split('-')[2];
+                                    const percentageInput = document.querySelector(`input[name="teacher_percentage_${teacherId}"]`);
+                                    
+                                    if (percentageInput) {
+                                        const value = percentageInput.value.trim();
+                                        
+                                        if (!value) {
+                                            invalidTeachers.push({
+                                                id: teacherId,
+                                                reason: 'empty'
+                                            });
+                                        } else {
+                                            const percentage = parseFloat(value);
+                                            if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+                                                invalidTeachers.push({
+                                                    id: teacherId,
+                                                    reason: 'invalid'
+                                                });
+                                            } else {
+                                                totalPercentage += percentage;
+                                            }
+                                        }
+                                    }
+                                });
+                                
+                                if (invalidTeachers.length > 0) {
+                                    e.preventDefault();
+                                    
+                                    // Focus on first invalid input
+                                    const firstInvalid = invalidTeachers[0];
+                                    const percentageInput = document.querySelector(`input[name="teacher_percentage_${firstInvalid.id}"]`);
+                                    if (percentageInput) {
+                                        percentageInput.focus();
+                                        percentageInput.select();
+                                    }
+                                    
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'خطا در فیصدی',
+                                        text: firstInvalid.reason === 'empty' 
+                                            ? 'لطفاً برای استادان انتخاب شده فیصدی وارد کنید'
+                                            : 'فیصدی باید بین 0 تا 100 باشد',
+                                        confirmButtonText: 'متوجه شدم'
+                                    });
+                                    return false;
+                                }
+                                
+                                // Check if total percentage exceeds 100
+                                if (totalPercentage > 100) {
+                                    e.preventDefault();
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'خطا در مجموع فیصدی',
+                                        html: `
+                                            <div class="text-right">
+                                                <p>مجموع فیصدی‌ها <strong>${totalPercentage.toFixed(1)}%</strong> است که از ۱۰۰% بیشتر است.</p>
+                                            </div>
+                                        `,
+                                        confirmButtonText: 'متوجه شدم'
+                                    });
+                                    return false;
+                                }
+                                
+                                // Optional warning if less than 100%
+                                if (totalPercentage < 100) {
+                                    const shouldContinue = confirm(`مجموع فیصدی‌ها ${totalPercentage.toFixed(1)}% است که از ۱۰۰% کمتر است. آیا می‌خواهید ادامه دهید؟`);
+                                    if (!shouldContinue) {
+                                        e.preventDefault();
+                                        return false;
+                                    }
+                                }
+                                
+                                console.log("Form validation passed, submitting..."); // Debug
+                                return true;
+                            });
+                            
+                            // Initialize datepicker
+                            if ($('#id_start_date').length) {
+                                $('#id_start_date').datepicker({
+                                    format: 'yyyy/mm/dd',
+                                    autoclose: true,
+                                    todayHighlight: true
+                                });
+                            }
+                            
+                            // Image loading handler
+                            const teacherImages = document.querySelectorAll('.teacher-profile-img');
+                            teacherImages.forEach(img => {
+                                img.addEventListener('error', function() {
+                                    this.style.display = 'none';
+                                    const initialDiv = this.nextElementSibling;
+                                    if (initialDiv) {
+                                        initialDiv.style.display = 'flex';
+                                    }
+                                });
+                            });
+                            
+                            // Debug: Add test button
+                            const debugButton = document.createElement('button');
+                            debugButton.type = 'button';
+                            debugButton.textContent = 'Test Form';
+                            debugButton.className = 'btn btn-info btn-sm';
+                            debugButton.style.position = 'fixed';
+                            debugButton.style.bottom = '10px';
+                            debugButton.style.right = '10px';
+                            debugButton.style.zIndex = '9999';
+                            debugButton.onclick = function() {
+                                console.log("Form elements:");
+                                console.log("Selected teachers:", document.querySelectorAll('.teacher-compact-card.selected').length);
+                                console.log("Total percentage:", calculateTotalPercentage());
+                                
+                                // Fill test data
+                                document.getElementById('id_name').value = 'تست کلاس';
+                                document.getElementById('id_fees').value = '1000';
+                                document.getElementById('id_capacity').value = '20';
+                                document.getElementById('id_room').value = 'اتاق ۱';
+                                document.getElementById('id_schedule').value = 'شنبه و دوشنبه ساعت ۱۰-۱۲';
+                                document.getElementById('id_time').value = '۱۰-۱۲';
+                                
+                                // Select first teacher if exists
+                                const firstTeacher = document.querySelector('.teacher-compact-card');
+                                if (firstTeacher) {
+                                    firstTeacher.click();
+                                    const percentageInput = document.querySelector('input[name^="teacher_percentage_"]');
+                                    if (percentageInput) {
+                                        percentageInput.value = '50';
+                                    }
+                                }
+                            };
+                            document.body.appendChild(debugButton);
                         });
-                        </script>
+                    </script>
+
+                    <style>
+                        /* Total Percentage Display */
+                        .total-percentage {
+                            font-size: 13px;
+                            padding: 3px 10px;
+                            border-radius: 15px;
+                            background: rgba(255, 255, 255, 0.9);
+                            margin-right: 10px;
+                            transition: all 0.3s ease;
+                        }
+                        
+                        .total-percentage.text-danger {
+                            background: rgba(220, 53, 69, 0.1);
+                            animation: shake 0.5s ease;
+                        }
+                        
+                        .total-percentage.text-success {
+                            background: rgba(40, 167, 69, 0.1);
+                        }
+                        
+                        .total-percentage.text-warning {
+                            background: rgba(255, 193, 7, 0.1);
+                        }
+                        
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                            20%, 40%, 60%, 80% { transform: translateX(5px); }
+                        }
+                        
+                        /* Percentage input validation styling */
+                        input:invalid {
+                            border-color: #dc3545 !important;
+                        }
+                        
+                        input:valid {
+                            border-color: #28a745 !important;
+                        }
+                        
+                        /* Warning for inputs that would exceed limit */
+                        .percentage-warning {
+                            border-color: #ffc107 !important;
+                            background-color: rgba(255, 193, 7, 0.05) !important;
+                        }
+                        
+                        /* Percentage limit indicator */
+                        .percentage-limit {
+                            font-size: 11px;
+                            padding: 2px 6px;
+                            border-radius: 10px;
+                            margin-top: 3px;
+                            display: inline-block;
+                        }
+                        
+                        .limit-danger {
+                            background: rgba(220, 53, 69, 0.1);
+                            color: #dc3545;
+                        }
+                        
+                        .limit-warning {
+                            background: rgba(255, 193, 7, 0.1);
+                            color: #ffc107;
+                        }
+                        
+                        .limit-success {
+                            background: rgba(40, 167, 69, 0.1);
+                            color: #28a745;
+                        }
+                    </style>
+
                         
                         <!-- ====== / Edit Station Form ====== -->
                       </div>

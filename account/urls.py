@@ -42,4 +42,5 @@ urlpatterns = [
     path('edit_accounts/<int:id>/', views.edit_accounts, name='edit_accounts'), 
     path('change_account_password/<int:id>/', views.change_account_password, name='change_account_password'), 
     path('assign_permission_for_user/<int:id>/', views.assign_permission_for_user, name='assign_permission_for_user'), 
+    path('account_more_info/<int:id>/', views.account_more_info, name='account_more_info'), 
 ]

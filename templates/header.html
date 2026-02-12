@@ -5,159 +5,261 @@
 
 
 <div class="app-admin-wrap layout-sidebar-vertical sidebar-full">
-<div class="sidebar-panel bg-white" style="font-family: 'Vazirmatn', sans-serif;">
+    <div class="sidebar-panel bg-white" style="font-family: 'Vazirmatn', sans-serif;">
 
 
-<a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
-  <img class="system-logo" src="{% if system_logo %}{{ system_logo }}{% else %}{% static 'icon/system-1-logo-svg-vector.svg' %}{% endif %}" alt="System Logo" />
-</a>
+        <a href="/" class="gull-brand pr-3 text-center mt-4 mb-2 d-flex justify-content-center align-items-center">
+            <img class="system-logo"
+                src="{% if system_logo %}{{ system_logo }}{% else %}{% static 'icon/system-1-logo-svg-vector.svg' %}{% endif %}"
+                alt="System Logo" />
+        </a>
 
-<style>.system-logo {
-  width: 80px; /* slightly larger */
-  height: auto;
-  border-radius: 10px; /* smooth corner cut */
-  transition: transform 0.3s ease;
-}
+        <style>
+            .system-logo {
+                width: 80px;
+                /* slightly larger */
+                height: auto;
+                border-radius: 10px;
+                /* smooth corner cut */
+                transition: transform 0.3s ease;
+            }
 
-.system-logo:hover {
-  transform: scale(1.05); /* small hover effect */
-}
-</style>
+            .system-logo:hover {
+                transform: scale(1.05);
+                /* small hover effect */
+            }
+        </style>
 
-  <hr>
-  <!--  user -->
-  <div class="scroll-nav ps ps--active-y" data-perfect-scrollbar="data-perfect-scrollbar" data-suppress-scroll-x="true">
-      <div class="side-nav">
-          <div class="main-menu">
-              <ul class="metismenu" id="menu">
-                
-                <li class="Ul_li--hover">
-                    <a href="/" class="d-flex align-items-center">
-                        <img src="{% static 'icon/line-md--home-twotone.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted" style="font-family: 'Vazirmatn', sans-serif;">داشبورد</span>
-                    </a>
-                </li>
+        <hr>
+        <!--  user -->
+        <div class="scroll-nav ps ps--active-y" data-perfect-scrollbar="data-perfect-scrollbar"
+            data-suppress-scroll-x="true">
+            <div class="side-nav">
+                <div class="main-menu">
+                    <ul class="metismenu" id="menu">
 
-                <li class="Ul_li--hover">
-                    <a href="#" class="has-arrow">
-                        <img src="{% static 'icon/hugeicons--teacher.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">شاگردان و استادان</span>
-                    </a>
-                    <ul class="mm-collapse">
-                        <li class="item-name">
-                            <a href="{% url 'students:students_registration' %}" class="d-flex align-items-center">
-                                <img src="{% static 'icon/hugeicons--student.svg' %}" alt="" style="margin-left: 8px;">
-                                <span class="item-name text-15 text-muted">ثبت نام شاگردان</span>
-                            </a>
-                        </li>
-                        <li class="item-name">
-                            <a href="{% url 'teachers:teacher_registration' %}" class="d-flex align-items-center">
-                                <img src="{% static 'icon/la--chalkboard-teacher.svg' %}" alt="" style="margin-left: 8px;">
-                                <span class="item-name text-15 text-muted">ثبت نام استادان</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                    <li class="Ul_li--hover">
+                        <a href="/" class="d-flex align-items-center">
+                            <img src="{% static 'icon/line-md--home-twotone.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted" style="font-family: 'Vazirmatn', sans-serif;">داشبورد</span>
+                        </a>
+                    </li>
 
-                <li class="Ul_li--hover">
-                    <a href="#" class="has-arrow">
-                        <img src="{% static 'icon/temaki--shopping-mall.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">کتابها و تامین ..</span>
-                    </a>
-                    <ul class="mm-collapse">
-                         <li class="Ul_li--hover">
-                            <a href="{% url 'library:library_view' %}" class="d-flex align-items-center">
-                                <img src="{% static 'icon/icon-park-twotone--notebook-and-pen.svg' %}" alt="" style="margin-left: 8px;">
-                                <span class="item-name text-15 text-muted"> کتابها</span>
-                            </a>
-                        </li>
-                        <li class="item-name">
-                            <a href="{% url 'home:supplier' %}" class="d-flex align-items-center">
-                                <img src="{% static 'icon/cib--shopify.svg' %}" alt="" style="margin-left: 8px;">
-                                <span class="item-name text-15 text-muted">تامین کننده گان</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-              
-                <li class="Ul_li--hover">
-                    <a href="{% url 'classes:main_classes' %}" class="d-flex align-items-center">
-                        <img src="{% static 'icon/streamline-plump--class-lesson-solid.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">صنوف</span>
-                    </a>
-                </li>
-           
-                <li class="Ul_li--hover">
-                    <a href="{% url 'management:Total_income' %}" class="d-flex align-items-center">
-                        <img src="{% static 'icon/healthicons--low-income-level.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">عواید و مصارف</span>
-                    </a>
-                </li>
-                <li class="Ul_li--hover">
-                    <a href="{% url 'reports:standard' %}" class="d-flex align-items-center">
-                        <img src="{% static 'icon/streamline-plump--file-report.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">راپورها</span>
-                    </a>
-                </li>
-                  <li class="Ul_li--hover">
-                    <a href="{% url 'account:accounts' %}" class="d-flex align-items-center">
-                        <img src="{% static 'icon/material-symbols--account-box-outline.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">اکونت ها</span>
-                    </a>
-                </li>
-                <li class="Ul_li--hover">
-                    <a href="{% url 'settings:settings' %}" class="d-flex align-items-center">
-                       <img src="{% static 'icon/weui--setting-outlined.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">تنظیمات</span>
-                    </a>
-                </li>
-                <li class="Ul_li--hover">
-                    <a href="{% url 'home:colculator' %}" class="d-flex align-items-center">
-                        <img src="{% static 'icon/mdi--calculator.svg' %}" alt="" style="margin-left: 8px;">
-                        <span class="item-name text-15 text-muted">ماشین حساب</span>
-                    </a>
-                </li>
-       
-              </ul>
+                    <li class="Ul_li--hover">
+                        <a href="#" class="has-arrow">
+                            <img src="{% static 'icon/hugeicons--teacher.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">شاگردان و استادان</span>
+                        </a>
+                        <ul class="mm-collapse">
+                            <li class="item-name">
+                                <a href="{% url 'students:students_registration' %}" class="d-flex align-items-center">
+                                    <img src="{% static 'icon/hugeicons--student.svg' %}" alt="" style="margin-left: 8px;">
+                                    <span class="item-name text-15 text-muted">ثبت نام شاگردان</span>
+                                </a>
+                            </li>
+                            <li class="item-name">
+                                <a href="{% url 'teachers:teacher_registration' %}" class="d-flex align-items-center">
+                                    <img src="{% static 'icon/la--chalkboard-teacher.svg' %}" alt="" style="margin-left: 8px;">
+                                    <span class="item-name text-15 text-muted">ثبت نام استادان</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="#" class="has-arrow">
+                            <img src="{% static 'icon/temaki--shopping-mall.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">کتابها و تامین ..</span>
+                        </a>
+                        <ul class="mm-collapse">
+                            <li class="Ul_li--hover">
+                                <a href="{% url 'library:library_view' %}" class="d-flex align-items-center">
+                                    <img src="{% static 'icon/icon-park-twotone--notebook-and-pen.svg' %}" alt="" style="margin-left: 8px;">
+                                    <span class="item-name text-15 text-muted"> کتابها</span>
+                                </a>
+                            </li>
+                            <li class="item-name">
+                                <a href="{% url 'home:supplier' %}" class="d-flex align-items-center">
+                                    <img src="{% static 'icon/cib--shopify.svg' %}" alt="" style="margin-left: 8px;">
+                                    <span class="item-name text-15 text-muted">تامین کننده گان</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="{% url 'classes:main_classes' %}" class="d-flex align-items-center">
+                            <img src="{% static 'icon/streamline-plump--class-lesson-solid.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">صنوف</span>
+                        </a>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="{% url 'management:Total_income' %}" class="d-flex align-items-center">
+                            <img src="{% static 'icon/healthicons--low-income-level.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">عواید و مصارف</span>
+                        </a>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="{% url 'reports:standard' %}" class="d-flex align-items-center">
+                            <img src="{% static 'icon/streamline-plump--file-report.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">راپورها</span>
+                        </a>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="{% url 'settings:settings' %}" class="d-flex align-items-center">
+                            <img src="{% static 'icon/weui--setting-outlined.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">تنظیمات</span>
+                        </a>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="{% url 'home:history' %}" class="d-flex align-items-center">
+                            <img src="{% static 'icon/material-symbols--history.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">تاریخچه</span>
+                        </a>
+                    </li>
+                </ul>
 
-              <div class="ml-auto">
-                <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                    <div class="card-body text-center">
-                        <div class="content">
-                            <p class="text-muted mt-2 mb-0">فعال :</p>
-                            <p class="text-primary text-18 line-height-1 mb-2">{{user.name}}</p>
+                    <div class="ml-auto">
+                        <div class="card user-profile-card border-0 shadow-sm mb-4">
+                            <div class="card-body text-center p-3">
+                                <!-- Combined Avatar with Green Dot -->
+                                <div class="position-relative d-inline-block mb-3">
+                                    <div class="user-avatar-with-dot">
+                                        {{ user.name|first|default:"U" }}
+                                    </div>
+                                    <span class="status-dot-online"></span>
+                                </div>
+
+                                <!-- User Name at Bottom -->
+                                <div class="user-name-bottom mb-2">
+                                    <h6 class="text-primary mb-0 font-weight-bold">{{ user.name }}</h6>
+                                </div>
+
+                                <!-- Logout Button -->
+                                <form method="post" action="{% url 'account:logout' %}" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-logout btn-sm w-100">
+                                        <i class="fas fa-sign-out-alt ms-2"></i>
+                                        خروج
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        <form method="post" action="{% url 'account:logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-icon m-1">خارج شدن</button>
-                        </form>
                     </div>
+
+                    <style>
+                        .user-profile-card {
+                            background: linear-gradient(135deg, #f8f9fe 0%, #ffffff 100%);
+                            border-radius: 12px;
+                            border: 1px solid rgba(78, 115, 223, 0.15);
+                            transition: all 0.3s ease;
+                        }
+
+                        .user-profile-card:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                            border-color: rgba(78, 115, 223, 0.3);
+                        }
+
+                        .user-avatar-with-dot {
+                            width: 60px;
+                            height: 60px;
+                            border-radius: 50%;
+                            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 1.5rem;
+                            font-weight: 600;
+                            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25);
+                            transition: all 0.3s ease;
+                        }
+
+                        .user-profile-card:hover .user-avatar-with-dot {
+                            transform: scale(1.05);
+                            box-shadow: 0 6px 18px rgba(78, 115, 223, 0.35);
+                        }
+
+                        .status-dot-online {
+                            position: absolute;
+                            bottom: 5px;
+                            left: 5px;
+                            width: 14px;
+                            height: 14px;
+                            border-radius: 50%;
+                            background: linear-gradient(135deg, #1cc88a 0%, #179b77 100%);
+                            border: 2px solid white;
+                            box-shadow: 0 2px 4px rgba(28, 200, 138, 0.3);
+                            animation: pulse-online 2s infinite;
+                        }
+
+                        @keyframes pulse-online {
+                            0% {
+                                transform: scale(1);
+                                box-shadow: 0 0 0 0 rgba(28, 200, 138, 0.7);
+                            }
+
+                            70% {
+                                transform: scale(1.1);
+                                box-shadow: 0 0 0 8px rgba(28, 200, 138, 0);
+                            }
+
+                            100% {
+                                transform: scale(1);
+                                box-shadow: 0 0 0 0 rgba(28, 200, 138, 0);
+                            }
+                        }
+
+                        .user-name-bottom {
+                            padding-top: 10px;
+                            border-top: 1px solid rgba(0, 0, 0, 0.08);
+                        }
+
+                        .btn-logout {
+                            background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            padding: 8px 16px;
+                            font-size: 13px;
+                            font-weight: 500;
+                            transition: all 0.3s ease;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+
+                        .btn-logout:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(231, 74, 59, 0.4);
+                            color: white;
+                        }
+
+                        .btn-logout:active {
+                            transform: translateY(0);
+                        }
+                    </style>
                 </div>
-
-         
+            </div>
+            <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
+                <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+            </div>
+            <div class="ps__rail-y" style="top: 0px; height: 404px; right: 0px;">
+                <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 325px;"></div>
+            </div>
+            <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
+                <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+            </div>
+            <div class="ps__rail-y" style="top: 0px; height: 404px; right: 0px;">
+                <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 325px;"></div>
+            </div>
         </div>
-          </div>
-      </div>
-      <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
-          <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
-      </div>
-      <div class="ps__rail-y" style="top: 0px; height: 404px; right: 0px;">
-          <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 325px;"></div>
-      </div>
-      <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
-          <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
-      </div>
-      <div class="ps__rail-y" style="top: 0px; height: 404px; right: 0px;">
-          <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 325px;"></div>
-      </div>
-  </div>
-  <!--  side-nav-close -->
-</div>
+        <!--  side-nav-close -->
+    </div>
 
-<div class="switch-overlay"></div>
-<div class="main-content-wrap mobile-menu-content bg-off-white m-0">
-   
+    <div class="switch-overlay"></div>
+    <div class="main-content-wrap mobile-menu-content bg-off-white m-0">
 
 
 
-{% endblock%}
+
+        {% endblock%}

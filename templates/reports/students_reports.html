@@ -6,350 +6,1106 @@
 <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
 <script src="{% static 'js/sweet.js' %}"></script>
 
-    <script>
-        {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{{ message|escapejs }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            {% endfor %}
-        {% endif %}
-    </script>
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+        {% endfor %}
+    {% endif %}
+</script>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
-    <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش گزارشات شاگردان 
-    </h4>
-
-
-    <div class="row">
-        <div class="col-lg-12 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center">  
-                    <div class="card-title mb-3">
-                        <button id="pwa-install-btn" class="btn btn-primary" data-toggle="modal" data-target="#filterModal">
-                            فلتر
-                        </button>
+    
+    <!-- Modern Glassmorphism Filter Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-header rounded-4 p-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon-wrapper me-3">
+                                <i class="fas fa-chart-line fa-3x text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-white fw-bold mb-1">گزارشات دانش‌آموزان</h2>
+                                <p class="text-white-50 mb-0">
+                                    <i class="fas fa-database me-1"></i>
+                                    مدیریت و تحلیل اطلاعات دانش‌آموزان
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    {% if filter_active == True %}
-                    <div class="card-title mb-3">
-                        <a href="{% url 'reports:students_reports' %}" id="pwa-install-btn" class="btn btn-danger">
-                            حذف فلتر
-                        </a>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Typing text -->
-                    <div class="typing-text">
-                        <span class="badge badge-pill badge-warning fs-4">  {{title}}</span>
-                       
+                    <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+                        <div class="d-flex justify-content-lg-end gap-3">
+                            <span class="stats-badge">
+                                <i class="fas fa-users me-2"></i>
+                                {{ students|length }} دانش‌آموز
+                            </span>
+                            <span class="stats-badge">
+                                <i class="fas fa-filter me-2"></i>
+                                {% if filter_active %}
+                                    {{ title }}
+                                {% else %}
+                                    همه
+                                {% endif %}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- CSS -->
-    <style>
-    .typing-text {
-        font-family: 'XW_Zar_Bd_0', sans-serif;
-        font-size: 16px;
-        color: #000000;
-        border-right: 2px solid #fff;
-        white-space: nowrap;
-        overflow: hidden;
-        width: 0;
-        animation: typing 3s steps(40, end) forwards, blink 0.75s step-end infinite;
-        margin: 10px auto 0;
-    }
-    
-    /* Typing animation */
-    @keyframes typing {
-        from { width: 0 }
-        to { width: 100% }
-    }
-    
-    /* Blinking cursor */
-    @keyframes blink {
-        0%, 100% { border-color: transparent }
-        50% { border-color: #fff }
-    }
-    </style>
-    
 
-
-    <div class="card">
-        <div class="card-body">
-
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-    
-                <div class="table-responsive">
-    <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-        <thead class="thead-dark">
-            <tr>
-                <th>#</th>
-                <th>نام و تخلص</th>
-                <th>نام پدر</th>
-
-                {% if filter_type == "students_complete_fess" %}
-                    <th>تاریخ پرداخت فیس</th>
-                    <th>تاریخ ختم فیس</th>
-                {% else %}
-                    <th>تاریخ ثبت نام</th>
-                    <th>شماره موبایل</th>
-                {% endif %}
-
-                <th>جنسیت</th>
-
-                {% if filter_type == "students_withoutclass" %}
-                    <th>تاریخ برای هشدار</th>
-                {% endif %}
-
-                {% if filter_type == "loan_students" %}
-                    <th>مقدار باقی مانده</th>
-                {% endif %}
-            </tr>
-        </thead>
-
-        <tbody id="table-body">
-            {% for i in students %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td><a href="{% url 'students:student_detail' i.id %}">
-                      {% if filter_type == "students_complete_fess" %}
-                    {{ i.student.first_name }} {{ i.student.last_name }}</a></td>
-                <td>{{ i.student.father_name }}</td>
-                {% else %}
-                 {{ i.first_name }} {{ i.last_name }}</a></td>
-                <td>{{ i.father_name }}</td>
-                {% endif %}
-
-                {% if filter_type == "students_complete_fess" %}
-                    <td>{{ i.date }}</td>
-                    <td>{{ i.end_date }}</td>
-                {% else %}
-                    <td>{{ i.date_of_registration }}</td>
-                    <td>{{ i.phone }}</td>
-                {% endif %}
-
-                <td>
-                    {% if i.student.gender == 'Male' %}مرد{% else %}زن{% endif %}
-                </td>
-
-                {% if filter_type == "students_withoutclass" %}
-                    <td>{{ i.date_for_notification }}</td>
-                {% endif %}
-
-                {% if filter_type == "loan_students" %}
-                    <td>
-                        {% with i.student_remains.first.amount as remain %}
-                            {{ remain }}
-                        {% endwith %}
-                    </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="row mb-4">
+    <div class="col-12">
+        <!-- Add form tag here -->
+        <form method="GET" action="{% url 'reports:students_reports' %}" id="filter_form">
+            <div class="quick-filter-card rounded-4 p-4">
+                <div class="row g-3 align-items-end">
+                    <!-- Date From -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label mb-2">
+                            <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                            از تاریخ
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-calendar text-primary"></i>
+                            </span>
+                            <input type="text" class="form-control datepicker border-start-0" 
+                                   id="date_from" placeholder="۱۴۰۳/۰۱/۰۱" 
+                                   name="start_date"
+                                   value="{{ form.start_date.value|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <!-- Date To -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label mb-2">
+                            <i class="fas fa-calendar-check me-2 text-success"></i>
+                            تا تاریخ
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-calendar-check text-success"></i>
+                            </span>
+                            <input type="text" class="form-control datepicker border-start-0" 
+                                   id="date_to" placeholder="۱۴۰۳/۱۲/۲۹"
+                                   name="end_date"
+                                   value="{{ form.end_date.value|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Type Dropdown -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label mb-2">
+                            <i class="fas fa-filter me-2 text-warning"></i>
+                            نوع گزارش
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-list-ul text-warning"></i>
+                            </span>
+                            <select class="form-select border-start-0" id="filter_type_select" name="filter_type">
+                                <option value="deactive_students" {% if filter_type == 'deactive_students' %}selected{% endif %}>
+                                    ❌ دانش‌آموزان غیرفعال
+                                </option>
+                                <option value="loan_students" {% if filter_type == 'loan_students' %}selected{% endif %}>
+                                    💰 دانش‌آموزان قرضدار
+                                </option>
+                                <option value="finish_fees" {% if filter_type == 'finish_fees' %}selected{% endif %}>
+                                    💰 دانش‌آموزان که فیس شان پوره شده
+                                </option>
+                                <option value="improving" {% if filter_type == 'improving' %}selected{% endif %}>
+                                    📚 دانش‌آموزان که ارتقاع کردند
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        {% if filter_active %}
+                            <a href="{% url 'reports:students_reports' %}" class="btn btn-gradient-primary w-100 py-3">
+                                <i class="fas fa-times-circle me-2"></i>
+                                حذف فیلتر
+                                <i class="fas fa-arrow-left me-2"></i>
+                            </a>
+                        {% else %}
+                            <button type="submit" class="btn btn-gradient-primary w-100 py-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                اعمال فیلتر
+                                <i class="fas fa-arrow-left me-2"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Simple Status Badge -->
+                    <div id="filter_status_badge" class="mt-2 col-12">
+                        <!-- Status will be shown here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Active Filters Display -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="active-filters d-flex flex-wrap gap-2">
+                            {% if filter_active %}
+                            <span class="active-filter-badge">
+                                <i class="fas fa-filter me-1"></i>
+                                {{ title }}
+                                <a href="{% url 'reports:students_reports' %}" class="remove-filter ms-2">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            {% if form.start_date.value %}
+                            <span class="active-filter-badge">
+                                <i class="fas fa-calendar me-1"></i>
+                                از: {{ form.start_date.value }}
+                            </span>
+                            {% endif %}
+                            {% if form.end_date.value %}
+                            <span class="active-filter-badge">
+                                <i class="fas fa-calendar-check me-1"></i>
+                                تا: {{ form.end_date.value }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form> <!-- Close form tag -->
+    </div>
 </div>
 
-                </div>
- 
-        </div>
-    </div>
-    
-
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow rounded-4">
-    
-                <!-- Modal Header -->
-                <div class="modal-header bg-gradient-primary text-white border-0">
-                    <h5 class="modal-title" id="filterModalLabel"><i class="bi bi-funnel me-2"></i>فیلتر وظایف</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
-                </div>
-    
-                <!-- Modal Body -->
-                <div class="modal-body p-5">
-                  <form method="get" 
-      action="{% url 'reports:students_reports' %}" 
-      class="needs-validation tablelist-form" 
-      id="studentReportForm" 
-      novalidate="novalidate">
-
-  <div class="row g-3 align-items-center">
-    <div class="col-md-6">
-      <label class="form-label fw-semibold">تاریخ آغاز</label>
-      <div class="input-group">
-        <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-        {{ form.start_date }}
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label fw-semibold">تاریخ پایان</label>
-      <div class="input-group">
-        <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-        {{ form.end_date }}
-      </div>
-    </div>
-  </div>
-
-  <!-- Dropdown -->
-  <div class="form-group mt-3">
-    <label for="filterType" class="fw-semibold">نوع فلتر</label>
-    <select class="form-control" id="filterType" name="filter_type" required>
-      <option value="active_students">شاگردان فعال</option>
-      <option value="deactive_students">شاگردان غیر فعال</option>
-      <option value="loan_students">شاگردان قرضدار</option>
-      <option value="students_withoutclass">شاگردان بدون صنف</option>
-      <option value="students_complete_fess">شاگردان که فیس شان پوره شده</option>
-    </select>
-  </div>
-
-  <!-- Bootstrap Alert -->
-  <div class="alert alert-warning alert-dismissible fade d-none mt-3" id="feesAlert" role="alert">
-    <strong>توجه!</strong> برای دیدن شاگردانی که فیس شان پوره شده، لطفاً تاریخ آغاز یا تاریخ پایان را انتخاب کنید.
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-  <div class="d-flex justify-content-end mt-4 gap-2">
-    <button type="submit" class="btn btn-success btn-lg fw-bold">
-      <i class="bi bi-funnel-fill me-2"></i>اعمال فیلتر
-    </button>
-    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
-      <i class="bi bi-x-circle me-2"></i>لغو
-    </button>
-  </div>
-</form>
-
-<!-- JS -->
+<!-- Add this JavaScript to handle disabled fields before submit -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const filterType = document.getElementById('filterType');
-  const alertBox = document.getElementById('feesAlert');
-
-  // Listen to dropdown changes
-  filterType.addEventListener('change', function () {
-    const startDate = document.querySelector('[name="start_date"]').value.trim();
-    const endDate = document.querySelector('[name="end_date"]').value.trim();
-
-    // Hide first
-    alertBox.classList.add('d-none');
-
-    // Show if condition matches
-    if (this.value === 'students_complete_fess' && (!startDate || !endDate)) {
-      alertBox.classList.remove('d-none');
-      // Use Bootstrap's fade-in animation
-      setTimeout(() => alertBox.classList.add('show'), 10);
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('filter_type_select');
+    const dateFrom = document.getElementById('date_from');
+    const dateTo = document.getElementById('date_to');
+    const dateFromContainer = dateFrom.closest('.col-lg-3');
+    const dateToContainer = dateTo.closest('.col-lg-3');
+    const statusBadgeContainer = document.getElementById('filter_status_badge');
+    const filterForm = document.getElementById('filter_form');
+    
+    // Simple filter configurations
+    const filterConfig = {
+        deactive_students: {
+            status: 'اختیاری',
+            statusClass: 'status-optional',
+            icon: 'fa-calendar-check',
+            dateRequired: 'optional',
+            hint: 'اختیاری - بدون تاریخ: همه دانش‌آموزان غیرفعال'
+        },
+        loan_students: {
+            status: 'نیاز نیست',
+            statusClass: 'status-not-required',
+            icon: 'fa-ban',
+            dateRequired: 'not_required',
+            hint: 'تاریخ نیاز نیست - همه دانش‌آموزان قرضدار'
+        },
+        finish_fees: {
+            status: 'الزامی',
+            statusClass: 'status-required',
+            icon: 'fa-exclamation-circle',
+            dateRequired: 'required',
+            hint: 'الزامی - تاریخ اتمام ثبت‌نام'
+        },
+        improving: {
+            status: 'الزامی',
+            statusClass: 'status-required',
+            icon: 'fa-exclamation-circle',
+            dateRequired: 'required',
+            hint: 'الزامی - تاریخ ارتقاع'
+        }
+    };
+    
+    function updateUI(selectedValue) {
+        const config = filterConfig[selectedValue];
+        if (!config) return;
+        
+        // Update status badge
+        statusBadgeContainer.innerHTML = `
+            <div class="status-badge ${config.statusClass}">
+                <i class="fas ${config.icon}"></i>
+                <span class="fw-bold">${config.status}</span>
+                <span class="filter-hint me-2">${config.hint}</span>
+            </div>
+        `;
+        
+        // Update date fields
+        if (config.dateRequired === 'required') {
+            dateFromContainer.classList.add('field-required');
+            dateToContainer.classList.add('field-required');
+            dateFromContainer.classList.remove('field-optional', 'field-disabled');
+            dateToContainer.classList.remove('field-optional', 'field-disabled');
+            dateFrom.disabled = false;
+            dateTo.disabled = false;
+            dateFrom.required = true;
+            dateTo.required = true;
+            
+        } else if (config.dateRequired === 'optional') {
+            dateFromContainer.classList.add('field-optional');
+            dateToContainer.classList.add('field-optional');
+            dateFromContainer.classList.remove('field-required', 'field-disabled');
+            dateToContainer.classList.remove('field-required', 'field-disabled');
+            dateFrom.disabled = false;
+            dateTo.disabled = false;
+            dateFrom.required = false;
+            dateTo.required = false;
+            
+        } else if (config.dateRequired === 'not_required') {
+            dateFromContainer.classList.add('field-disabled');
+            dateToContainer.classList.add('field-disabled');
+            dateFromContainer.classList.remove('field-required', 'field-optional');
+            dateToContainer.classList.remove('field-required', 'field-optional');
+            dateFrom.disabled = true;
+            dateTo.disabled = true;
+            dateFrom.required = false;
+            dateTo.required = false;
+            dateFrom.value = '';
+            dateTo.value = '';
+        }
     }
-  });
-
-  // Handle close button properly
-  alertBox.addEventListener('closed.bs.alert', function () {
-    alertBox.classList.add('d-none');
-  });
+    
+    // Initialize
+    updateUI(filterSelect.value);
+    
+    // On change
+    filterSelect.addEventListener('change', function() {
+        updateUI(this.value);
+    });
+    
+    // Enable disabled fields before form submit so their values are sent
+    if (filterForm) {
+        filterForm.addEventListener('submit', function() {
+            // Temporarily enable disabled fields so they are included in form submission
+            dateFrom.disabled = false;
+            dateTo.disabled = false;
+        });
+    }
 });
 </script>
 
+<style>
+    /* Simple Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        width: 100%;
+    }
+    
+    .status-required {
+        background-color: #ffebee;
+        color: #c62828;
+        border-right: 3px solid #c62828;
+    }
+    
+    .status-optional {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-right: 3px solid #2e7d32;
+    }
+    
+    .status-not-required {
+        background-color: #fff3e0;
+        color: #ef6c00;
+        border-right: 3px solid #ef6c00;
+    }
+    
+    .status-badge i {
+        margin-left: 8px;
+        font-size: 14px;
+    }
+    
+    /* Simple Field Status */
+    .field-required .input-group {
+        border-right: 3px solid #c62828;
+    }
+    
+    .field-optional .input-group {
+        border-right: 3px solid #2e7d32;
+    }
+    
+    .field-disabled {
+        opacity: 0.7;
+    }
+    
+    .field-disabled input {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+    }
+    
+    /* Simple Hint Text */
+    .filter-hint {
+        font-size: 11px;
+        color: #757575;
+        margin-top: 4px;
+        padding-right: 8px;
+    }
+    
+    /* Active filter badge */
+    .active-filter-badge {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .remove-filter {
+        color: #0d47a1;
+        text-decoration: none;
+    }
+    
+    .remove-filter:hover {
+        color: #c62828;
+    }
+</style>
+    
+    <!-- Search and Advanced Filter Row -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="search-wrapper">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 rounded-start-0">
+                        <i class="fas fa-search text-primary"></i>
+                    </span>
+                    <input type="text" class="form-control form-control-lg border-start-0 border-end-0" 
+                           id="studentSearch" placeholder="جستجوی دانش‌آموز... (نام، نام پدر، شماره تماس)">
+                    <span class="input-group-text bg-white border-start-0 rounded-end-0">
+                        <i class="fas fa-sliders-h text-muted" data-bs-toggle="modal" data-bs-target="#filterModal" style="cursor: pointer;"></i>
+                    </span>
                 </div>
+                <div id="searchStats" class="search-stats mt-2"></div>
             </div>
         </div>
     </div>
 
-    
+    <!-- Students Cards Grid -->
+    <div class="row g-4" id="studentGrid">
+        {% for student in students %}
+        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 student-item" 
+             data-name="{% if filter_type == 'students_complete_fess' %}{{ student.student.first_name }} {{ student.student.last_name }}{% else %}{{ student.first_name }} {{ student.last_name }}{% endif %}"
+             data-father="{% if filter_type == 'students_complete_fess' %}{{ student.student.father_name }}{% else %}{{ student.father_name }}{% endif %}"
+             data-phone="{% if filter_type == 'students_complete_fess' %}{{ student.student.phone }}{% else %}{{ student.phone }}{% endif %}"
+             data-date="{% if filter_type == 'students_complete_fess' %}{{ student.date|date:'Ymd' }}{% else %}{{ student.date_of_registration|date:'Ymd' }}{% endif %}">
+            <div class="card student-card h-100 border-0 shadow-hover rounded-4">
+                <div class="card-body p-4">
+                    <!-- Badge for filter type -->
+                    <div class="position-absolute top-0 end-0 mt-3 me-3">
+                        {% if filter_type == "active_students" %}
+                        <span class="badge bg-success rounded-pill px-3 py-2">
+                            <i class="fas fa-check-circle me-1"></i> فعال
+                        </span>
+                        {% elif filter_type == "deactive_students" %}
+                        <span class="badge bg-secondary rounded-pill px-3 py-2">
+                            <i class="fas fa-times-circle me-1"></i> غیرفعال
+                        </span>
+                        {% elif filter_type == "loan_students" %}
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                            <i class="fas fa-money-bill-wave me-1"></i> قرضدار
+                        </span>
+                        {% elif filter_type == "students_withoutclass" %}
+                        <span class="badge bg-warning rounded-pill px-3 py-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i> بدون صنف
+                        </span>
+                        {% elif filter_type == "finish_fees" %}
+                        <span class="badge bg-info rounded-pill px-3 py-2">
+                            <i class="fas fa-check-double me-1"></i> فیس کامل
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Student Image / Avatar -->
+                    <div class="text-center mb-3">
+                        {% if filter_type == "finish_fees" %}
+                            <div class="avatar-xxl mx-auto mb-3 position-relative">
+                                {% if student.student.image %}
+                                <img src="{{ student.student.image.url }}" alt="{{ student.student.first_name }}" 
+                                     class="rounded-circle border border-4 border-white shadow-sm" 
+                                     style="width: 110px; height: 110px; object-fit: cover;">
+                                {% else %}
+                                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                     style="width: 110px; height: 110px; background: linear-gradient(145deg, #667eea, #764ba2);">
+                                    <span class="text-white fw-bold" style="font-size: 2.8rem;">
+                                        {{ student.first_name|slice:":1"|upper }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <h5 class="student-name fw-bold mb-1">
+                                <a href="{% url 'students:student_detail' student.id %}" class="text-decoration-none text-dark">
+                                    {{ student.student.first_name }} {{ student.student.last_name|default:'' }}
+                                </a>
+                            </h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-user me-1"></i> {{ student.student.father_name|default:'نام پدر ثبت نشده' }}
+                            </p>
+                        {% else %}
+                            <div class="avatar-xxl mx-auto mb-3 position-relative">
+                                {% if student.image %}
+                                <img src="{{ student.image.url }}" alt="{{ student.first_name }}" 
+                                     class="rounded-circle border border-4 border-white shadow-sm" 
+                                     style="width: 110px; height: 110px; object-fit: cover;">
+                                {% else %}
+                                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                     style="width: 110px; height: 110px; background: linear-gradient(145deg, #667eea, #764ba2);">
+                                    <span class="text-white fw-bold" style="font-size: 2.8rem;">
+                                        {{ student.first_name|slice:":1"|upper }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <h5 class="student-name fw-bold mb-1">
+                                <a href="{% url 'students:student_detail' student.id %}" class="text-decoration-none text-dark">
+                                    {{ student.first_name }} {{ student.last_name|default:'' }}
+                                </a>
+                            </h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-user me-1"></i> {{ student.father_name|default:'نام پدر ثبت نشده' }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Student Info Tags -->
+                    <div class="student-info-tags mb-3">
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <span class="info-tag">
+                                <i class="fas fa-phone-alt me-1 text-primary"></i>
+                                {% if filter_type == "students_complete_fess" %}
+                                    {{ student.student.phone|default:'---' }}
+                                {% else %}
+                                    {{ student.phone|default:'---' }}
+                                {% endif %}
+                            </span>
+                            
+                            <span class="info-tag">
+                                <i class="fas fa-venus-mars me-1 text-info"></i>
+                                {% if filter_type == "students_complete_fess" %}
+                                    {{ student.student.get_gender_display }}
+                                {% else %}
+                                    {{ student.get_gender_display }}
+                                {% endif %}
+                            </span>
+
+                          
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Content Based on Filter Type -->
+                    <div class="student-dynamic-info mt-3">
+                        {% if filter_type == "students_complete_fess" %}
+                        <div class="info-card-modern success">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-credit-card me-1"></i> تاریخ پرداخت:</span>
+                                <span class="badge bg-success">{{ student.date }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span><i class="fas fa-calendar-times me-1"></i> تاریخ ختم:</span>
+                                <span class="badge bg-warning">{{ student.end_date }}</span>
+                            </div>
+                        </div>
+                        {% elif filter_type == "students_withoutclass" %}
+                        <div class="info-card-modern warning">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-bell me-1"></i> تاریخ هشدار:</span>
+                                <span class="badge bg-danger">{{ student.date_for_notification }}</span>
+                            </div>
+                        </div>
+                        {% elif filter_type == "loan_students" %}
+                            <div class="info-card-modern danger py-2 px-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-6"><i class="fas fa-money-bill-wave me-1"></i> مقدار باقی‌مانده:</span>
+                                    <span class="fw-bold text-danger fs-6">
+                                        {% with student.studentbalance_set.first.remain as remain %}
+                                            {{ remain|default:0 }} افغانی
+                                        {% endwith %}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4 d-flex gap-2 justify-content-center">
+                        {% if filter_type == "students_complete_fess" %}
+                        <a href="{% url 'students:student_detail' student.student.id %}" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-user me-1"></i> پروفایل
+                        </a>
+                        {% else %}
+                        <a href="{% url 'students:student_detail' student.id %}" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-user me-1"></i> پروفایل
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-outline-secondary rounded-pill px-3" onclick="quickView(this)" data-student-id="{% if filter_type == 'students_complete_fess' %}{{ student.student.id }}{% else %}{{ student.id }}{% endif %}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <!-- Empty State -->
+        <div class="col-12">
+            <div class="empty-state-modern text-center p-5">
+                <div class="empty-icon-wrapper mb-4">
+                    <i class="fas fa-user-graduate fa-5x text-muted"></i>
+                </div>
+                <h4 class="text-muted mb-3">هیچ دانش‌آموزی یافت نشد</h4>
+                <p class="text-muted mb-4">لطفاً فیلتر خود را تغییر دهید یا دانش‌آموز جدید ثبت کنید</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-primary rounded-pill px-5 py-3" data-bs-toggle="modal" data-bs-target="#filterModal">
+                        <i class="fas fa-filter me-2"></i> تغییر فیلتر
+                    </button>
+                    <a href="{% url 'students:students_registration' %}" class="btn btn-success rounded-pill px-5 py-3">
+                        <i class="fas fa-plus-circle me-2"></i> ثبت دانش‌آموز
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if students.paginator.num_pages > 1 %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if students.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ students.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in students.paginator.page_range %}
+                    <li class="page-item {% if students.number == i %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if students.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ students.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Advanced Filter Modal -->
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header bg-gradient-primary text-white border-0 rounded-top-4">
+                    <h5 class="modal-title" id="filterModalLabel">
+                        <i class="fas fa-sliders-h me-2"></i>فیلتر پیشرفته
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
+                </div>
+                <div class="modal-body p-5">
+                    <form method="get" action="{% url 'reports:students_reports' %}" id="advancedFilterForm">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">تاریخ آغاز</label>
+                                {{ form.start_date }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">تاریخ پایان</label>
+                                {{ form.end_date }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">نوع گزارش</label>
+                                <select class="form-select" name="filter_type">
+                                    <option value="deactive_students">❌ دانش‌آموزان غیرفعال</option>
+                                    <option value="loan_students">💰 دانش‌آموزان قرضدار</option>
+                                    <option value="finish_fees">💰 دانش‌آموزان که فیس شان پوره شده</option>
+                                    <option value="improving">💰 دانش‌آموزان که ارتقاع کردند</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-3 mt-5">
+                            <button type="button" class="btn btn-outline-secondary btn-lg px-5" data-bs-dismiss="modal">
+                                لغو
+                            </button>
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                اعمال فیلتر
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-
+<!-- Custom CSS -->
 <style>
-    /* Apply styles for all screen sizes */
-    #pwa-install-btn {
-        position: relative;
-        border-radius: 50px;
-        background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        /* Starting blend */
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        padding: 10px 25px;
-        margin-top: 10px;
-        font-family: XW_Zar_Bd_0;
-        z-index: 1;
-        overflow: hidden;
-        animation: centerColorBlend 6s ease-in-out infinite;
+    /* Modern Glassmorphism Header */
+    .glass-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6b8cff 100%);
         background-size: 200% 200%;
-        border: none;
+        animation: gradientMove 15s ease infinite;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
     }
 
-    /* Animated multicolor border */
-    #pwa-install-btn:after {
+    .glass-header::before {
         content: '';
         position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="white" opacity="0.05"/></svg>');
+        background-size: 60px 60px;
+        opacity: 0.1;
+    }
+
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Stats Badge */
+    .stats-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 20px;
         border-radius: 50px;
-        background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-        z-index: -1;
-        animation: animatedborder 3s linear infinite;
-        background-size: 300% 300%;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
     }
 
-    /* Border animation */
-    @keyframes animatedborder {
-        0% {
-            background-position: 0% 50%;
-        }
+    .stats-badge:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
 
-        50% {
-            background-position: 100% 50%;
-        }
+    /* Quick Filter Card */
+    .quick-filter-card {
+        background: white;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+    }
 
-        100% {
-            background-position: 0% 50%;
+    .quick-filter-card:hover {
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #495057;
+        letter-spacing: 0.5px;
+    }
+
+    /* Gradient Button */
+    .btn-gradient-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-gradient-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-gradient-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Active Filter Badge */
+    .active-filter-badge {
+        background: linear-gradient(45deg, #f8f9fc, #e3e6f0);
+        padding: 6px 15px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .active-filter-badge:hover {
+        background: linear-gradient(45deg, #e3e6f0, #d4d8dd);
+    }
+
+    .remove-filter {
+        color: #dc3545;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .remove-filter:hover {
+        color: #bd2130;
+    }
+
+    /* Search Wrapper */
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper .form-control {
+        border: 2px solid #e9ecef;
+        padding: 12px 20px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+    }
+
+    .search-stats {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* View Toggle */
+    .view-toggle {
+        display: flex;
+        gap: 5px;
+    }
+
+    .view-toggle .btn {
+        padding: 10px 15px;
+        border: 2px solid #e9ecef;
+    }
+
+    .view-toggle .btn.active {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-color: transparent;
+        color: white;
+    }
+
+    /* Student Card */
+    .shadow-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .shadow-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 35px rgba(102, 126, 234, 0.15) !important;
+    }
+
+    .student-card {
+        background: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .student-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .student-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    /* Info Tags */
+    .info-tag {
+        background: #f8f9fc;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        color: #495057;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .info-tag:hover {
+        background: linear-gradient(45deg, #f8f9fc, #e3e6f0);
+        border-color: #ced4da;
+    }
+
+    /* Info Card Modern */
+    .info-card-modern {
+        background: linear-gradient(145deg, #ffffff, #f8f9fc);
+        padding: 12px 15px;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+    }
+
+    .info-card-modern.success {
+        border-right: 4px solid #28a745;
+    }
+
+    .info-card-modern.warning {
+        border-right: 4px solid #ffc107;
+    }
+
+    .info-card-modern.danger {
+        border-right: 4px solid #dc3545;
+    }
+
+    /* Empty State Modern */
+    .empty-state-modern {
+        background: linear-gradient(145deg, #ffffff, #f8f9fc);
+        border-radius: 30px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .empty-icon-wrapper {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(145deg, #f8f9fc, #e9ecef);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        border: none;
+        padding: 10px 18px;
+        margin: 0 3px;
+        border-radius: 12px;
+        color: #667eea;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .active .page-link {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .avatar-xxl {
+            width: 90px;
+            height: 90px;
+        }
+        
+        .avatar-placeholder span {
+            font-size: 2.2rem !important;
+        }
+        
+        .btn-gradient-primary {
+            padding: 12px !important;
+        }
+        
+        .view-toggle {
+            justify-content: flex-end;
         }
     }
 
-    /* Center gradient animation */
-    @keyframes centerColorBlend {
-        0% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
+    /* Datepicker Customization */
+    .datepicker {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
 
-        33% {
-            background: radial-gradient(circle at center, #ff0080, #00c3ff);
-        }
+    .datepicker:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+    }
 
-        66% {
-            background: radial-gradient(circle at center, #00c3ff, #00ff72);
-        }
+    /* List View (Hidden by default) */
+    .student-item.list-view {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
 
-        100% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
+    .student-item.list-view .student-card .card-body {
+        display: flex;
+        align-items: center;
+        text-align: right;
+    }
+
+    .student-item.list-view .avatar-xxl {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 0 !important;
+        margin-left: 20px;
     }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker20').datepicker({});
+        // Initialize datepickers
+        $('.datepicker').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'bottom'
+        });
+
+        // Apply filter button
+        document.getElementById('applyFilterBtn')?.addEventListener('click', function() {
+            const dateFrom = document.getElementById('date_from')?.value || '';
+            const dateTo = document.getElementById('date_to')?.value || '';
+            const filterType = document.getElementById('filter_type_select')?.value || 'active_students';
+            
+            let url = new URL(window.location.origin + '{% url "reports:students_reports" %}');
+            url.searchParams.set('start_date', dateFrom);
+            url.searchParams.set('end_date', dateTo);
+            url.searchParams.set('filter_type', filterType);
+            
+            window.location.href = url.toString();
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('studentSearch');
+        const studentItems = document.querySelectorAll('.student-item');
+        const searchStats = document.getElementById('searchStats');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                let visibleCount = 0;
+
+                studentItems.forEach(item => {
+                    const name = item.dataset.name?.toLowerCase() || '';
+                    const father = item.dataset.father?.toLowerCase() || '';
+                    const phone = item.dataset.phone?.toLowerCase() || '';
+                    
+                    const matches = searchTerm === '' || 
+                                   name.includes(searchTerm) || 
+                                   father.includes(searchTerm) || 
+                                   phone.includes(searchTerm);
+                    
+                    item.style.display = matches ? '' : 'none';
+                    if (matches) visibleCount++;
+                });
+
+                if (searchStats) {
+                    if (searchTerm) {
+                        searchStats.textContent = `${visibleCount} دانش‌آموز یافت شد`;
+                        searchStats.classList.add('text-success');
+                    } else {
+                        searchStats.textContent = '';
+                    }
+                }
+            });
+        }
+
+        // View toggle (Grid/List)
+        const gridViewBtn = document.getElementById('gridViewBtn');
+        const listViewBtn = document.getElementById('listViewBtn');
+
+        if (gridViewBtn && listViewBtn) {
+            gridViewBtn.addEventListener('click', function() {
+                studentItems.forEach(item => {
+                    item.classList.remove('list-view');
+                });
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+            });
+
+            listViewBtn.addEventListener('click', function() {
+                studentItems.forEach(item => {
+                    item.classList.add('list-view');
+                });
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+            });
+        }
+
+        // Sort functionality
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                const sortBy = this.value;
+                const grid = document.getElementById('studentGrid');
+                const items = Array.from(studentItems);
+                
+                items.sort((a, b) => {
+                    if (sortBy === 'name') {
+                        return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+                    } else if (sortBy === 'father') {
+                        return (a.dataset.father || '').localeCompare(b.dataset.father || '');
+                    } else if (sortBy === 'date') {
+                        return (b.dataset.date || 0) - (a.dataset.date || 0);
+                    }
+                });
+                
+                items.forEach(item => grid.appendChild(item));
+            });
+        }
+
+        // Quick view function
+        window.quickView = function(button) {
+            const studentId = button.dataset.studentId;
+            // Implement quick view modal or redirect
+            window.location.href = `{% url 'students:student_detail' 0 %}`.replace('0', studentId);
+        };
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker21').datepicker({});
-    });
-</script>
+
 {% endblock %}
