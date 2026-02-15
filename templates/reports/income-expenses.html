@@ -6,299 +6,704 @@
 <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
 <script src="{% static 'js/sweet.js' %}"></script>
 
-    <script>
-        {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{{ message|escapejs }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            {% endfor %}
-        {% endif %}
-    </script>
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+        {% endfor %}
+    {% endif %}
+</script>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
-    <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش گزارشات عواید و مصارف 
-    </h4>
-
-
-    <div class="row">
-        <div class="col-lg-12 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center">  
-                    <div class="card-title mb-3">
-                        <button id="pwa-install-btn" class="btn btn-primary" data-toggle="modal" data-target="#filterModal">
-                            فلتر
-                        </button>
+    
+    <!-- Modern Glassmorphism Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-header rounded-4 p-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon-wrapper me-3">
+                                <i class="fas fa-chart-pie fa-3x text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-white fw-bold mb-1">گزارش عواید و مصارف</h2>
+                                <p class="text-white-50 mb-0">
+                                    <i class="fas fa-database me-1"></i>
+                                    مدیریت و تحلیل عواید و مصارف
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    {% if filter_active == True %}
-                    <div class="card-title mb-3">
-                        <a href="{% url 'reports:income_expenses' %}" id="pwa-install-btn" class="btn btn-danger">
-                            حذف فلتر
+                    <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+                        <div class="d-flex justify-content-lg-end gap-3">
+                            <span class="stats-badge">
+                                <i class="fas fa-coins me-2"></i>
+                                {% if filter_active %}
+                                    {{ title }}
+                                {% else %}
+                                    همه عواید و مصارف
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Action Buttons for Today/Yesterday -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="quick-filter-card rounded-4 p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="?date_filter=today" class="btn btn-gradient-primary w-100 py-3">
+                            <i class="fas fa-calendar-day me-2"></i>
+                            سنجیدن عواید و مصارف امروز
+                            <i class="fas fa-arrow-left me-2"></i>
                         </a>
                     </div>
-                    {% endif %}
-                    
-                    <!-- Typing text -->
-                    <div class="typing-text">
-                        <span class="badge badge-pill badge-warning fs-4">  {{title}}</span>
-                       
+                    <div class="col-md-6">
+                        <a href="?date_filter=yesterday_today" class="btn btn-gradient-primary w-100 py-3">
+                            <i class="fas fa-calendar-week me-2"></i>
+                            سنجیدن عواید و مصارف امروز و دیروز
+                            <i class="fas fa-arrow-left me-2"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- CSS -->
-    <style>
-    .typing-text {
-        font-family: 'XW_Zar_Bd_0', sans-serif;
-        font-size: 16px;
-        color: #000000;
-        border-right: 2px solid #fff;
-        white-space: nowrap;
-        overflow: hidden;
-        width: 0;
-        animation: typing 3s steps(40, end) forwards, blink 0.75s step-end infinite;
-        margin: 10px auto 0;
-    }
-    
-    /* Typing animation */
-    @keyframes typing {
-        from { width: 0 }
-        to { width: 100% }
-    }
-    
-    /* Blinking cursor */
-    @keyframes blink {
-        0%, 100% { border-color: transparent }
-        50% { border-color: #fff }
-    }
-    </style>
-    
 
-
-   
-    <!-- 🔸 Two-column layout -->
-    <div class="row">
-      <!-- ✅ Left: Income -->
-      <div class="col-md-6 mb-4">
-        <div class="card border-success">
-          <div class="card-header bg-success text-white text-center fw-bold">
-            عواید
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered mb-0">
-                <thead class="table-success">
-                  <tr>
-                    <th>#</th>
-                    <th>نوع عواید</th>
-                    <th>تاریخ</th>
-                    <th>مقدار</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for i in income_data %}
-                  <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ i.type }}</td>
-                    <td>{{ i.date }}</td>
-                    <td>{{ i.amount }}</td>
-                  </tr>
-                  {% empty %}
-                  <tr><td colspan="4" class="text-center text-muted">هیچ عایدی یافت نشد.</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ✅ Right: Expenses -->
-      <div class="col-md-6 mb-4">
-        <div class="card border-danger">
-          <div class="card-header bg-danger text-white text-center fw-bold">
-            مصارف
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered mb-0">
-                <thead class="table-danger">
-                  <tr>
-                    <th>#</th>
-                    <th>نوع مصرف</th>
-                    <th>تاریخ</th>
-                    <th>مقدار</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for e in expense_data %}
-                  <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ e.type }}</td>
-                    <td>{{ e.date }}</td>
-                    <td>{{ e.amount }}</td>
-                  </tr>
-                  {% empty %}
-                  <tr><td colspan="4" class="text-center text-muted">هیچ مصرفی یافت نشد.</td></tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow rounded-4">
-    
-                <!-- Modal Header -->
-                <div class="modal-header bg-gradient-primary text-white border-0">
-                    <h5 class="modal-title" id="filterModalLabel"><i class="bi bi-funnel me-2"></i>فیلتر وظایف</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
-                </div>
-    
-                <!-- Modal Body -->
-                <div class="modal-body p-5">
-                    <form method="get" action="{% url 'reports:income_expenses' %}" class="needs-validation tablelist-form" novalidate="novalidate">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">تاریخ آغاز</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-                                    {{ form.start_date }}
-                                </div>
-                            </div>
-    
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">تاریخ پایان</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-                                    {{ form.end_date }}
-                                </div>
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <form method="GET" action="{% url 'reports:income_expenses' %}" id="filter_form">
+                <div class="quick-filter-card rounded-4 p-4">
+                    <div class="row g-3 align-items-end">
+                        <!-- Date From -->
+                        <div class="col-lg-4 col-md-6">
+                            <label class="filter-label mb-2">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                از تاریخ
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-calendar text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control datepicker border-start-0" 
+                                       id="date_from" placeholder="۱۴۰۳/۰۱/۰۱" 
+                                       name="start_date"
+                                       value="{{ form.start_date.value|default:'' }}">
                             </div>
                         </div>
                         
-          <!-- Dropdown -->
-          <div class="form-group">
-            <label for="filterType">نوع فلتر</label>
-            <select class="form-control" id="filterType" name="filter_type" required>
-              <option value="income_expenses">عواید و مصارف</option>
-              <option value="income">عواید</option>
-              <option value="expenses">مصارف</option>
-            </select>
-          </div>
-    
-                        <div class="d-flex justify-content-end mt-4 gap-2">
-                            <button type="submit" class="btn btn-success btn-lg fw-bold">
-                                <i class="bi bi-funnel-fill me-2"></i>اعمال فیلتر
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-2"></i>لغو
-                            </button>
+                        <!-- Date To -->
+                        <div class="col-lg-4 col-md-6">
+                            <label class="filter-label mb-2">
+                                <i class="fas fa-calendar-check me-2 text-success"></i>
+                                تا تاریخ
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-calendar-check text-success"></i>
+                                </span>
+                                <input type="text" class="form-control datepicker border-start-0" 
+                                       id="date_to" placeholder="۱۴۰۳/۱۲/۲۹"
+                                       name="end_date"
+                                       value="{{ form.end_date.value|default:'' }}">
+                            </div>
                         </div>
-                    </form>
+                        
+                        <div class="col-lg-4 col-md-12">
+                            <div class="d-flex gap-2">
+                                {% if filter_active %}
+                                    <a href="{% url 'reports:income_expenses' %}" class="btn btn-gradient-primary w-50 py-3">
+                                        <i class="fas fa-times-circle me-2"></i>
+                                        حذف
+                                    </a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-gradient-primary {% if filter_active %}w-50{% else %}w-100{% endif %} py-3">
+                                    <i class="fas fa-search me-2"></i>
+                                    جستجو
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                        <div class="col-12 mt-3">
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Active Filters Display -->
+                    {% if filter_active %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="active-filters d-flex flex-wrap gap-2">
+                                <span class="active-filter-badge">
+                                    <i class="fas fa-filter me-1"></i>
+                                    {{ title }}
+                                </span>
+                                {% if form.start_date.value %}
+                                <span class="active-filter-badge">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    از: {{ form.start_date.value }}
+                                </span>
+                                {% endif %}
+                                {% if form.end_date.value %}
+                                <span class="active-filter-badge">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    تا: {{ form.end_date.value }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total Income -->
+        <div class="col-md-4">
+            <div class="summary-card-modern p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="summary-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                        <i class="fas fa-arrow-up text-success fa-2x"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">عواید کل</span>
+                        <span class="fw-bold fs-2">{{ total_income|floatformat:0 }} <small class="fs-6">افغانی</small></span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span><i class="fas fa-chart-line me-1"></i> تعداد {{ income_count }} رکورد</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Expense -->
+        <div class="col-md-4">
+            <div class="summary-card-modern p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="summary-icon-wrapper bg-danger bg-opacity-10 rounded-circle p-3 me-3">
+                        <i class="fas fa-arrow-down text-danger fa-2x"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">مصارف کل</span>
+                        <span class="fw-bold fs-2">{{ total_expense|floatformat:0 }} <small class="fs-6">افغانی</small></span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span><i class="fas fa-chart-line me-1"></i> تعداد {{ expense_count }} رکورد</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Net Balance -->
+        <div class="col-md-4">
+            <div class="summary-card-modern p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="summary-icon-wrapper {% if net_balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} bg-opacity-10 rounded-circle p-3 me-3">
+                        <i class="fas fa-scale-balanced {% if net_balance >= 0 %}text-primary{% else %}text-warning{% endif %} fa-2x"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">مانده خالص</span>
+                        <span class="fw-bold fs-2 {% if net_balance >= 0 %}text-primary{% else %}text-warning{% endif %}">
+                            {{ net_balance|floatformat:0 }} <small class="fs-6">افغانی</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span><i class="fas fa-percent me-1"></i> 
+                        {% if total_income > 0 %}
+                            {{ net_balance|divisibleby:total_income|floatformat:1 }}% سود
+                        {% else %}
+                            0% سود
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    
+    <!-- Records Section - Income and Expense Tables -->
+    <div class="row g-4">
+        <!-- Income Records -->
+        <div class="col-lg-6">
+            <div class="notification-table-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 text-success">
+                        <i class="fas fa-arrow-up ms-2"></i>
+                        عواید
+                    </h5>
+                    <span class="badge bg-success text-white px-3 py-2 rounded-pill">
+                        {{ income_count }} رکورد
+                    </span>
+                </div>
+
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="notification-table">
+                        <thead>
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>عنوان</th>
+                                <th>مبلغ</th>
+                                <th>توضیحات</th>
+                                <th>منبع</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in income_data %}
+                            <tr class="notification-row {% if not record.is_editable %}external-record{% endif %}">
+                                <td data-label="تاریخ">{{ record.date }}</td>
+                                <td data-label="عنوان">{{ record.title|default:'---' }}</td>
+                                <td data-label="مبلغ">
+                                    <span class="fw-bold text-success">{{ record.amount|floatformat:0 }} افغانی</span>
+                                </td>
+                                <td data-label="توضیحات">{{ record.description|truncatechars:30|default:'---' }}</td>
+                                <td data-label="منبع">
+                                    {% if record.is_external %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-link me-1"></i>
+                                            {% if record.content_type.model == 'studentfessinfo' %}شهریه{% else %}خودکار{% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-pencil me-1"></i>
+                                            دستی
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                    هیچ رکورد عایدی یافت نشد
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Records -->
+        <div class="col-lg-6">
+            <div class="notification-table-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 text-danger">
+                        <i class="fas fa-arrow-down ms-2"></i>
+                        مصارف
+                    </h5>
+                    <span class="badge bg-danger text-white px-3 py-2 rounded-pill">
+                        {{ expense_count }} رکورد
+                    </span>
+                </div>
+
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="notification-table">
+                        <thead>
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>عنوان</th>
+                                <th>مبلغ</th>
+                                <th>توضیحات</th>
+                                <th>منبع</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in expense_data %}
+                            <tr class="notification-row {% if not record.is_editable %}external-record{% endif %}">
+                                <td data-label="تاریخ">{{ record.date }}</td>
+                                <td data-label="عنوان">{{ record.title|default:'---' }}</td>
+                                <td data-label="مبلغ">
+                                    <span class="fw-bold text-danger">{{ record.amount|floatformat:0 }} افغانی</span>
+                                </td>
+                                <td data-label="توضیحات">{{ record.description|truncatechars:30|default:'---' }}</td>
+                                <td data-label="منبع">
+                                    {% if record.is_external %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-link me-1"></i>
+                                            {% if record.content_type.model == 'purchase' %}خرید{% else %}خودکار{% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-pencil me-1"></i>
+                                            دستی
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                    هیچ رکورد مصرفی یافت نشد
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section (Optional) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="quick-filter-card rounded-4 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-chart-pie ms-2 text-primary"></i>
+                        نمودار مقایسه
+                    </h5>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="progress-stacked" style="height: 30px; border-radius: 15px;">
+                            {% if total_income > 0 or total_expense > 0 %}
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {% widthratio total_income total_income|add:total_expense 100 %}%">
+                                عواید {{ total_income|floatformat:0 }}
+                            </div>
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: {% widthratio total_expense total_income|add:total_expense 100 %}%">
+                                مصارف {{ total_expense|floatformat:0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-around">
+                            <div>
+                                <span class="badge bg-success p-2">▲</span>
+                                <span class="me-2">عواید</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-danger p-2">▼</span>
+                                <span class="me-2">مصارف</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-
+<!-- Custom CSS (keeping your existing styles and adding new ones) -->
 <style>
-    /* Apply styles for all screen sizes */
-    #pwa-install-btn {
-        position: relative;
-        border-radius: 50px;
-        background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        /* Starting blend */
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        padding: 10px 25px;
-        margin-top: 10px;
-        font-family: XW_Zar_Bd_0;
-        z-index: 1;
-        overflow: hidden;
-        animation: centerColorBlend 6s ease-in-out infinite;
+    /* Keep all your existing styles exactly as they were */
+    .glass-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6b8cff 100%);
         background-size: 200% 200%;
-        border: none;
+        animation: gradientMove 15s ease infinite;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
     }
 
-    /* Animated multicolor border */
-    #pwa-install-btn:after {
+    .glass-header::before {
         content: '';
         position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="white" opacity="0.05"/></svg>');
+        background-size: 60px 60px;
+        opacity: 0.1;
+    }
+
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .stats-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 20px;
         border-radius: 50px;
-        background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-        z-index: -1;
-        animation: animatedborder 3s linear infinite;
-        background-size: 300% 300%;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
     }
 
-    /* Border animation */
-    @keyframes animatedborder {
-        0% {
-            background-position: 0% 50%;
-        }
+    .stats-badge:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
 
-        50% {
-            background-position: 100% 50%;
-        }
+    .quick-filter-card {
+        background: white;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+        border-radius: 1.5rem;
+    }
 
-        100% {
-            background-position: 0% 50%;
+    .quick-filter-card:hover {
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #495057;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-gradient-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .btn-gradient-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-gradient-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-gradient-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Summary Card Modern */
+    .summary-card-modern {
+        background: white;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+    }
+
+    .summary-card-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .summary-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Active Filter Badge */
+    .active-filter-badge {
+        background: linear-gradient(45deg, #f8f9fc, #e3e6f0);
+        padding: 6px 15px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .active-filter-badge:hover {
+        background: linear-gradient(45deg, #e3e6f0, #d4d8dd);
+    }
+
+    /* Notification Table */
+    .notification-table-container {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        height: 100%;
+    }
+
+    .notification-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .notification-table thead th {
+        padding: 1rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #5a5c69;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .notification-table tbody tr {
+        background: #f8f9fc;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .notification-table tbody tr:hover {
+        background: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transform: scale(1.01);
+    }
+
+    .notification-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    .notification-table tbody td:first-child {
+        border-top-right-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+    }
+
+    .notification-table tbody td:last-child {
+        border-top-left-radius: 1rem;
+        border-bottom-left-radius: 1rem;
+    }
+
+    /* External record styling */
+    .external-record {
+        border-right: 3px solid #36b9cc;
+    }
+
+    /* Progress Stacked */
+    .progress-stacked {
+        background-color: #e9ecef;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .progress-stacked .progress-bar {
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 30px;
+        color: white;
+    }
+
+    /* Datepicker Customization */
+    .datepicker {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .datepicker:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+    }
+
+    /* Responsive Table */
+    @media (max-width: 768px) {
+        .notification-table thead {
+            display: none;
+        }
+        
+        .notification-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+        }
+        
+        .notification-table tbody td {
+            display: block;
+            text-align: right;
+            padding: 0.75rem 1rem;
+        }
+        
+        .notification-table tbody td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+            color: #5a5c69;
         }
     }
 
-    /* Center gradient animation */
-    @keyframes centerColorBlend {
-        0% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
-
-        33% {
-            background: radial-gradient(circle at center, #ff0080, #00c3ff);
-        }
-
-        66% {
-            background: radial-gradient(circle at center, #00c3ff, #00ff72);
-        }
-
-        100% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
-    }
+    /* RTL Fixes */
+    .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+    .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+    .me-3 { margin-left: 1rem !important; margin-right: 0 !important; }
+    .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
+    .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
+    .ms-3 { margin-right: 1rem !important; margin-left: 0 !important; }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker20').datepicker({});
+        // Initialize datepickers
+        $('.datepicker').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'bottom'
+        });
+
+        // Row click handler to show details
+        const rows = document.querySelectorAll('.notification-row');
+        rows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (!e.target.closest('.badge')) {
+                    this.style.backgroundColor = '#ffffff';
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                    }, 300);
+                }
+            });
+        });
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker21').datepicker({});
-    });
-</script>
+
 {% endblock %}

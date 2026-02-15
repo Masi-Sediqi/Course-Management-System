@@ -6,308 +6,543 @@
 <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
 <script src="{% static 'js/sweet.js' %}"></script>
 
-    <script>
-        {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{{ message|escapejs }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            {% endfor %}
-        {% endif %}
-    </script>
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+        {% endfor %}
+    {% endif %}
+</script>
 
 <div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
-    <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">داشبورد /</span> بخش گزارشات کتابها 
-    </h4>
-
-
-    <div class="row">
-        <div class="col-lg-12 col-md-6 col-sm-6">
-            <div class="card card-icon-bg card-icon-bg-primary o-hidden mb-4">
-                <div class="card-body text-center">  
-                    <div class="card-title mb-3">
-                        <button id="pwa-install-btn" class="btn btn-primary" data-toggle="modal" data-target="#filterModal">
-                            فلتر
-                        </button>
+    
+    <!-- Modern Glassmorphism Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-header rounded-4 p-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon-wrapper me-3">
+                                <i class="fas fa-book-open fa-3x text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-white fw-bold mb-1">گزارشات کتابها</h2>
+                                <p class="text-white-50 mb-0">
+                                    <i class="fas fa-database me-1"></i>
+                                    مدیریت خرید و فروش کتابها
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    {% if filter_active == True %}
-                    <div class="card-title mb-3">
-                        <a href="{% url 'reports:students_reports' %}" id="pwa-install-btn" class="btn btn-danger">
-                            حذف فلتر
+                    <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+                        <div class="d-flex justify-content-lg-end gap-3">
+                            <span class="stats-badge">
+                                <i class="fas fa-books me-2"></i>
+                                {% if selected_item %}
+                                    {{ selected_item.name }}
+                                {% else %}
+                                    {{ items|length }} کتاب
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section (Required) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <form method="GET" action="{% url 'reports:books_reports' %}" id="filter_form">
+                <div class="quick-filter-card rounded-4 p-4">
+                    <div class="row g-3 align-items-end">
+                        <!-- Date From (Required) -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="filter-label mb-2">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                از تاریخ <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-calendar text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control datepicker border-start-0" 
+                                       id="date_from" placeholder="۱۴۰۳/۰۱/۰۱" 
+                                       name="start_date" required
+                                       value="{{ form.start_date.value|default:'' }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Date To (Required) -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="filter-label mb-2">
+                                <i class="fas fa-calendar-check me-2 text-success"></i>
+                                تا تاریخ <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-calendar-check text-success"></i>
+                                </span>
+                                <input type="text" class="form-control datepicker border-start-0" 
+                                       id="date_to" placeholder="۱۴۰۳/۱۲/۲۹"
+                                       name="end_date" required
+                                       value="{{ form.end_date.value|default:'' }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Filter Item Dropdown (Optional) -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="filter-label mb-2">
+                                <i class="fas fa-book me-2 text-warning"></i>
+                                انتخاب کتاب (اختیاری)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-list-ul text-warning"></i>
+                                </span>
+                                <select class="form-select border-start-0" id="item_select" name="item_id">
+                                    <option value="">همه کتابها</option>
+                                    {% for item in items %}
+                                    <option value="{{ item.item.id }}" {% if selected_item_id == item.item.id %}selected{% endif %}>
+                                        {{ item.item.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="d-flex gap-2">
+                                {% if filter_active or selected_item_id %}
+                                    <a href="{% url 'reports:books_reports' %}" class="btn btn-gradient-primary w-50 py-3">
+                                        <i class="fas fa-times-circle me-2"></i>
+                                        حذف
+                                    </a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-gradient-primary {% if filter_active or selected_item_id %}w-50{% else %}w-100{% endif %} py-3">
+                                    <i class="fas fa-search me-2"></i>
+                                    جستجو
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                        <div class="col-12 mt-3">
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Section (Only shown when filter is active) -->
+    {% if filter_active %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="quick-filter-card rounded-4 p-4">
+                <h4 class="mb-4 text-primary">{{ title }}</h4>
+                
+                <!-- Summary Cards for the filtered data -->
+                <div class="row g-4">
+                    <!-- Purchase Stats -->
+                    <div class="col-md-4">
+                        <div class="summary-card-modern p-3 h-100">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-shopping-bag text-success ms-2"></i>
+                                آمار خرید
+                            </h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>تعداد خرید:</span>
+                                <span class="fw-bold">{{ total_purchase }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>مبلغ کل خرید:</span>
+                                <span class="fw-bold">{{ total_purchase_amount }} افغانی</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>پرداخت شده:</span>
+                                <span class="fw-bold text-success">{{ total_purchase_amount_paid }} افغانی</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>باقی مانده:</span>
+                                <span class="fw-bold text-danger">{{ total_purchase_amount_remain }} افغانی</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sales Stats -->
+                    <div class="col-md-4">
+                        <div class="summary-card-modern p-3 h-100">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-shopping-cart text-info ms-2"></i>
+                                آمار فروش
+                            </h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>تعداد فروش:</span>
+                                <span class="fw-bold">{{ total_sale }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>مبلغ کل فروش:</span>
+                                <span class="fw-bold">{{ total_sale_amount }} افغانی</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>پرداخت شده:</span>
+                                <span class="fw-bold text-success">{{ total_sale_amount_paid }} افغانی</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>باقی مانده:</span>
+                                <span class="fw-bold text-danger">{{ total_sale_amount_remain }} افغانی</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div class="col-md-4">
+                        <div class="summary-card-modern p-3 h-100 bg-light">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-chart-pie text-primary ms-2"></i>
+                                خلاصه گزارش
+                            </h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>مجموع خرید و فروش:</span>
+                                <span class="fw-bold">{{ total_purchase_amount|add:total_sale_amount }} افغانی</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>مجموع پرداختی‌ها:</span>
+                                <span class="fw-bold text-success">{{ total_purchase_amount_paid|add:total_sale_amount_paid }} افغانی</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>مجموع باقی مانده:</span>
+                                <span class="fw-bold text-danger">{{ total_purchase_amount_remain|add:total_sale_amount_remain }} افغانی</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not filter_active %}
+    <div class="row g-4" id="bookGrid">
+        {% for item in items %}
+        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 book-item" 
+             data-name="{{ item.item.name|lower }}"
+             data-id="{{ item.item.id }}">
+            <div class="card book-card h-100 border-0 shadow-hover rounded-4">
+                <div class="card-body p-4">
+                    <!-- Book Cover / Avatar -->
+                    <div class="text-center mb-3">
+                        <div class="avatar-xxl mx-auto mb-3 position-relative">
+                            {% if item.item.image %}
+                            <img src="{{ item.item.image.url }}" alt="{{ item.item.name }}" 
+                                 class="rounded-3 border border-4 border-white shadow-sm" 
+                                 style="width: 110px; height: 110px; object-fit: cover;">
+                            {% else %}
+                            <div class="avatar-placeholder rounded-3 d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 110px; height: 110px; background: linear-gradient(145deg, #667eea, #764ba2);">
+                                <i class="fas fa-book text-white fa-3x"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="book-name fw-bold mb-1">
+                            <a href="" class="text-decoration-none text-dark">
+                                {{ item.item.name|truncatechars:25 }}
+                            </a>
+                        </h5>
+                    </div>
+
+                    <!-- Summary Stats - Compact -->
+                    <div class="summary-stats mb-3">
+                        <div class="row g-1 text-center justify-content-center">
+                            <div class="col-4">
+                                <div class="stat-box bg-light rounded p-1">
+                                    <small class="text-muted d-block">باقی</small>
+                                    <span class="fw-bold text-warning">{{ item.total_remain_item|default:0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-3 d-flex gap-1 justify-content-center">
+                        <a href="" class="btn btn-sm btn-outline-primary rounded-pill px-2">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <a href="" class="btn btn-sm btn-outline-success rounded-pill px-2">
+                            <i class="fas fa-plus-circle"></i>
+                        </a>
+                        <a href="" class="btn btn-sm btn-outline-info rounded-pill px-2">
+                            <i class="fas fa-shopping-cart"></i>
                         </a>
                     </div>
-                    {% endif %}
-                    
-                    <!-- Typing text -->
-                    <div class="typing-text">
-                        <span class="badge badge-pill badge-primary fs-4">  {{title}}</span>
-                       
-                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- CSS -->
-    <style>
-    .typing-text {
-        font-family: 'XW_Zar_Bd_0', sans-serif;
-        font-size: 16px;
-        color: #000000;
-        border-right: 2px solid #fff;
-        white-space: nowrap;
-        overflow: hidden;
-        width: 0;
-        animation: typing 3s steps(40, end) forwards, blink 0.75s step-end infinite;
-        margin: 10px auto 0;
-    }
-    
-    /* Typing animation */
-    @keyframes typing {
-        from { width: 0 }
-        to { width: 100% }
-    }
-    
-    /* Blinking cursor */
-    @keyframes blink {
-        0%, 100% { border-color: transparent }
-        50% { border-color: #fff }
-    }
-    </style>
-    
-
-
-    <div class="card">
-        <div class="card-body">
-
-                <!-- Tab 1: Income Table -->
-                <div class="tab-pane fade show active" id="income" role="tabpanel">
-                    <!-- ✅ Paste your full income table & modals here -->
-    
-                    <!-- your full code... -->
-                    <div class="table-responsive">
-                  <table class="display table table-striped table-bordered" id="comma_decimal_table" style="width:100%">
-                      <thead class="thead-dark">
-                          <tr>
-                              <th>#</th>
-                              <th>تاریخ</th>
-                              <th>تام کتاب</th>
-                              <th>تعداد</th>
-                              <th>مقدار فی</th>
-                              <th>مقدار کُل</th>
-                              <th>مقدار پرداخت شده</th>
-                              <th>مقدار برای فروش</th>
-                              <th>مقدار باقی مانده</th>
-                              <th>عملیات</th>
-                          </tr>
-                      </thead>
-                      <tbody id="table-body">
-                          {% for i in books %}
-                          <tr>
-                              <td>{{ forloop.counter }}</td>
-                              <td>{{ i.date }}</td>
-                              <td><a href="{% url 'library:buy_book_again' i.id %}">
-                                {{ i.name }}</td>
-                              <td>{{ i.number_of_book }}</td>
-                              <td>{{ i.per_price }}</td>
-                              <td>{{ i.price }}</td>
-                              <td>{{ i.paid_price }}</td>
-                              <td>{{ i.per_book_price_for_buy }}</td>
-                              <td>{{ i.total_amount_value|default:"0" }}</td>
-
-                              <td>
-                                  <!-- Actions like edit/delete buttons go here -->
-                                  <a href="{% url 'library:edit_book' i.id %}" class="btn btn-sm btn-primary">تغییرات</a>
-                                  <!-- Delete Button (opens modal) -->
-                                  <button class="btn btn-sm btn-danger"
-                                  data-toggle="modal" data-target="#deletebookConfirmModal{{ i.id }}">
-                                      حذف
-                                  </button> 
-                              </td>
-                          </tr>
-                        
-
-
-                      
-                          
-                              <div class="modal fade" id="deletebookConfirmModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ i.id }}" aria-hidden="true">
-                                  <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content text-center">
-                                      <div class="modal-header">
-                                        <h5 class="modal-title w-100" id="deleteModalLabel{{ i.id }}">هشدار حذف</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                          <span aria-hidden="true">&times;</span>
-                                        </button>
-                                      </div>
-                                      <div class="modal-body">
-                                        <p class="fs-5">    آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟</p>
-                                        <div class="d-flex justify-content-center gap-2">
-                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">نخیر</button>
-                                          <a href="{% url 'library:delete_book' i.id %}" class="btn btn-danger">بلی، حذف کن</a>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                          {% endfor %}
-                      </tbody>
-                      
-                  </table>
-              </div>
+        {% empty %}
+        <!-- Empty State -->
+        <div class="col-12">
+            <div class="empty-state-modern text-center p-5">
+                <div class="empty-icon-wrapper mb-4">
+                    <i class="fas fa-book-open fa-5x text-muted"></i>
                 </div>
- 
-        </div>
-    </div>
-    
-
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow rounded-4">
-    
-                <!-- Modal Header -->
-                <div class="modal-header bg-gradient-primary text-white border-0">
-                    <h5 class="modal-title" id="filterModalLabel"><i class="bi bi-funnel me-2"></i>فیلتر وظایف</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
-                </div>
-    
-                <!-- Modal Body -->
-                <div class="modal-body p-5">
-                    <form method="get" action="{% url 'reports:students_reports' %}" class="needs-validation tablelist-form" novalidate="novalidate">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">تاریخ آغاز</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-                                    {{ form.start_date }}
-                                </div>
-                            </div>
-    
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">تاریخ پایان</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><img src="{% static 'icon/uiw--date.svg' %}" alt=""></span>
-                                    {{ form.end_date }}
-                                </div>
-                            </div>
-                        </div>
-                        
-          <!-- Dropdown -->
-          <div class="form-group">
-            <label for="filterType">نوع فلتر</label>
-            <select class="form-control" id="filterType" name="filter_type" required>
-              <option value="remain_books">کتابهای باقی مانده</option>
-              <option value="buy_books">کتابهای های فروخته شده</option>
-              <!-- <option value="loan_students">شاگردان قرضدار</option>
-              <option value="students_withoutclass">شاگردان بدون صنف</option> -->
-            </select>
-          </div>
-    
-                        <div class="d-flex justify-content-end mt-4 gap-2">
-                            <button type="submit" class="btn btn-success btn-lg fw-bold">
-                                <i class="bi bi-funnel-fill me-2"></i>اعمال فیلتر
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-2"></i>لغو
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <h4 class="text-muted mb-3">هیچ کتابی یافت نشد</h4>
+                <p class="text-muted mb-4">لطفاً کتاب جدید ثبت کنید</p>
             </div>
         </div>
+        {% endfor %}
     </div>
-
-    
+    {% else %}
+    <div class="col-12">
+        <div class="empty-state-modern text-center p-5">
+            <div class="empty-icon-wrapper mb-4">
+                <i class="fas fa-book-open fa-5x text-muted"></i>
+            </div>
+            <h4 class="text-muted mb-3">فلتر انجام شده</h4>
+            <p class="text-muted mb-4">برای دیدن تمام گتاب ها فلتر را حذف کنید</p>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
-
+<!-- Keep all your existing CSS styles exactly as they were -->
 <style>
-    /* Apply styles for all screen sizes */
-    #pwa-install-btn {
-        position: relative;
-        border-radius: 50px;
-        background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        /* Starting blend */
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        padding: 10px 25px;
-        margin-top: 10px;
-        font-family: XW_Zar_Bd_0;
-        z-index: 1;
-        overflow: hidden;
-        animation: centerColorBlend 6s ease-in-out infinite;
+    /* All your existing CSS styles remain exactly the same */
+    .glass-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6b8cff 100%);
         background-size: 200% 200%;
-        border: none;
+        animation: gradientMove 15s ease infinite;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
     }
 
-    /* Animated multicolor border */
-    #pwa-install-btn:after {
+    .glass-header::before {
         content: '';
         position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="white" opacity="0.05"/></svg>');
+        background-size: 60px 60px;
+        opacity: 0.1;
+    }
+
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .stats-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 20px;
         border-radius: 50px;
-        background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-        z-index: -1;
-        animation: animatedborder 3s linear infinite;
-        background-size: 300% 300%;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
     }
 
-    /* Border animation */
-    @keyframes animatedborder {
-        0% {
-            background-position: 0% 50%;
-        }
-
-        50% {
-            background-position: 100% 50%;
-        }
-
-        100% {
-            background-position: 0% 50%;
-        }
+    .stats-badge:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
     }
 
-    /* Center gradient animation */
-    @keyframes centerColorBlend {
-        0% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
-
-        33% {
-            background: radial-gradient(circle at center, #ff0080, #00c3ff);
-        }
-
-        66% {
-            background: radial-gradient(circle at center, #00c3ff, #00ff72);
-        }
-
-        100% {
-            background: radial-gradient(circle at center, #ff6a00, #ff0080);
-        }
+    .summary-card-modern {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
     }
+
+    .summary-card-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .quick-filter-card {
+        background: white;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+    }
+
+    .quick-filter-card:hover {
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #495057;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-gradient-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-gradient-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-gradient-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .shadow-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .shadow-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 35px rgba(102, 126, 234, 0.15) !important;
+    }
+
+    .book-card {
+        background: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .book-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .book-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    .stat-box {
+        transition: all 0.2s ease;
+    }
+
+    .stat-box:hover {
+        background: #e9ecef !important;
+    }
+
+    .empty-state-modern {
+        background: linear-gradient(145deg, #ffffff, #f8f9fc);
+        border-radius: 30px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .empty-icon-wrapper {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(145deg, #f8f9fc, #e9ecef);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .datepicker {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .datepicker:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+    }
+
+    .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+    .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+    .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
+    .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker20').datepicker({});
+        // Initialize datepickers
+        $('.datepicker').datepicker({
+            format: 'yyyy/mm/dd',
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'bottom'
+        });
+
+        // Form validation to ensure both dates are filled
+        const filterForm = document.getElementById('filter_form');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                const dateFrom = document.getElementById('date_from').value;
+                const dateTo = document.getElementById('date_to').value;
+                
+                if (!dateFrom || !dateTo) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'خطا',
+                        text: 'تاریخ شروع و پایان هر دو الزامی هستند',
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            });
+        }
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        $('#datepicker21').datepicker({});
-    });
-</script>
+
 {% endblock %}

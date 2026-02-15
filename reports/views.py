@@ -147,8 +147,6 @@ def students_reports(request):
 
 
 def teachers_reports(request):
-
-
     form = StudentFilterForm(request.GET or None)
     teachers = Teacher.objects.filter(is_active=True)
     filter_type = request.GET.get('filter_type', 'active_teachers')
@@ -159,51 +157,54 @@ def teachers_reports(request):
         start_date = form.cleaned_data.get('start_date') or None
         end_date = form.cleaned_data.get('end_date') or None
 
-        # 🔹 Active Teachers
-        if filter_type == "active_teachers":
-            teachers = Teacher.objects.filter(is_active=True)
-            if start_date and end_date:
-                teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
-                title = f"فلتر استادان فعال از تاریخ {start_date} الی {end_date}"
-            else:
-                title = "تمام استادان فعال"
-            filter_active = True
-
         # 🔹 Deactive Teachers
-        elif filter_type == "deactive_teachers":
+        if filter_type == "deactive_teachers":
             teachers = Teacher.objects.filter(is_active=False)
+
             if start_date and end_date:
-                teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
+                from datetime import datetime
+
+                start_dt = datetime.strptime(start_date, "%d/%m/%Y").date()
+                end_dt = datetime.strptime(end_date, "%d/%m/%Y").date()
+
+                filtered_ids = []
+                for teacher in teachers:
+                    if teacher.deactivate_at:
+                        teacher_dt = datetime.strptime(teacher.deactivate_at, "%d/%m/%Y").date()
+                        if start_dt <= teacher_dt <= end_dt:
+                            filtered_ids.append(teacher.id)
+
+                teachers = teachers.filter(id__in=filtered_ids)
                 title = f"فلتر استادان غیر فعال از تاریخ {start_date} الی {end_date}"
             else:
                 title = "تمام استادان غیر فعال"
+
             filter_active = True
 
-        # 🔹 Loan Teachers
+        # 🔹 Loan Teachers (FIXED)
         elif filter_type == "loan_teachers":
-            teachers_with_loans = TeacherTotalLoan.objects.filter(
-                total_loan_amount__gt=0
-            ).values_list('teacher_id', flat=True)
-
-            teachers = Teacher.objects.filter(id__in=teachers_with_loans)
-            if start_date and end_date:
-                teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
-                title = f"فلتر استادان قرضدار از تاریخ {start_date} الی {end_date}"
-            else:
-                title = "تمام استادان قرضدار"
-            filter_active = True
-
-        # 🔹 Teachers with Remaining Money
-        elif filter_type == "teachers_remain":
             teachers = Teacher.objects.filter(
-                teacher_remains__total_amount__gt=0
+                teacherbalance__total_loan__gt=0
             ).distinct()
 
-            if start_date and end_date:
-                teachers = teachers.filter(date__gte=start_date, date__lte=end_date)
-                title = f"فلتر استادان دارای باقی‌مانده از تاریخ {start_date} الی {end_date}"
-            else:
-                title = "تمام استادان دارای باقی‌مانده"
+            title = (
+                f"فلتر استادان قرضدار از تاریخ {start_date} الی {end_date}"
+                if start_date and end_date
+                else "تمام استادان قرضدار"
+            )
+            filter_active = True
+
+        # 🔹 Teachers with Remaining Salary (FIXED)
+        elif filter_type == "teachers_remain":
+            teachers = Teacher.objects.filter(
+                teacherbalance__total_remain__gt=0
+            ).distinct()
+
+            title = (
+                f"فلتر استادان دارای باقی‌مانده از تاریخ {start_date} الی {end_date}"
+                if start_date and end_date
+                else "تمام استادان دارای باقی‌مانده"
+            )
             filter_active = True
 
     context = {
@@ -215,151 +216,175 @@ def teachers_reports(request):
     }
     return render(request, "reports/teachers_reports.html", context)
 
+
 def books_reports(request):
 
-
-    books = Books.objects.all()
-
-    # Attach total_amount from TotalBook to each book
-    for book in books:
-        total_book = TotalBook.objects.filter(book=book).last()  # latest record
-        book.total_amount_value = total_book.total_amount if total_book else 0
-
+    item_balance = TotalItem.objects.all()
     form = StudentFilterForm(request.GET or None)
-    filter_type = request.GET.get('filter_type', 'remain_books')
+
     filter_active = False
-    title = "در حال حاضر تمام کتاب‌ها نمایش داده می‌شوند"
+    title = "همه کتاب‌ها"
+
+    selected_item_id = request.GET.get('item_id')
+    selected_item = None
+
+    # default values (تا ارور ندهد)
+    total_purchase = 0
+    total_sale = 0
+
+    total_purchase_amount = 0
+    total_purchase_amount_paid = 0
+    total_purchase_amount_remain = 0
+
+    total_sale_amount = 0
+    total_sale_amount_paid = 0
+    total_sale_amount_remain = 0
 
     if form.is_valid():
-        start_date = form.cleaned_data.get('start_date') or None
-        end_date = form.cleaned_data.get('end_date') or None
 
-        # Helper function
-        def date_filter(qs):
-            if start_date and end_date:
-                return qs.filter(date__range=[start_date, end_date])
-            elif start_date:
-                return qs.filter(date__gte=start_date)
-            elif end_date:
-                return qs.filter(date__lte=end_date)
-            return qs
+        start_date = form.cleaned_data.get('start_date')
+        end_date = form.cleaned_data.get('end_date')
 
-        # 🔹 Remaining Books
-        if filter_type == "remain_books":
-            books = date_filter(Books.objects.all())
+        # 🔴 تاریخ‌ها اجباری
+        if not start_date or not end_date:
+            form.add_error(None, "تاریخ شروع و پایان الزامی است")
+        else:
             filter_active = True
-            title = f"کتاب‌های باقی‌مانده {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
 
-        # 🔹 Purchased Books
-        elif filter_type == "buy_books":
-            books = date_filter(BuyBook.objects.all())
-            filter_active = True
-            title = f"کتاب‌های خریداری‌شده {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
+            purchases = Purchase.objects.filter(date__range=[start_date, end_date])
+            sales = BuyBook.objects.filter(date__range=[start_date, end_date])
+
+            # ✅ اگر آیتم انتخاب شده باشد
+            if selected_item_id:
+                selected_item = Item.objects.get(id=selected_item_id)
+                purchases = purchases.filter(item=selected_item)
+                sales = sales.filter(item=selected_item)
+
+            # ----------------- محاسبه -----------------
+
+            total_purchase = purchases.aggregate(total=Sum('number'))['total'] or 0
+            total_sale = sales.aggregate(total=Sum('number_of_book'))['total'] or 0
+            total_purchase_amount = purchases.aggregate(total=Sum('total_price'))['total'] or 0
+            total_purchase_amount_paid = purchases.aggregate(total=Sum('paid_price'))['total'] or 0
+            total_purchase_amount_remain = purchases.aggregate(total=Sum('remain_price'))['total'] or 0
+
+            total_sale_amount = sales.aggregate(total=Sum('total_amount'))['total'] or 0
+            total_sale_amount_paid = sales.aggregate(total=Sum('paid_amount'))['total'] or 0
+            total_sale_amount_remain = sales.aggregate(total=Sum('remain_amount'))['total'] or 0
+
+            title = f"گزارش از تاریخ '{start_date}' الی '{end_date}' کتاب '{selected_item.name}'"
 
     context = {
-        'books': books,
+        'items': item_balance,
         'form': form,
-        'filter_type': filter_type,
         'filter_active': filter_active,
         'title': title,
+        'selected_item': selected_item,
+        'selected_item_id': int(selected_item_id) if selected_item_id else None,
+
+        "total_purchase": total_purchase,
+        "total_sale": total_sale,
+
+        "total_purchase_amount": total_purchase_amount,
+        "total_purchase_amount_paid": total_purchase_amount_paid,
+        "total_purchase_amount_remain": total_purchase_amount_remain,
+
+        "total_sale_amount": total_sale_amount,
+        "total_sale_amount_paid": total_sale_amount_paid,
+        "total_sale_amount_remain": total_sale_amount_remain,
     }
+
     return render(request, "reports/books_report.html", context)
 
 
 def income_expenses(request):
-
-
-    title = "در حال حاضر تمام عایدات و مصارفات نمایش داده می‌شوند"
+    from django.utils import timezone
+    from datetime import datetime, timedelta
+    
+    title = "تمام عواید و مصارف"
     form = StudentFilterForm(request.GET or None)
-    filter_type = request.GET.get('filter_type', 'income_expenses')
     filter_active = False
-    income_data, expense_data = [], []
+    start_date = None
+    end_date = None
+    
+    # Quick filters
+    date_filter = request.GET.get('date_filter')
 
-    # Helper for flexible date filtering
-    def date_filter(qs, start_date, end_date):
-        if start_date and end_date:
-            return qs.filter(date__range=[start_date, end_date])
-        elif start_date:
-            return qs.filter(date__gte=start_date)
-        elif end_date:
-            return qs.filter(date__lte=end_date)
-        return qs
+    if date_filter == 'today':
+        today = jdatetime.date.today()
 
-    # Income sources
-    income_sources = [
-        ("عواید عمومی", OtherIncome),
-        ("فیس شاگردان", Student_fess_info),
-        ("فروش کتاب", BuyBook),
-        ("فروش قرطاسیه", BuyStationery),
-        ("پرداخت پول باقی مانده توسط شاگرد", StudentGiveRemainMoney),
-    ]
+        start_date = today.strftime('%d/%m/%Y')
+        end_date = today.strftime('%d/%m/%Y')
 
-    # Expense sources
-    expense_sources = [
-        ("مصارف عمومی", Expenses),
-        ("ماش استادان", TeacherPaidSalary),
-        ("قرض استادان", TeacherLoan),
-        ("خرید قرطاسیه", StationeryItem),
-        ("خرید دوباره قرطاسیه", BuyStationeryAgain),
-        ("خرید کتاب", Books),
-        ("خرید دوباره کتاب", BuyBookAgain),
-    ]
+        filter_active = True
+        title = f"عواید و مصارف امروز ({start_date})"
 
+
+    elif date_filter == 'yesterday_today':
+        today = jdatetime.date.today()
+        yesterday = today - jdatetime.timedelta(days=1)
+
+        start_date = yesterday.strftime('%d/%m/%Y')
+        end_date = today.strftime('%d/%m/%Y')
+
+        filter_active = True
+        title = f"عواید و مصارف امروز و دیروز ({start_date} تا {end_date})"
+    
+    # Check for date range filter from form
     if form.is_valid():
-        start_date = form.cleaned_data.get('start_date') or None
-        end_date = form.cleaned_data.get('end_date') or None
-
-        # Apply filters dynamically
-        if start_date or end_date:
+        form_start = form.cleaned_data.get('start_date')
+        form_end = form.cleaned_data.get('end_date')
+        
+        if form_start and form_end:
+            start_date = form_start
+            end_date = form_end
             filter_active = True
             title = f"گزارش از تاریخ {start_date} تا {end_date}"
-        else:
-            title = "تمام عایدات و مصارفات"
-
+        elif form_start or form_end:
+            # If only one date is provided, use it for both
+            if form_start:
+                start_date = form_start
+                end_date = form_start
+            else:
+                start_date = form_end
+                end_date = form_end
+            filter_active = True
+            title = f"گزارش برای تاریخ {start_date or end_date}"
+    
+    # Get finance records based on filters
+    if filter_active and start_date and end_date:
+        # Filter by date range
+        income_data = FinanceRecord.objects.filter(
+            type='income',
+            date__gte=start_date,
+            date__lte=end_date
+        ).order_by('-date')
+        
+        expense_data = FinanceRecord.objects.filter(
+            type='expense',
+            date__gte=start_date,
+            date__lte=end_date
+        ).order_by('-date')
     else:
-        start_date = end_date = None
-
-    # Build income and expense lists
-    if filter_type in ["income_expenses", "income"]:
-        for label, model in income_sources:
-            qs = date_filter(model.objects.all(), start_date, end_date)
-            for obj in qs:
-                income_data.append({
-                    'id': obj.id,
-                    'type': label,
-                    'date': getattr(obj, 'date', None),
-                    'amount': getattr(obj, 'amount', getattr(obj, 'give_fees',
-                               getattr(obj, 'paid_amount',
-                               getattr(obj, 'paid_stationery_amount', 0)))),
-                })
-
-    if filter_type in ["income_expenses", "expenses"]:
-        for label, model in expense_sources:
-            qs = date_filter(model.objects.all(), start_date, end_date)
-            for obj in qs:
-                expense_data.append({
-                    'id': obj.id,
-                    'type': label,
-                    'date': getattr(obj, 'date', None),
-                    'amount': getattr(obj, 'amount', getattr(obj, 'paid_salary',
-                               getattr(obj, 'stationery_paid_price',
-                               getattr(obj, 'paid_price', 0)))),
-                })
-
-    # Smart title updates
-    if filter_type == "income":
-        title = f"تمام عواید {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
-    elif filter_type == "expenses":
-        title = f"تمام مصارفات {f'از تاریخ {start_date} الی {end_date}' if (start_date or end_date) else ''}"
-
-    income_data = sorted(income_data, key=lambda x: x['date'] or '', reverse=True)
-    expense_data = sorted(expense_data, key=lambda x: x['date'] or '', reverse=True)
-
+        # Get all records
+        income_data = FinanceRecord.objects.filter(type='income').order_by('-date')
+        expense_data = FinanceRecord.objects.filter(type='expense').order_by('-date')
+    
+    # Calculate totals
+    total_income = income_data.aggregate(total=models.Sum('amount'))['total'] or 0
+    total_expense = expense_data.aggregate(total=models.Sum('amount'))['total'] or 0
+    net_balance = total_income - total_expense
+    
     context = {
         'title': title,
         'filter_active': filter_active,
         'form': form,
         'income_data': income_data,
         'expense_data': expense_data,
+        'income_count': income_data.count(),
+        'expense_count': expense_data.count(),
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'net_balance': net_balance,
     }
     return render(request, 'reports/income-expenses.html', context)

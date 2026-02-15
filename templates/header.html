@@ -103,16 +103,24 @@
                             <span class="item-name text-15 text-muted">راپورها</span>
                         </a>
                     </li>
-                    <li class="Ul_li--hover">
-                        <a href="{% url 'settings:settings' %}" class="d-flex align-items-center">
-                            <img src="{% static 'icon/weui--setting-outlined.svg' %}" alt="" style="margin-left: 8px;">
-                            <span class="item-name text-15 text-muted">تنظیمات</span>
-                        </a>
-                    </li>
+                    {% if system_permission and system_permission.setting %}
+                        <li class="Ul_li--hover">
+                            <a href="{% url 'settings:settings' %}" class="d-flex align-items-center">
+                                <img src="{% static 'icon/weui--setting-outlined.svg' %}" alt="" style="margin-left: 8px;">
+                                <span class="item-name text-15 text-muted">تنظیمات</span>
+                            </a>
+                        </li>
+                    {% endif %}
                     <li class="Ul_li--hover">
                         <a href="{% url 'home:history' %}" class="d-flex align-items-center">
                             <img src="{% static 'icon/material-symbols--history.svg' %}" alt="" style="margin-left: 8px;">
                             <span class="item-name text-15 text-muted">تاریخچه</span>
+                        </a>
+                    </li>
+                    <li class="Ul_li--hover">
+                        <a href="{% url 'home:about_us' %}" class="d-flex align-items-center">
+                            <img src="{% static 'icon/ix--about.svg' %}" alt="" style="margin-left: 8px;">
+                            <span class="item-name text-15 text-muted">درباره ما</span>
                         </a>
                     </li>
                 </ul>

@@ -35,7 +35,7 @@ def teacher_registration(request):
             return redirect(referer)
     else:
         form = TeacherForm(initial={'date': formatted_date})
-        teachers = Teacher.objects.filter(is_active=True)
+        teachers = Teacher.objects.all()
     context = {
         'teachers':teachers,
         'form':form,
@@ -46,6 +46,8 @@ def deactive_teacher(request, id):
 
     referer = request.META.get('HTTP_REFERER', '/')
     teacher = Teacher.objects.get(id=id)
+    jalali_now = jdatetime.datetime.now().strftime("%d/%m/%Y")
+    teacher.deactivate_at = jalali_now
     if teacher:
         teacher.is_active = False
         teacher.save()
@@ -145,7 +147,7 @@ def teacher_paid_salary(request, id):
             get_sub = get_amount - find_sub
 
             # Teacher Balance 
-            teacher_balance.total_paid += get_amount
+            teacher_balance.total_paid += get_paid_amount
             teacher_balance.total_remain += get_sub
             teacher_balance.total_loan -= loan_deduction
             teacher_balance.save()
@@ -206,8 +208,9 @@ def delete_teacher_salary_record(request, salary_id):
     loan_deduction = getattr(salary, "loan_amount", 0) or 0
 
     if teacher_balance:
-        teacher_balance.total_paid -= amount
+        teacher_balance.total_paid -= paid_amount
         teacher_balance.total_remain -= remain_amount
+        teacher_balance.total_loan += loan_deduction
         if teacher_balance.total_paid < 0:
             teacher_balance.total_paid = 0
         teacher_balance.save()
@@ -267,10 +270,7 @@ def edit_teacher_salary_record(request, salary_id):
     salary_instance = get_object_or_404(TeacherPaidSalary, id=salary_id)
     teacher = salary_instance.teacher
 
-    # Teacher balance and total balance
     teacher_balance, _ = TeacherBalance.objects.get_or_create(teacher=teacher)
-    total_balance, _ = TotalBalance.objects.get_or_create(pk=1)
-
     # Get existing finance record
     finance_record, _ = FinanceRecord.objects.get_or_create(
         content_type=ContentType.objects.get_for_model(TeacherPaidSalary),
@@ -283,11 +283,18 @@ def edit_teacher_salary_record(request, salary_id):
         }
     )
 
+    old_paid = salary_instance.paid_salary
+    old_loan = salary_instance.loan_amount
+    old_remain = salary_instance.remain_salary
+
+    loan = teacher_balance.total_loan + salary_instance.loan_amount
+
     if request.method == "POST":
         form = TeacherPaidSalaryForm(request.POST, instance=salary_instance)
         if form.is_valid():
             new_total = form.cleaned_data.get('amount')
             new_paid = form.cleaned_data.get('paid_salary')
+            new_remain = float(request.POST.get('remain'))
             new_loan = float(request.POST.get('loan_amount', 0))
 
             # Validation
@@ -295,27 +302,42 @@ def edit_teacher_salary_record(request, salary_id):
                 messages.warning(request, "جمع پرداخت و قرض نمی‌تواند بیشتر از مقدار کل باشد")
                 return redirect(referer)
 
-            # Save updated salary record
+            # Teacher Balance 
+
+            if new_paid < old_paid:
+                deffrence = old_paid - new_paid
+                teacher_balance.total_paid -= deffrence
+                teacher_balance.save()
+
+            if new_paid > old_paid:
+                deffrence = new_paid - old_paid
+                teacher_balance.total_paid += deffrence
+                teacher_balance.save()
+
+            if new_loan > old_loan:
+                loan_deffrence = new_loan - old_loan
+                teacher_balance.total_loan -= loan_deffrence
+                teacher_balance.save()
+
+            if new_remain < old_remain:
+                remain_deffrence = old_remain - new_remain
+                teacher_balance.total_remain -= remain_deffrence
+                teacher_balance.save()
+
+            if new_remain > old_remain:
+                remain_deffrence = new_remain - old_remain
+                teacher_balance.total_remain += remain_deffrence
+                teacher_balance.save()
+
+            if new_loan < old_loan:
+                loan_deffrence = old_loan - new_loan
+                teacher_balance.total_loan += loan_deffrence
+                teacher_balance.save()
+
             instance = form.save(commit=False)
             instance.remain_salary = new_total - new_paid - new_loan
             instance.loan_amount = new_loan
             instance.save()
-
-            # --- Recalculate teacher_balance from all salary records ---
-            all_salaries = TeacherPaidSalary.objects.filter(teacher=teacher)
-            total_paid = all_salaries.aggregate(total=Sum('paid_salary'))['total'] or 0
-            total_remain = all_salaries.aggregate(total=Sum('remain_salary'))['total'] or 0
-            total_loan = all_salaries.aggregate(total=Sum('loan_amount'))['total'] or 0
-
-            teacher_balance.total_paid = total_paid
-            teacher_balance.total_remain = total_remain
-            teacher_balance.total_loan = total_loan
-            teacher_balance.save()
-
-            # --- Update TotalBalance ---
-            total_expenses = TeacherPaidSalary.objects.aggregate(total=Sum('paid_salary'))['total'] or 0
-            total_balance.total_expenses = total_expenses
-            total_balance.save()
 
             # --- Update FinanceRecord ---
             finance_record.date = instance.date
@@ -336,8 +358,8 @@ def edit_teacher_salary_record(request, salary_id):
         'form': form,
         'salary_id': salary_instance,
         'teacher_balance': teacher_balance,
-        'total_balance': total_balance,
         'finance_record': finance_record,
+        'loan':loan,
     }
     return render(request, 'teachers/edit-teacher-paid-salary.html', context)
 

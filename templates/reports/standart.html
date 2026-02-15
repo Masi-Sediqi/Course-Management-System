@@ -15,40 +15,45 @@
       <div class="row justify-content-center g-4">
         
         <!-- 🔹 Students Report Card -->
-        <div class="col-md-4 col-sm-6">
-          <a href="{% url 'reports:students_reports' %}" class="report-card text-decoration-none">
-            <div class="card border-0 shadow-sm h-100 hover-card">
-              <img src="{% static 'images/Reports/student-repo.png' %}" class="card-img-top rounded-top" alt="Students Report">
-              <div class="card-body">
-                <h5 class="card-title text-center fw-bold text-info mb-2">
-                  <i class="fas fa-users me-1"></i> گزارشات شاگردان
-                </h5>
-                <p class="card-text text-muted small">
-                  مشاهده و مدیریت تمام شاگردان فعال، غیر فعال و قرضدار.
-                </p>
+        {% if system_permission and system_permission.student_report %}
+          <div class="col-md-4 col-sm-6">
+            <a href="{% url 'reports:students_reports' %}" class="report-card text-decoration-none">
+              <div class="card border-0 shadow-sm h-100 hover-card">
+                <img src="{% static 'images/Reports/student-repo.png' %}" class="card-img-top rounded-top" alt="Students Report">
+                <div class="card-body">
+                  <h5 class="card-title text-center fw-bold text-info mb-2">
+                    <i class="fas fa-users me-1"></i> گزارشات شاگردان
+                  </h5>
+                  <p class="card-text text-muted small">
+                    مشاهده و مدیریت تمام شاگردان فعال، غیر فعال و قرضدار.
+                  </p>
+                </div>
               </div>
-            </div>
-          </a>
-        </div>
+            </a>
+          </div>
+        {% endif %}
 
         <!-- 🔹 Teachers Report Card -->
-        <div class="col-md-4 col-sm-6">
-          <a href="{% url 'reports:teachers_reports' %}" class="report-card text-decoration-none">
-            <div class="card border-0 shadow-sm h-100 hover-card">
-              <img src="{% static 'images/Reports/teahcer-repo.jpg' %}" class="card-img-top rounded-top" alt="Teachers Report">
-              <div class="card-body">
-                <h5 class="card-title text-center fw-bold text-primary mb-2">
-                  <i class="fas fa-chalkboard-teacher me-1"></i> گزارشات استادان
-                </h5>
-                <p class="card-text text-muted small">
-                  دسترسی به تمام گزارشات استادان فعال، غیر فعال و دارای قرض.
-                </p>
+        {% if system_permission and system_permission.student_report %}
+          <div class="col-md-4 col-sm-6">
+            <a href="{% url 'reports:teachers_reports' %}" class="report-card text-decoration-none">
+              <div class="card border-0 shadow-sm h-100 hover-card">
+                <img src="{% static 'images/Reports/teahcer-repo.jpg' %}" class="card-img-top rounded-top" alt="Teachers Report">
+                <div class="card-body">
+                  <h5 class="card-title text-center fw-bold text-primary mb-2">
+                    <i class="fas fa-chalkboard-teacher me-1"></i> گزارشات استادان
+                  </h5>
+                  <p class="card-text text-muted small">
+                    دسترسی به تمام گزارشات استادان فعال، غیر فعال و دارای قرض.
+                  </p>
+                </div>
               </div>
-            </div>
-          </a>
-        </div>
+            </a>
+          </div>
+        {% endif %}
 
-           <div class="col-md-4 col-sm-6">
+        {% if system_permission and system_permission.student_report %}
+          <div class="col-md-4 col-sm-6">
           <a href="{% url 'reports:books_reports' %}" class="report-card text-decoration-none">
             <div class="card border-0 shadow-sm h-100 hover-card">
               <img src="{% static 'images/Reports/books-repo.jpeg' %}" class="card-img-top rounded-top" alt="Teachers Report">
@@ -62,23 +67,27 @@
               </div>
             </div>
           </a>
-        </div>
+          </div>
+        {% endif %}
 
-            <div class="col-md-4 col-sm-6">
-          <a href="{% url 'reports:income_expenses' %}" class="report-card text-decoration-none">
-            <div class="card border-0 shadow-sm h-100 hover-card">
-              <img src="{% static 'images/Reports/income-and-expenses-spot.jpg' %}" class="card-img-top rounded-top" alt="Teachers Report">
-              <div class="card-body">
-                <h5 class="card-title text-center fw-bold text-primary mb-2">
-                  <i class="fas fa-book me-1"></i> گزارشات عواید و مصارف
-                </h5>
-                <p class="card-text text-muted small">
-                  دسترسی به تمام گزارشات عواید و مصارف.
-                </p>
-              </div>
+        {% if system_permission and system_permission.student_report %}
+          <div class="col-md-4 col-sm-6">
+        <a href="{% url 'reports:income_expenses' %}" class="report-card text-decoration-none">
+          <div class="card border-0 shadow-sm h-100 hover-card">
+            <img src="{% static 'images/Reports/income-and-expenses-spot.jpg' %}" class="card-img-top rounded-top" alt="Teachers Report">
+            <div class="card-body">
+              <h5 class="card-title text-center fw-bold text-primary mb-2">
+                <i class="fas fa-book me-1"></i> گزارشات عواید و مصارف
+              </h5>
+              <p class="card-text text-muted small">
+                دسترسی به تمام گزارشات عواید و مصارف.
+              </p>
             </div>
-          </a>
-        </div>
+          </div>
+        </a>
+          </div>
+        {% endif %}
+      
       </div>
 
       

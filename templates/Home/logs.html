@@ -25,6 +25,112 @@
         padding: 1.5rem;
     }
     
+    /* Filter Section */
+    .filter-card {
+        background: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .filter-btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .filter-btn.active {
+        background: linear-gradient(135deg, #2E7D32, #1B5E20);
+        color: white;
+        border-color: #2E7D32;
+    }
+    
+    .filter-btn:not(.active) {
+        background: white;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+    
+    .filter-btn:hover:not(.active) {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: #495057;
+    }
+    
+    .date-input-group {
+        background: white;
+        border-radius: 2rem;
+        overflow: hidden;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .date-input-group:focus-within {
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+    }
+    
+    .date-input-group .input-group-text {
+        background: white;
+        border: none;
+        color: #2E7D32;
+    }
+    
+    .date-input-group input[type="date"] {
+        border: none;
+        padding: 0.75rem;
+        font-family: 'Vazirmatn', sans-serif;
+        direction: ltr;
+    }
+    
+    .date-input-group input[type="date"]:focus {
+        outline: none;
+        box-shadow: none;
+    }
+    
+    /* Style for date input placeholder */
+    .date-input-group input[type="date"]::-webkit-datetime-edit-text,
+    .date-input-group input[type="date"]::-webkit-datetime-edit-month-field,
+    .date-input-group input[type="date"]::-webkit-datetime-edit-day-field,
+    .date-input-group input[type="date"]::-webkit-datetime-edit-year-field {
+        color: #495057;
+    }
+    
+    .date-input-group input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent;
+        color: #2E7D32;
+        cursor: pointer;
+        opacity: 0.6;
+    }
+    
+    .date-input-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+    
+    .active-filter-badge {
+        background: linear-gradient(135deg, #2E7D32, #1B5E20);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
     /* Table Styling */
     .table thead {
         background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
@@ -105,37 +211,31 @@
     .action-create {
         background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
         color: white;
-        border: 1px solid #4CAF50;
     }
     
     .action-update {
         background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
         color: white;
-        border: 1px solid #2196F3;
     }
     
     .action-delete {
         background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
         color: white;
-        border: 1px solid #F44336;
     }
     
     .action-login {
         background: linear-gradient(135deg, #9C27B0 0%, #6A1B9A 100%);
         color: white;
-        border: 1px solid #9C27B0;
     }
     
     .action-logout {
         background: linear-gradient(135deg, #FF9800 0%, #EF6C00 100%);
         color: white;
-        border: 1px solid #FF9800;
     }
     
     .action-default {
         background: linear-gradient(135deg, #757575 0%, #424242 100%);
         color: white;
-        border: 1px solid #757575;
     }
     
     /* User Info */
@@ -256,6 +356,11 @@
         .table th, .table td {
             padding: 0.5rem;
         }
+        
+        .filter-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
     }
 </style>
 
@@ -276,13 +381,253 @@
                 <div class="d-flex align-items-center">
                     <span class="badge bg-white text-success mr-2" style="font-size: 1rem;">
                         <i class="fas fa-database ml-2"></i>
-                        {{ logs.count }} رکورد
+                        {{ total_count }} رکورد
                     </span>
                 </div>
             </div>
         </div>
 
         <div class="card-body">
+            <!-- Filter Section -->
+            <div class="filter-card">
+                <form method="GET" action="{% url 'home:history' %}" id="filterForm">
+                    <!-- Quick Filter Buttons -->
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <a href="?filter_type=all" class="filter-btn {% if filter_type == 'all' %}active{% endif %}">
+                            <i class="fas fa-list ms-1"></i>
+                            همه
+                        </a>
+                        <a href="?filter_type=today" class="filter-btn {% if filter_type == 'today' %}active{% endif %}">
+                            <i class="fas fa-calendar-day ms-1"></i>
+                            امروز
+                        </a>
+                        <a href="?filter_type=yesterday" class="filter-btn {% if filter_type == 'yesterday' %}active{% endif %}">
+                            <i class="fas fa-calendar-minus ms-1"></i>
+                            دیروز
+                        </a>
+                        <a href="?filter_type=last_week" class="filter-btn {% if filter_type == 'last_week' %}active{% endif %}">
+                            <i class="fas fa-calendar-week ms-1"></i>
+                            هفته اخیر
+                        </a>
+                        <a href="?filter_type=last_month" class="filter-btn {% if filter_type == 'last_month' %}active{% endif %}">
+                            <i class="fas fa-calendar-alt ms-1"></i>
+                            ماه اخیر
+                        </a>
+                        <a href="?filter_type=custom" class="filter-btn {% if filter_type == 'custom' %}active{% endif %}">
+                            <i class="fas fa-sliders-h ms-1"></i>
+                            بازه دلخواه
+                        </a>
+                    </div>
+
+                    <!-- Custom Date Range with HTML5 Date Inputs -->
+                    <div id="customDateRange" style="display: {% if filter_type == 'custom' %}block{% else %}none{% endif %};">
+          <div class="row g-3">
+    <div class="col-md-5">
+        <div class="date-input-group">
+            <label class="form-label text-muted small mb-1">از تاریخ</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 12px 0 0 12px;">
+                    <i class="fas fa-calendar-alt text-success"></i>
+                </span>
+                <input type="date" class="form-control border-start-0" id="start_date" name="start_date" 
+                       value="{{ request.GET.start_date|default:'' }}" 
+                       min="2020-01-01" max="2030-12-31"
+                       style="border-radius: 0 12px 12px 0; border-right: none; direction: ltr; font-family: monospace; padding: 0.6rem 0.75rem;"
+                       autocomplete="off">
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="date-input-group">
+            <label class="form-label text-muted small mb-1">تا تاریخ</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 12px 0 0 12px;">
+                    <i class="fas fa-calendar-check text-success"></i>
+                </span>
+                <input type="date" class="form-control border-start-0" id="end_date" name="end_date" 
+                       value="{{ request.GET.end_date|default:'' }}" 
+                       min="2020-01-01" max="2030-12-31"
+                       style="border-radius: 0 12px 12px 0; border-right: none; direction: ltr; font-family: monospace; padding: 0.6rem 0.75rem;"
+                       autocomplete="off">
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-success w-100 py-3" style="border-radius: 12px; background: linear-gradient(135deg, #2E7D32, #1B5E20); border: none; box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);">
+            <i class="fas fa-search me-2"></i>
+            فیلتر
+        </button>
+    </div>
+</div>
+
+<!-- Add custom styling for date inputs -->
+<style>
+    /* Custom date input styling */
+    .date-input-group {
+        background: white;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .date-input-group input[type="date"] {
+        background: white;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        color: #2c3e50;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .date-input-group input[type="date"]:focus {
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+        outline: none;
+    }
+    
+    .date-input-group .input-group-text {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        color: #2E7D32;
+        font-size: 1.1rem;
+    }
+    
+    /* Style the calendar picker icon */
+    .date-input-group input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent;
+        color: #2E7D32;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+    
+    .date-input-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+    
+    /* Style the date text */
+    .date-input-group input[type="date"]::-webkit-datetime-edit {
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        padding: 0 3px;
+    }
+    
+    .date-input-group input[type="date"]::-webkit-datetime-edit-year-field,
+    .date-input-group input[type="date"]::-webkit-datetime-edit-month-field,
+    .date-input-group input[type="date"]::-webkit-datetime-edit-day-field {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .date-input-group input[type="date"]::-webkit-datetime-edit-text {
+        color: #2E7D32;
+        font-weight: bold;
+    }
+    
+    /* Hover effect */
+    .date-input-group:hover input[type="date"] {
+        border-color: #2E7D32;
+    }
+    
+    .date-input-group:hover .input-group-text {
+        border-color: #2E7D32;
+        color: #1B5E20;
+    }
+    
+    /* Label styling */
+    .form-label {
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        margin-right: 5px;
+    }
+    
+    /* Button hover effect */
+    .btn-success {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-success::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-success:hover::before {
+        left: 100%;
+    }
+    
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(46, 125, 50, 0.4) !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .col-md-2.d-flex {
+            margin-top: 1rem;
+        }
+        
+        .date-input-group input[type="date"] {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+                        
+                        <div class="text-muted small mt-2">
+                            <i class="fas fa-info-circle ms-1"></i>
+                            تاریخ را به فرمت میلادی وارد کنید (YYYY-MM-DD)
+                        </div>
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger mt-3">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <input type="hidden" name="filter_type" id="filter_type" value="{{ filter_type }}">
+                </form>
+
+                <!-- Active Filter Display -->
+                {% if filter_type != 'all' %}
+                <div class="mt-3">
+                    <div class="active-filter-badge">
+                        <i class="fas fa-filter ms-1"></i>
+                        {% if filter_type == 'today' %}
+                            امروز ({{ today }})
+                        {% elif filter_type == 'yesterday' %}
+                            دیروز ({{ yesterday }})
+                        {% elif filter_type == 'last_week' %}
+                            هفته اخیر ({{ week_ago }} تا {{ today }})
+                        {% elif filter_type == 'last_month' %}
+                            ماه اخیر ({{ month_ago }} تا {{ today }})
+                        {% elif filter_type == 'custom' %}
+                            بازه دلخواه: 
+                            {% if request.GET.start_date %}{{ request.GET.start_date }}{% endif %}
+                            تا 
+                            {% if request.GET.end_date %}{{ request.GET.end_date }}{% endif %}
+                        {% endif %}
+                        <a href="?filter_type=all" class="text-white ms-2">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
             <!-- Logs Table -->
             <div class="table-responsive">
                 {% if logs %}
@@ -294,7 +639,7 @@
                             <th width="15%">عملیات</th>
                             <th width="30%">توضیحات</th>
                             <th width="15%">کاربر</th>
-                            <th width="20%">زمان</th>
+                            <th width="20%">زمان (Miladi)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -307,15 +652,19 @@
                                 <span class="badge-section">{{ log.section }}</span>
                             </td>
                             <td>
-                                {% with action_lower=log.action|lower %}
-                                <span class="action-badge">
+                                <span class="action-badge 
+                                    {% if 'create' in log.action|lower %}action-create
+                                    {% elif 'update' in log.action|lower or 'edit' in log.action|lower %}action-update
+                                    {% elif 'delete' in log.action|lower %}action-delete
+                                    {% elif 'login' in log.action|lower %}action-login
+                                    {% elif 'logout' in log.action|lower %}action-logout
+                                    {% else %}action-default{% endif %}">
                                     {{ log.action }}
                                 </span>
-                                {% endwith %}
                             </td>
                             <td class="description-cell" title="{{ log.description }}">
                                 {% if log.description %}
-                                    {{ log.description|truncatechars:40 }}
+                                    {{ log.description|truncatechars:50 }}
                                 {% else %}
                                     <span class="text-muted">بدون توضیح</span>
                                 {% endif %}
@@ -332,8 +681,8 @@
                             </td>
                             <td>
                                 <div class="timestamp">
-                                    <i class="fas fa-clock ml-2"></i>
-                                    {{ log.timestamp|date:"Y/m/d H:i" }}
+                                    <i class="fas fa-clock"></i>
+                                    {{ log.timestamp|date:"Y-m-d H:i" }}
                                 </div>
                             </td>
                         </tr>
@@ -345,8 +694,20 @@
                     <div class="empty-state-icon">
                         <i class="fas fa-history"></i>
                     </div>
-                    <h5 class="text-muted mb-3">هیچ لاگی ثبت نشده است</h5>
-                    <p class="text-muted mb-4">هنوز فعالیتی در سیستم ثبت نشده است</p>
+                    <h5 class="text-muted mb-3">هیچ لاگی یافت نشد</h5>
+                    <p class="text-muted mb-4">
+                        {% if filter_type != 'all' %}
+                            برای این بازه زمانی هیچ فعالیتی ثبت نشده است
+                        {% else %}
+                            هنوز فعالیتی در سیستم ثبت نشده است
+                        {% endif %}
+                    </p>
+                    {% if filter_type != 'all' %}
+                    <a href="?filter_type=all" class="btn btn-outline-success">
+                        <i class="fas fa-list ms-1"></i>
+                        نمایش همه
+                    </a>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -356,18 +717,75 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Handle filter button clicks
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const filterTypeInput = document.getElementById('filter_type');
+        const customDateRange = document.getElementById('customDateRange');
+        
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                const urlParams = new URLSearchParams(href.split('?')[1]);
+                const filterType = urlParams.get('filter_type');
+                
+                filterTypeInput.value = filterType;
+                
+                if (filterType === 'custom') {
+                    customDateRange.style.display = 'block';
+                } else {
+                    // Submit form for non-custom filters
+                    document.getElementById('filterForm').submit();
+                }
+            });
+        });
+
+        // Handle custom date form submission
+        const startDate = document.getElementById('start_date');
+        const endDate = document.getElementById('end_date');
+        
+        if (startDate && endDate) {
+            const form = document.getElementById('filterForm');
+            
+            form.addEventListener('submit', function(e) {
+                if (filterTypeInput.value === 'custom') {
+                    if (!startDate.value || !endDate.value) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'خطا',
+                            text: 'لطفاً تاریخ شروع و پایان را وارد کنید',
+                            confirmButtonText: 'باشه'
+                        });
+                    } else if (startDate.value > endDate.value) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'خطا',
+                            text: 'تاریخ شروع باید قبل از تاریخ پایان باشد',
+                            confirmButtonText: 'باشه'
+                        });
+                    }
+                }
+            });
+        }
+
         // Add hover effect to description cells
         const descriptionCells = document.querySelectorAll('.description-cell');
         descriptionCells.forEach(cell => {
             cell.addEventListener('mouseenter', function() {
                 const title = this.getAttribute('title');
                 if (title && title !== 'بدون توضیح') {
-                    // You can add a custom tooltip here if needed
+                    this.style.backgroundColor = '#f8f9fa';
                 }
+            });
+            
+            cell.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
             });
         });
         
-        // Add animation to new rows (if you want to highlight new logs)
+        // Add animation to new rows
         const rows = document.querySelectorAll('#logsTable tbody tr');
         if (rows.length > 0) {
             rows[0].classList.add('new-log');

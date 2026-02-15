@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<style>
+    /* Background image */
+    .background-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("{% static 'images/2.jpg' %}") no-repeat center center;
+        background-size: cover;
+        filter: brightness(0.6);
+        z-index: 1;
+    }
+
+    /* Glass effect card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(14px);
+        border-radius: 1.2rem;
+        color: white;
+        transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 246, 255, 0.3);
+        position: relative;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        border-color: rgba(0, 246, 255, 0.6);
+    }
+
+    /* Glow text */
+    .glow-text {
+        background: linear-gradient(90deg, #00f6ff, #ff00d4, #00ff9d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 8px rgba(0, 246, 255, 0.6);
+    }
+
+    /* Glass HR */
+    .glass-hr {
+        border: none;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 0 15px rgba(0, 246, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+
+    .glass-hr::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #00f6ff, #ff00d4, #00ff9d, #00f6ff);
+        animation: hrSlide 3s linear infinite;
+    }
+
+    @keyframes hrSlide {
+        0% { left: -100%; }
+        50% { left: 0%; }
+        100% { left: 100%; }
+    }
+
+    /* Backup Cards */
+    .backup-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 1.2rem;
+        padding: 1.2rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .backup-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 246, 255, 0.2);
+        border-color: rgba(0, 246, 255, 0.3);
+    }
+
+    .backup-icon {
+        width: 45px;
+        height: 45px;
+        background: rgba(0, 246, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #00f6ff;
+    }
+
+    .file-size {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 4px 12px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        color: #fff;
+    }
+
+    /* Spinner */
+    .spinner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .spinner-container {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(14px);
+        padding: 3rem;
+        border-radius: 2rem;
+        border: 1px solid rgba(0, 246, 255, 0.3);
+        color: white;
+    }
+
+    .backup-spinner {
+        width: 70px;
+        height: 70px;
+        border: 5px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #00f6ff;
+        border-right-color: #ff00d4;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-backup-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 2rem;
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .empty-icon {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    /* Module checkboxes */
+    .module-check-group {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        padding: 1rem;
+    }
+
+    .module-check-item {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: background 0.2s;
+    }
+
+    .module-check-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .module-check-item input {
+        margin-left: 0.5rem;
+    }
+
+    /* Total size badge */
+    .total-size-badge {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        padding: 0.5rem 1.2rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<div class="background-image"></div>
+
+<div class="container py-4" style="position: relative; z-index: 2; font-family: 'Vazirmatn', sans-serif;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4 mt-4">
+        <hr class="glass-hr flex-grow-1">
+        <h4 class="text-white mb-0 mx-3 glow-text">بخش بک اپ‌گیری سیستم</h4>
+        <hr class="glass-hr flex-grow-1">
+    </div>
+
+    <!-- Main Backup Card -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="glow-text mb-4">
+                    <i class="fas fa-database ms-2"></i>
+                    ایجاد بک اپ جدید
+                </h5>
+
+                <form method="POST" id="backupForm" onsubmit="showSpinner()">
+                    {% csrf_token %}
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label class="form-label text-white fw-bold">توضیحات (اختیاری)</label>
+                        {{ form.description }}
+                    </div>
+
+                    <!-- Modules Selection -->
+                    <div class="mb-4">
+                        <label class="form-label text-white fw-bold mb-3">ماژول‌های مورد نظر</label>
+                        <div class="module-check-group">
+                            <div class="row">
+                                {% for value, label in form.modules.field.choices %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="module-check-item">
+                                        <div class="form-check" style="margin-right: 19px;">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="modules" value="{{ value }}" 
+                                                   id="mod_{{ value }}" 
+                                                   {% if value in form.modules.value %}checked{% endif %}>
+                                            <label class="form-check-label text-white" for="mod_{{ value }}" style="margin-right: 19px;">
+                                                {{ label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if form.modules.errors %}
+                        <div class="text-danger mt-2">{{ form.modules.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1" style="background: linear-gradient(45deg, #00f6ff, #ff00d4); border: none;">
+                            <i class="fas fa-play ms-2"></i>
+                            شروع بک اپ‌گیری
+                        </button>
+                        <button type="reset" class="btn btn-outline-light btn-lg" onclick="resetForm()">
+                            <i class="fas fa-redo ms-2"></i>
+                            بازنشانی
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="glow-text mb-0">
+                    <i class="fas fa-history ms-2"></i>
+                    تاریخچه بک اپ‌گیری
+                </h5>
+                <div>
+                    <span class="total-size-badge me-2">
+                        <i class="fas fa-database ms-1"></i>
+                        حجم کل: {{ total_size|filesizeformat }}
+                    </span>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill">
+                        {{ backups.count }} بک اپ
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for backup in backups %}
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="backup-card">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="backup-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <span class="file-size">
+                                {{ backup.file_size|filesizeformat }}
+                            </span>
+                        </div>
+
+                        <h6 class="fw-bold mb-1 text-white">بک اپ #{{ backup.id }}</h6>
+                        <p class="small text-white-50 mb-2">
+                            <i class="fas fa-calendar ms-1"></i> 
+                            {{ backup.created_at|date:"Y/m/d H:i" }}
+                        </p>
+
+                        {% if backup.description %}
+                        <p class="small text-white-50 mb-2 bg-dark bg-opacity-25 p-2 rounded">
+                            <i class="fas fa-tag ms-1"></i> {{ backup.description }}
+                        </p>
+                        {% endif %}
+
+                        <div class="d-flex align-items-center small text-white-50 mb-3">
+                            <i class="fas fa-user ms-1"></i>
+                            {{ backup.created_by.name|default:'---' }}
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-globe ms-1"></i>
+                            {{ backup.ip_address|default:'---' }}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="{{ backup.backup_file.url }}" class="btn btn-sm btn-outline-info flex-grow-1" download>
+                                <i class="fas fa-download ms-1"></i>
+                                دانلود
+                            </a>
+                            <form method="POST" action="{% url 'settings:delete_backup' backup.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="empty-backup-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-database fa-3x text-white-50"></i>
+                        </div>
+                        <h5 class="text-white mb-3">هنوز بک اپی ایجاد نشده است</h5>
+                        <p class="text-white-50 mb-4">برای ایجاد اولین بک اپ، فرم بالا را پر کنید</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Spinner Overlay -->
+<div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner-container">
+        <div class="backup-spinner"></div>
+        <h5 class="spinner-text text-white">در حال ایجاد بک اپ...</h5>
+        <p class="text-white-50">لطفاً چند لحظه صبر کنید</p>
+    </div>
+</div>
+
+<script>
+    // Show spinner when form is submitted
+    function showSpinner() {
+        // Check if at least one module is selected
+        const checkboxes = document.querySelectorAll('input[name="modules"]:checked');
+        if (checkboxes.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'خطا',
+                text: 'حداقل یک ماژول را انتخاب کنید',
+                confirmButtonText: 'باشه'
+            });
+            return false;
+        }
+        
+        document.getElementById('spinnerOverlay').style.display = 'flex';
+        return true;
+    }
+
+    // Confirm delete
+    function confirmDelete(event) {
+        event.preventDefault();
+        const form = event.target.closest('form');
+        
+        Swal.fire({
+            title: 'آیا مطمئن هستید؟',
+            text: 'این عملیات قابل برگشت نیست!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'بله، حذف کن',
+            cancelButtonText: 'لغو'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        
+        return false;
+    }
+
+    // Reset form
+    function resetForm() {
+        document.querySelectorAll('input[name="modules"]').forEach(cb => cb.checked = true);
+        document.querySelector('input[name="description"]').value = '';
+    }
+
+    // Auto-hide spinner when page loads with messages
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('spinnerOverlay').style.display = 'none';
+    });
+
+    // SweetAlert for messages
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+
+{% endblock %}

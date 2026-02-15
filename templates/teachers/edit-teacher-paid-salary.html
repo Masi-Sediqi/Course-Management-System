@@ -7,122 +7,120 @@
         <div class="col-md-12">
             <ul class="nav nav-tabs justify-content-end mb-4" id="myTab" role="tablist">
             </ul>
-<div class="card">
-  <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
-        <!-- Loan Info Card -->
-        <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'teachers:edit_teacher_salary_record' salary_id.id %}">
-            {% csrf_token %}
+            <div class="card">
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="invoice" role="tabpanel" aria-labelledby="invoice-tab">
+                    <!-- Loan Info Card -->
+                    <form class="row g-3 needs-validation" novalidate method="post" action="{% url 'teachers:edit_teacher_salary_record' salary_id.id %}">
+                        {% csrf_token %}
 
-            <!-- Total Paid -->
-            <div class="col-md-12 d-flex align-items-center mb-3">
-                <label class="col-sm-4 col-form-label">تاریخ</label>
-                <div class="col-sm-8">
-                    {{ form.date }}
+                        <!-- Total Paid -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">تاریخ</label>
+                            <div class="col-sm-8">
+                                {{ form.date }}
+                            </div>
+                        </div>
+
+                        <!-- Remaining Balance -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label"> مقدار کل
+                                </label>
+                            <div class="col-sm-8">
+                                {{ form.amount }}
+                            </div>
+                        </div>
+                        {% if salary_id.loan_amount > 0 or teacher_balance.total_loan > 0 %}
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">مقدار قرض
+                                </label>
+                            <div class="col-sm-8">
+                                <input 
+                                    type="number" 
+                                    class="form-control" 
+                                    name="loan_amount"
+                                    value="{{ salary_id.loan_amount }}"
+                                >
+                            </div>
+                        </div>
+                        {% endif %}
+                        <!-- Remaining Balance -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">مقدار پرداخت شده
+                                </label>
+                            <div class="col-sm-8">
+                                {{ form.paid_salary }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">مقدار باقی مانده
+                                </label>
+                            <div class="col-sm-8">
+                                <input type="number" class="form-control" name="remain" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Remaining Balance -->
+                        <div class="col-md-12 d-flex align-items-center mb-3">
+                            <label class="col-sm-4 col-form-label">توضیحات</label>
+                            <div class="col-sm-8">
+                                {{ form.description }}
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="col-12 d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
+                                بستن
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-submit ml-2"></i>ارسال
+                            </button>
+                        </div>
+                    </form>
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+
+                        const totalInput = document.querySelector('#id_amount');
+                        const paidInput = document.querySelector('#id_paid_salary');
+                        const loanInput = document.querySelector('input[name="loan_amount"]');
+                        const remainInput = document.querySelector('input[name="remain"]');
+
+                        const maxLoan = {{ loan|default:0 }};
+
+                        function calculateRemain() {
+                            let total = parseFloat(totalInput.value) || 0;
+                            let paid = parseFloat(paidInput.value) || 0;
+                            let loan = parseFloat(loanInput ? loanInput.value : 0) || 0;
+
+                            // قرض بیشتر از قرض اصلی نشود
+                            if (loan > maxLoan) {
+                                loan = maxLoan;
+                                loanInput.value = maxLoan;
+                            }
+
+                            // مجموع پرداخت + قرض از amount بیشتر نشود
+                            if ((paid + loan) > total) {
+                                paid = total - loan;
+                                if (paid < 0) paid = 0;
+                                paidInput.value = paid;
+                            }
+
+                            let remain = total - paid - loan;
+                            remainInput.value = remain >= 0 ? remain.toFixed(2) : 0;
+                        }
+
+                        totalInput.addEventListener("input", calculateRemain);
+                        paidInput.addEventListener("input", calculateRemain);
+                        if (loanInput) loanInput.addEventListener("input", calculateRemain);
+
+                        calculateRemain();
+                    });
+                    </script>
                 </div>
             </div>
-
-            <!-- Remaining Balance -->
-            <div class="col-md-12 d-flex align-items-center mb-3">
-                <label class="col-sm-4 col-form-label"> مقدار کل
-                    </label>
-                <div class="col-sm-8">
-                    {{ form.amount }}
-                </div>
             </div>
-            {% if salary_id.loan_amount > 0 %}
-            <div class="col-md-12 d-flex align-items-center mb-3">
-                <label class="col-sm-4 col-form-label">مقدار قرض
-                    </label>
-                <div class="col-sm-8">
-                    <input 
-                        type="number" 
-                        class="form-control" 
-                        name="loan_amount"
-                        max="{{ teacher_balance.total_loan }}"
-                    >
-                </div>
-            </div>
-            {% endif %}
-            <!-- Remaining Balance -->
-            <div class="col-md-12 d-flex align-items-center mb-3">
-                <label class="col-sm-4 col-form-label">مقدار پرداخت شده
-                    </label>
-                <div class="col-sm-8">
-                    {{ form.paid_salary }}
-                </div>
-            </div>
-            
-            <div class="col-md-12 d-flex align-items-center mb-3">
-                <label class="col-sm-4 col-form-label">مقدار باقی مانده
-                    </label>
-                <div class="col-sm-8">
-                    <input type="number" class="form-control" name="remain" readonly>
-                </div>
-            </div>
-
-            <!-- Remaining Balance -->
-            <div class="col-md-12 d-flex align-items-center mb-3">
-                <label class="col-sm-4 col-form-label">توضیحات</label>
-                <div class="col-sm-8">
-                    {{ form.description }}
-                </div>
-            </div>
-
-            <!-- Submit Buttons -->
-            <div class="col-12 d-flex justify-content-end mt-3">
-                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">
-                    بستن
-                </button>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-submit ml-2"></i>ارسال
-                </button>
-            </div>
-        </form>
-        <script>
-        document.addEventListener("DOMContentLoaded", function() {
-
-            const totalInput = document.querySelector('#id_amount');
-            const paidInput = document.querySelector('#id_paid_salary');
-            const loanInput = document.querySelector('input[name="loan_amount"]');
-            const remainInput = document.querySelector('input[name="remain"]');
-
-            const maxLoan = {{ teacher_balance.total_loan|default:0 }};
-
-            function calculateRemain() {
-                let total = parseFloat(totalInput.value) || 0;
-                let paid = parseFloat(paidInput.value) || 0;
-                let loan = parseFloat(loanInput ? loanInput.value : 0) || 0;
-
-                // قرض بیشتر از قرض اصلی نشود
-                if (loan > maxLoan) {
-                    loan = maxLoan;
-                    loanInput.value = maxLoan;
-                }
-
-                // مجموع پرداخت + قرض از amount بیشتر نشود
-                if ((paid + loan) > total) {
-                    paid = total - loan;
-                    if (paid < 0) paid = 0;
-                    paidInput.value = paid;
-                }
-
-                let remain = total - paid - loan;
-                remainInput.value = remain >= 0 ? remain.toFixed(2) : 0;
-            }
-
-            totalInput.addEventListener("input", calculateRemain);
-            paidInput.addEventListener("input", calculateRemain);
-            if (loanInput) loanInput.addEventListener("input", calculateRemain);
-
-            calculateRemain();
-        });
-        </script>
-    </div>
-  </div>
-</div>
-
-
         </div>
     </div><!-- end of main-content -->
 </div>

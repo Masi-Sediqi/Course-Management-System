@@ -1,0 +1,616 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Add Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<link href="{% static 'css/sweet.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweet.js' %}"></script>
+
+<style>
+    /* About Page Styles */
+    .about-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #2980b9 100%);
+        color: white;
+        border-radius: 1.5rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 20px 40px rgba(52, 152, 219, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-header::before {
+        content: '\f2b9';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        bottom: -30px;
+        left: -30px;
+        font-size: 200px;
+        opacity: 0.1;
+        color: white;
+        transform: rotate(10deg);
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 2rem;
+        padding: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        height: 100%;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 45px rgba(52, 152, 219, 0.15);
+    }
+
+    .profile-image {
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        border: 4px solid white;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-image i {
+        font-size: 4rem;
+        color: white;
+    }
+
+    .tech-badge {
+        background: #f8fafc;
+        border-radius: 50px;
+        padding: 0.5rem 1.2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2c3e50;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin: 0.3rem;
+    }
+
+    .tech-badge i {
+        margin-left: 0.5rem;
+        font-size: 1.1rem;
+        color: #3498db;
+    }
+
+    .tech-badge:hover {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+    }
+
+    .tech-badge:hover i {
+        color: white;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 1.8rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+
+    .section-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(52, 152, 219, 0.1);
+        border-color: rgba(52, 152, 219, 0.2);
+    }
+
+    .section-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #3498db20, #2980b920);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #3498db;
+        margin-bottom: 1rem;
+    }
+
+    .contact-info {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-info::before {
+        content: '\f095';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        bottom: -20px;
+        right: -20px;
+        font-size: 150px;
+        opacity: 0.1;
+        color: white;
+        transform: rotate(-15deg);
+    }
+
+    .contact-item {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .contact-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(-5px);
+    }
+
+    .contact-item i {
+        font-size: 1.5rem;
+        margin-left: 1rem;
+    }
+
+    .experience-badge {
+        background: linear-gradient(135deg, #f1c40f, #f39c12);
+        color: white;
+        padding: 0.3rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .divider-custom {
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        border-radius: 2px;
+        margin: 1rem 0 2rem;
+    }
+
+    /* Animation */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+        .about-header {
+            padding: 2rem;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .profile-image i {
+            font-size: 3rem;
+        }
+        
+        .tech-badge {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    
+    <!-- About Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="about-header rounded-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="display-4 fw-bold mb-3">درباره ما</h1>
+                        <p class="lead mb-0 opacity-75" style="font-size: 1.3rem;">
+                            <i class="fas fa-quote-right ms-2"></i>
+                            سیستم مدیریت یکپارچه آموزشی با بهترین تکنولوژی‌های روز
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <div class="d-inline-flex align-items-center bg-white bg-opacity-10 rounded-pill py-2 px-4">
+                            <i class="fas fa-code fs-5 ms-2"></i>
+                            <span>نسخه ۱.۰</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-4">
+        <!-- Profile Column -->
+        <div class="col-lg-4">
+            <div class="profile-card text-center">
+                <div class="profile-image float-animation">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                
+                <h3 class="fw-bold mb-1">توسعه‌دهنده سیستم</h3>
+                <p class="text-muted mb-3">برنامه‌نویس فول استک</p>
+                
+                <div class="experience-badge mb-4">
+                    <i class="fas fa-star ms-1"></i>
+                    ۳.۵ سال تجربه
+                </div>
+                
+                <p class="text-muted mb-4" style="line-height: 1.8;">
+                    با افتخار این سیستم را با استفاده از آخرین تکنولوژی‌های روز طراحی و پیاده‌سازی کرده‌ام. 
+                    هدف من ایجاد سیستمی کارآمد و کاربرپسند برای مدیریت بهتر مراکز آموزشی است.
+                </p>
+                
+                <!-- Technology Badges - Now Visible! -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    <span class="tech-badge">
+                        <i class="fab fa-python"></i>
+                        Python
+                    </span>
+                    <span class="tech-badge">
+                        <i class="fab fa-bootstrap"></i>
+                        Bootstrap
+                    </span>
+                    <span class="tech-badge">
+                        <i class="fab fa-js"></i>
+                        JavaScript
+                    </span>
+                    <span class="tech-badge">
+                        <i class="fab fa-html5"></i>
+                        HTML5
+                    </span>
+                    <span class="tech-badge">
+                        <i class="fab fa-css3-alt"></i>
+                        CSS3
+                    </span>
+                    <span class="tech-badge">
+                        <i class="fab fa-django"></i>
+                        Django
+                    </span>
+                </div>
+                
+                <div class="divider-custom mx-auto"></div>
+                
+                <div class="text-start">
+                    <p class="mb-2">
+                        <i class="fas fa-check-circle text-success ms-2"></i>
+                        بیش از ۳۰ پروژه موفق
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-check-circle text-success ms-2"></i>
+                        تخصص در Django و Python
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-check-circle text-success ms-2"></i>
+                        طراحی ریسپانسیو و مدرن
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info Column -->
+        <div class="col-lg-8">
+            <div class="row g-4">
+                <!-- System Description -->
+                <div class="col-12">
+                    <div class="section-card">
+                        <h4 class="fw-bold mb-3">
+                            <i class="fas fa-cog text-primary ms-2"></i>
+                            درباره سیستم
+                        </h4>
+                        <p class="text-muted" style="line-height: 1.9; font-size: 1.05rem;">
+                            این سیستم مدیریت آموزشی با استفاده از زبان برنامه‌نویسی پایتون و فریمورک جنگو توسعه یافته است. 
+                            فرانت‌اند سیستم با استفاده از Bootstrap، CSS، JavaScript و HTML5 طراحی شده تا تجربه کاربری 
+                            روان و جذابی را ارائه دهد. تمامی بخش‌های سیستم به صورت کاملاً ریسپانسیو طراحی شده‌اند تا در 
+                            تمام دستگاه‌ها به خوبی نمایش داده شوند.
+                        </p>
+
+                        <!-- Internet Connection Notice -->
+                        <div class="alert alert-info d-flex align-items-center mt-3 p-3" style="background: rgba(52, 152, 219, 0.1); border: 1px solid rgba(52, 152, 219, 0.3); border-radius: 1rem;">
+                            <div class="me-3">
+                                <i class="fas fa-globe fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <strong class="text-primary d-block mb-1">نکته مهم در مورد اتصال اینترنت:</strong>
+                                <p class="mb-0 text-muted small" style="line-height: 1.7;">
+                                    <i class="fas fa-check-circle text-success ms-1"></i>
+                                    اگر سیستم شما به اینترنت متصل باشد، تمام آیکون‌ها و استایل‌های زیبا به صورت کامل نمایش داده می‌شود.
+                                    <br>
+                                    <i class="fas fa-exclamation-triangle text-warning ms-1"></i>
+                                    در صورت قطع بودن اینترنت، سیستم همچنان به کار خود ادامه می‌دهد اما برخی آیکون‌ها و استایل‌های 
+                                    وابسته به اینترنت (مانند Font Awesome) ممکن است به درستی نمایش داده نشوند. تمام عملکردهای اصلی 
+                                    سیستم بدون اینترنت نیز قابل استفاده هستند.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Optional: Add internet connection status indicator -->
+                        <div class="d-flex justify-content-end mt-2">
+                            <div class="connection-status" id="connectionStatus">
+                                <span class="badge bg-success" id="onlineStatus" style="display: none;">
+                                    <i class="fas fa-wifi ms-1"></i>
+                                    متصل به اینترنت
+                                </span>
+                                <span class="badge bg-secondary" id="offlineStatus" style="display: none;">
+                                    <i class="fas fa-exclamation-circle ms-1"></i>
+                                    آفلاین - حالت آفلاین
+                                </span>
+                            </div>
+                        </div>
+
+                        <script>
+                            // Check internet connection status
+                            function updateConnectionStatus() {
+                                const onlineStatus = document.getElementById('onlineStatus');
+                                const offlineStatus = document.getElementById('offlineStatus');
+                                
+                                if (navigator.onLine) {
+                                    onlineStatus.style.display = 'inline-block';
+                                    offlineStatus.style.display = 'none';
+                                } else {
+                                    onlineStatus.style.display = 'none';
+                                    offlineStatus.style.display = 'inline-block';
+                                }
+                            }
+                            
+                            // Initial check
+                            updateConnectionStatus();
+                            
+                            // Listen for connection changes
+                            window.addEventListener('online', updateConnectionStatus);
+                            window.addEventListener('offline', updateConnectionStatus);
+                        </script>
+                    </div>
+                </div>
+
+                <!-- System Sections -->
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش دانش‌آموزان</h5>
+                        <p class="text-muted small">مدیریت اطلاعات دانش‌آموزان، ثبت‌نام، شهریه، خرید کتاب و ارتقاء سطح</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">Student</span>
+                            <span class="badge bg-light text-dark me-1">Fees</span>
+                            <span class="badge bg-light text-dark">BuyBook</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش معلمان</h5>
+                        <p class="text-muted small">مدیریت اطلاعات معلمان، تنخواه، معاشات، مرخصی‌ها و حاضری</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">Teacher</span>
+                            <span class="badge bg-light text-dark me-1">Salary</span>
+                            <span class="badge bg-light text-dark">Loan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش کلاس‌ها</h5>
+                        <p class="text-muted small">مدیریت کلاس‌ها، برنامه درسی، ظرفیت و لیست دانش‌آموزان هر کلاس</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">SubClass</span>
+                            <span class="badge bg-light text-dark me-1">Schedule</span>
+                            <span class="badge bg-light text-dark">Room</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش کتابخانه</h5>
+                        <p class="text-muted small">مدیریت کتاب‌ها، خرید کتاب، موجودی و فروش کتاب به دانش‌آموزان</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">Item</span>
+                            <span class="badge bg-light text-dark me-1">Purchase</span>
+                            <span class="badge bg-light text-dark">TotalItem</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش تأمین‌کنندگان</h5>
+                        <p class="text-muted small">مدیریت تأمین‌کنندگان، خریدها و محاسبات با تأمین‌کنندگان</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">Supplier</span>
+                            <span class="badge bg-light text-dark">Calculation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش عواید و مصارف</h5>
+                        <p class="text-muted small">مدیریت عواید و مصارف، گزارش‌گیری و تحلیل مالی</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">Income</span>
+                            <span class="badge bg-light text-dark me-1">Expense</span>
+                            <span class="badge bg-light text-dark">Balance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش حساب‌ها</h5>
+                        <p class="text-muted small">مدیریت کاربران سیستم، دسترسی‌ها و تنظیمات امنیتی</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">User</span>
+                            <span class="badge bg-light text-dark me-1">Role</span>
+                            <span class="badge bg-light text-dark">Permission</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-card">
+                        <div class="section-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">بخش گزارشات</h5>
+                        <p class="text-muted small">گزارشات متنوع از تمام بخش‌های سیستم</p>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-dark me-1">Reports</span>
+                            <span class="badge bg-light text-dark me-1">Statistics</span>
+                            <span class="badge bg-light text-dark">Export</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="contact-info">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h3 class="fw-bold mb-3">تماس با من</h3>
+                        <p class="mb-4 opacity-75">برای مشاوره، سفارش پروژه یا هرگونه سوال با من در تماس باشید</p>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="contact-item d-flex align-items-center">
+                                    <i class="fas fa-phone-alt"></i>
+                                    <div>
+                                        <small class="d-block opacity-75">شماره تماس</small>
+                                        <span class="fw-bold fs-5" dir="ltr">۰۷۶۶۶۵۷۸۴۹</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="contact-item d-flex align-items-center">
+                                    <i class="fab fa-whatsapp"></i>
+                                    <div>
+                                        <small class="d-block opacity-75">واتساپ</small>
+                                        <span class="fw-bold fs-5" dir="ltr">۰۷۸۶۴۷۴۶۰۵</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="contact-item d-flex align-items-center">
+                                    <i class="fas fa-envelope"></i>
+                                    <div>
+                                        <small class="d-block opacity-75">ایمیل</small>
+                                        <span class="fw-bold">masisediqi9@gmail.com</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="contact-item d-flex align-items-center">
+                                    <i class="fab fa-telegram"></i>
+                                    <div>
+                                        <small class="d-block opacity-75">تلگرام</small>
+                                        <span class="fw-bold">masisediqi@</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 text-lg-center mt-4 mt-lg-0">
+                        <div class="bg-white bg-opacity-10 rounded-4 p-4">
+                            <h5 class="mb-3">ساعات پاسخگویی</h5>
+                            <div class="d-flex justify-content-around">
+                                <div class="text-center">
+                                    <i class="fas fa-sun fa-2x mb-2 opacity-75"></i>
+                                    <div>شنبه - چهارشنبه</div>
+                                    <small>۹ صبح - ۵ عصر</small>
+                                </div>
+                                <div class="text-center">
+                                    <i class="fas fa-moon fa-2x mb-2 opacity-75"></i>
+                                    <div>پنجشنبه</div>
+                                    <small>۹ صبح - ۱۲ ظهر</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <p class="text-muted small">
+                <i class="fas fa-copyright me-1"></i>
+                تمامی حقوق برای توسعه‌دهنده محفوظ است - ۱۴۰۴
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add smooth scroll animation
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.section-card, .profile-card, .contact-item');
+        
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.5s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100 * index);
+        });
+    });
+</script>
+
+{% endblock %}

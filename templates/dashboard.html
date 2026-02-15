@@ -1,12 +1,12 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 {% load static %}
-{% block content%}
+{% block content %}
 
 <link href="{% static 'css/sweet.css' %}" rel="stylesheet">
 <script src="{% static 'js/sweet.js' %}"></script>
 
 <style>
-    /* Main Dashboard Styles */
+    /* Notification Page Styles */
     :root {
         --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         --success-gradient: linear-gradient(135deg, #1cc88a 0%, #179b77 100%);
@@ -15,667 +15,949 @@
         --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
         --dark-gradient: linear-gradient(135deg, #5a5c69 0%, #3a3b45 100%);
     }
-    
-    .dashboard-header {
+
+    /* Header Styles */
+    .notification-header {
         background: var(--primary-gradient);
         color: white;
-        border-radius: 0.75rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(102, 126, 234, 0.3);
-    }
-    
-    .stat-card {
-        border: none;
-        border-radius: 0.75rem;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        position: relative;
         overflow: hidden;
+    }
+
+    .notification-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .header-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .live-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 20px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 1rem;
+    }
+
+    .live-dot {
+        width: 10px;
+        height: 10px;
+        background: #1cc88a;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 8px;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+    }
+
+    /* Stats Cards */
+    .stat-card-modern {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.03);
         height: 100%;
+        position: relative;
+        overflow: hidden;
     }
-    
-    .stat-card:hover {
+
+    .stat-card-modern::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .stat-card-modern:hover {
         transform: translateY(-5px);
-        box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
     }
-    
-    .stat-icon {
+
+    .stat-icon-modern {
         width: 60px;
         height: 60px;
-        border-radius: 12px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.8rem;
         margin-left: 1rem;
     }
-    
-    .stat-content {
-        flex: 1;
+
+    /* Urgency Levels */
+    .urgency-high {
+        background: linear-gradient(135deg, rgba(231, 74, 59, 0.1) 0%, rgba(231, 74, 59, 0.05) 100%);
+        color: #e74a3b;
     }
-    
-    /* Stat Card Colors */
-    .stat-primary {
-        border-left: 4px solid #4e73df;
-        background: white;
+
+    .urgency-medium {
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1) 0%, rgba(246, 194, 62, 0.05) 100%);
+        color: #f6c23e;
     }
-    
-    .stat-success {
-        border-left: 4px solid #1cc88a;
-        background: white;
+
+    .urgency-low {
+        background: linear-gradient(135deg, rgba(28, 200, 138, 0.1) 0%, rgba(28, 200, 138, 0.05) 100%);
+        color: #1cc88a;
     }
-    
-    .stat-warning {
-        border-left: 4px solid #f6c23e;
+
+    /* Notification Table */
+    .notification-table-container {
         background: white;
-    }
-    
-    .stat-danger {
-        border-left: 4px solid #e74a3b;
-        background: white;
-    }
-    
-    .stat-info {
-        border-left: 4px solid #36b9cc;
-        background: white;
-    }
-    
-    .stat-dark {
-        border-left: 4px solid #5a5c69;
-        background: white;
-    }
-    
-    /* Charts and Graphs */
-    .chart-container {
-        background: white;
-        border-radius: 0.75rem;
+        border-radius: 1.5rem;
         padding: 1.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        height: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.03);
     }
-    
-    .activity-card {
+
+    .notification-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .notification-table thead th {
+        padding: 1rem 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #5a5c69;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .notification-table tbody tr {
+        background: #f8f9fc;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .notification-table tbody tr:hover {
         background: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        height: 100%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        transform: scale(1.01);
     }
-    
-    /* Activity Timeline */
-    .activity-timeline {
-        position: relative;
-        padding-right: 2rem;
+
+    .notification-table tbody td {
+        padding: 1.2rem 1.5rem;
+        vertical-align: middle;
+        border: none;
+        font-size: 0.95rem;
     }
-    
-    .activity-item {
-        position: relative;
-        padding-bottom: 1.5rem;
-        padding-right: 2rem;
-        border-right: 2px solid #e3e6f0;
+
+    .notification-table tbody td:first-child {
+        border-top-right-radius: 1rem;
+        border-bottom-right-radius: 1rem;
     }
-    
-    .activity-item:last-child {
-        border-right: none;
+
+    .notification-table tbody td:last-child {
+        border-top-left-radius: 1rem;
+        border-bottom-left-radius: 1rem;
     }
-    
-    .activity-dot {
-        position: absolute;
-        right: -8px;
-        top: 0;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 0 0 2px #4e73df;
+
+    /* Student Avatar */
+    .student-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 1.2rem;
     }
-    
-    .activity-dot.success {
-        box-shadow: 0 0 0 2px #1cc88a;
+
+    .avatar-bg-1 {
+        background: linear-gradient(135deg, #667eea, #764ba2);
     }
-    
-    .activity-dot.warning {
-        box-shadow: 0 0 0 2px #f6c23e;
+
+    .avatar-bg-2 {
+        background: linear-gradient(135deg, #1cc88a, #179b77);
     }
-    
-    .activity-dot.danger {
-        box-shadow: 0 0 0 2px #e74a3b;
+
+    .avatar-bg-3 {
+        background: linear-gradient(135deg, #f6c23e, #dda20a);
     }
-    
-    /* Progress Bars */
-    .progress-sm {
+
+    .avatar-bg-4 {
+        background: linear-gradient(135deg, #e74a3b, #be2617);
+    }
+
+    .avatar-bg-5 {
+        background: linear-gradient(135deg, #36b9cc, #258391);
+    }
+
+    /* Status Badges */
+    .status-badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .status-badge-modern i {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    .badge-expiring-soon {
+        background: linear-gradient(135deg, #fff3cd, #ffe69c);
+        color: #856404;
+    }
+
+    .badge-expiring-today {
+        background: linear-gradient(135deg, #f8d7da, #f5c2c7);
+        color: #721c24;
+    }
+
+    .badge-expiring-tomorrow {
+        background: linear-gradient(135deg, #fff3cd, #ffe69c);
+        color: #856404;
+    }
+
+    .badge-expiring-week {
+        background: linear-gradient(135deg, #d1e7dd, #badbcc);
+        color: #0f5132;
+    }
+
+    /* Progress Bar */
+    .progress-modern {
         height: 8px;
         border-radius: 4px;
+        background: #e9ecef;
+        overflow: hidden;
+        width: 120px;
     }
-    
-    /* Animation Classes */
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-        100% {
-            transform: scale(1);
-        }
+
+    .progress-bar-modern {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
     }
-    
-    @keyframes float {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-    
-    .pulse {
-        animation: pulse 2s infinite;
-    }
-    
-    .float {
-        animation: float 3s ease-in-out infinite;
-    }
-    
-    /* Recent Activity Badge */
-    .recent-badge {
-        position: absolute;
-        top: -8px;
-        left: -8px;
+
+    .progress-bar-danger {
         background: #e74a3b;
+    }
+
+    .progress-bar-warning {
+        background: #f6c23e;
+    }
+
+    .progress-bar-success {
+        background: #1cc88a;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         color: white;
-        width: 20px;
-        height: 20px;
+        transition: all 0.3s ease;
+        margin: 0 3px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-pay {
+        background: linear-gradient(135deg, #1cc88a, #179b77);
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #36b9cc, #258391);
+    }
+
+    .btn-remind {
+        background: linear-gradient(135deg, #f6c23e, #dda20a);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        background: #f8f9fc;
+        color: #5a5c69;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state-notification {
+        text-align: center;
+        padding: 4rem;
+        background: #f8f9fc;
+        border-radius: 1.5rem;
+    }
+
+    .empty-icon {
+        width: 120px;
+        height: 120px;
+        background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
-        animation: pulse 1.5s infinite;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     }
-    
-    /* Quick Actions */
-    .quick-action-btn {
-        background: white;
-        border: 1px solid #e3e6f0;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-    
-    .quick-action-btn:hover {
-        border-color: #4e73df;
-        transform: translateY(-3px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-    }
-    
+
     /* Responsive */
     @media (max-width: 768px) {
-        .dashboard-header {
+        .notification-header {
             padding: 1.5rem;
         }
-        
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 1.5rem;
+
+        .header-icon-wrapper {
+            width: 60px;
+            height: 60px;
+        }
+
+        .notification-table thead {
+            display: none;
+        }
+
+        .notification-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .notification-table tbody td {
+            display: block;
+            text-align: right;
+            padding: 0.75rem 1rem;
+        }
+
+        .notification-table tbody td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+            color: #5a5c69;
         }
     }
 </style>
 
 <div style="font-family: 'Vazirmatn', sans-serif;">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
+    <!-- Notification Header -->
+    <div class="notification-header">
         <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="mb-2">{{ system_title }}</h1>
-            </div>
-            <div class="col-md-4 text-left">
-                <div class="bg-white text-primary rounded-pill py-2 px-3 d-inline-block">
-                    <i class="fas fa-chart-line ml-2"></i>
-                    <span id="liveTime"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards Row 1 -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-primary">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(78, 115, 223, 0.1) 0%, rgba(78, 115, 223, 0.05) 100%); color: #4e73df;">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-primary font-weight-bold">شاگردان جدید امروز</div>
-                            <div class="h2 mb-0 font-weight-bold">۱۲</div>
-                            <small class="text-muted">+۲ از دیروز</small>
-                        </div>
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon-wrapper ml-4">
+                        <i class="fas fa-bell fa-2x text-white"></i>
                     </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-primary" style="width: 75%"></div>
+                    <div>
+                        <h1 class="mb-2 display-6 fw-bold">مرکز اعلانات</h1>
+                        <p class="mb-0 opacity-75">
+                            <i class="fas fa-exclamation-circle ml-2"></i>
+                            پیگیری وضعیت سیستم
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-success">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(28, 200, 138, 0.1) 0%, rgba(28, 200, 138, 0.05) 100%); color: #1cc88a;">
-                            <i class="fas fa-money-check-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-success font-weight-bold">فیس‌های پرداخت شده</div>
-                            <div class="h2 mb-0 font-weight-bold">۵۴,۰۰۰</div>
-                            <small class="text-muted">افغانی</small>
-                        </div>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-success" style="width: 85%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-warning">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(246, 194, 62, 0.1) 0%, rgba(246, 194, 62, 0.05) 100%); color: #f6c23e;">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-warning font-weight-bold">معاش پرداخت شده</div>
-                            <div class="h2 mb-0 font-weight-bold">۲۳,۰۰۰</div>
-                            <small class="text-muted">افغانی</small>
-                        </div>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-warning" style="width: 60%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-danger">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(231, 74, 59, 0.1) 0%, rgba(231, 74, 59, 0.05) 100%); color: #e74a3b;">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-danger font-weight-bold">سود خالص امروز</div>
-                            <div class="h2 mb-0 font-weight-bold">۳۱,۰۰۰</div>
-                            <small class="text-muted">افغانی</small>
-                        </div>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-danger" style="width: 90%"></div>
-                    </div>
+            <div class="col-lg-4 text-lg-left mt-4 mt-lg-0">
+                <div class="live-badge d-inline-flex align-items-center">
+                    <span class="live-dot ml-2"></span>
+                    <span class="ml-2">آپدیت لحظه‌ای</span>
+                    <span id="liveTime" class="mr-2"></span>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Notifications Table -->
+    <div class="notification-table-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0">
+                <i class="fas fa-list-ul ml-2 text-primary"></i>
+                لیست اعلانات 
+            </h5>
+            <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                <i class="fas fa-bell ml-1"></i>
+                {{ notifications|length }} اعلانات فعال
+            </span>
+            <span class="badge bg-light text-dark px-3 py-2 rounded-pill" onclick="markAllAsRead()">
+                <i class="fas fa-check-double me-1"></i>
+                {{ notifications|length }} علامت همه به عنوان خوانده شده
+            </span>
+        </div>
 
-    <!-- Statistics Cards Row 2 -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-info">
-                <div class="card-body">
+        <!-- Notification Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stats-card-modern p-3">
                     <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(54, 185, 204, 0.1) 0%, rgba(54, 185, 204, 0.05) 100%); color: #36b9cc;">
-                            <i class="fas fa-book"></i>
+                        <div class="stats-icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                            <i class="fas fa-bell text-primary fa-2x"></i>
                         </div>
-                        <div class="stat-content">
-                            <div class="text-info font-weight-bold">کتاب‌های فروخته شده</div>
-                            <div class="h2 mb-0 font-weight-bold">۸</div>
-                            <small class="text-muted">امروز</small>
-                        </div>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-info" style="width: 45%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-dark">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(90, 92, 105, 0.1) 0%, rgba(90, 92, 105, 0.05) 100%); color: #5a5c69;">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-dark font-weight-bold">کل شاگردان فعال</div>
-                            <div class="h2 mb-0 font-weight-bold">۱۵۶</div>
-                            <small class="text-muted">در سیستم</small>
-                        </div>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-dark" style="width: 78%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-primary pulse">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(78, 115, 223, 0.1) 0%, rgba(78, 115, 223, 0.05) 100%); color: #4e73df;">
-                            <i class="fas fa-sign-in-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-primary font-weight-bold">لاگین‌های امروز</div>
-                            <div class="h2 mb-0 font-weight-bold">۹</div>
-                            <small class="text-muted">کاربران سیستم</small>
-                        </div>
-                        <span class="recent-badge">۳</span>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-primary" style="width: 65%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card stat-success float">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, rgba(28, 200, 138, 0.1) 0%, rgba(28, 200, 138, 0.05) 100%); color: #1cc88a;">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="text-success font-weight-bold">درصد پر بودن کلاس‌ها</div>
-                            <div class="h2 mb-0 font-weight-bold">۸۷٪</div>
-                            <small class="text-muted">میانگین پر بودن</small>
-                        </div>
-                    </div>
-                    <div class="progress progress-sm mt-3">
-                        <div class="progress-bar bg-success" style="width: 87%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts and Activity Section -->
-    <div class="row mb-4">
-        <!-- Income/Expense Chart -->
-        <div class="col-xl-8 mb-4">
-            <div class="chart-container">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="font-weight-bold text-primary">
-                        <i class="fas fa-chart-bar ml-2"></i>
-                        نمودار درآمد و مصارف هفته
-                    </h5>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sm btn-outline-primary active">هفته</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary">ماه</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary">سال</button>
-                    </div>
-                </div>
-                
-                <!-- Simple Chart (Static) -->
-                <div class="text-center py-5">
-                    <div class="row align-items-end justify-content-center mb-4">
-                        <div class="col-auto mx-2">
-                            <div class="bg-primary rounded" style="width: 40px; height: 200px;"></div>
-                            <div class="mt-2">شنبه</div>
-                        </div>
-                        <div class="col-auto mx-2">
-                            <div class="bg-primary rounded" style="width: 40px; height: 180px;"></div>
-                            <div class="mt-2">یکشنبه</div>
-                        </div>
-                        <div class="col-auto mx-2">
-                            <div class="bg-primary rounded" style="width: 40px; height: 240px;"></div>
-                            <div class="mt-2">دوشنبه</div>
-                        </div>
-                        <div class="col-auto mx-2">
-                            <div class="bg-primary rounded" style="width: 40px; height: 220px;"></div>
-                            <div class="mt-2">سه‌شنبه</div>
-                        </div>
-                        <div class="col-auto mx-2">
-                            <div class="bg-primary rounded" style="width: 40px; height: 260px;"></div>
-                            <div class="mt-2">چهارشنبه</div>
-                        </div>
-                        <div class="col-auto mx-2">
-                            <div class="bg-primary rounded" style="width: 40px; height: 280px;"></div>
-                            <div class="mt-2">پنجشنبه</div>
-                        </div>
-                        <div class="col-auto mx-2">
-                            <div class="bg-success rounded" style="width: 40px; height: 320px;"></div>
-                            <div class="mt-2">امروز</div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-center align-items-center">
-                        <div class="d-flex align-items-center mr-4">
-                            <div class="bg-primary rounded mr-2" style="width: 20px; height: 20px;"></div>
-                            <span>درآمد</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="bg-danger rounded mr-2" style="width: 20px; height: 20px;"></div>
-                            <span>مصارف</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="col-xl-4 mb-4">
-            <div class="activity-card">
-                <h5 class="font-weight-bold text-primary mb-4">
-                    <i class="fas fa-history ml-2"></i>
-                    فعالیت‌های اخیر
-                </h5>
-                
-                <div class="activity-timeline">
-                    <div class="activity-item">
-                        <div class="activity-dot success"></div>
-                        <div class="mb-2">
-                            <strong>محمد کریمی</strong> فیس پرداخت کرد
-                            <small class="d-block text-muted">۲ دقیقه قبل - ۵,۰۰۰ افغانی</small>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-dot"></div>
-                        <div class="mb-2">
-                            <strong>استاد احمدی</strong> معاش دریافت کرد
-                            <small class="d-block text-muted">۱۵ دقیقه قبل - ۱۰,۰۰۰ افغانی</small>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-dot warning"></div>
-                        <div class="mb-2">
-                            <strong>علی محمدی</strong> ثبت نام جدید
-                            <small class="d-block text-muted">۱ ساعت قبل - کلاس انگلیسی</small>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-dot danger"></div>
-                        <div class="mb-2">
-                            <strong>زهرا حسینی</strong> کتاب خریداری کرد
-                            <small class="d-block text-muted">۲ ساعت قبل - کتاب Basic 1</small>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-dot"></div>
-                        <div class="mb-2">
-                            <strong>مدیر سیستم</strong> وارد سیستم شد
-                            <small class="d-block text-muted">۳ ساعت قبل</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions and System Status -->
-    <div class="row">
-        <!-- Quick Actions -->
-        <div class="col-xl-6 mb-4">
-            <div class="chart-container">
-                <h5 class="font-weight-bold text-primary mb-4">
-                    <i class="fas fa-bolt ml-2"></i>
-                    اقدامات سریع
-                </h5>
-                
-                <div class="row">
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-primary mb-2">
-                                <i class="fas fa-user-plus fa-2x"></i>
-                            </div>
-                            <small class="text-dark">ثبت شاگرد جدید</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-success mb-2">
-                                <i class="fas fa-money-bill-wave fa-2x"></i>
-                            </div>
-                            <small class="text-dark">پرداخت فیس</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-warning mb-2">
-                                <i class="fas fa-user-tie fa-2x"></i>
-                            </div>
-                            <small class="text-dark">پرداخت معاش</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-info mb-2">
-                                <i class="fas fa-book fa-2x"></i>
-                            </div>
-                            <small class="text-dark">فروش کتاب</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-danger mb-2">
-                                <i class="fas fa-chart-line fa-2x"></i>
-                            </div>
-                            <small class="text-dark">گزارش مالی</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-dark mb-2">
-                                <i class="fas fa-cogs fa-2x"></i>
-                            </div>
-                            <small class="text-dark">تنظیمات</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-primary mb-2">
-                                <i class="fas fa-print fa-2x"></i>
-                            </div>
-                            <small class="text-dark">پرینت گزارش</small>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="quick-action-btn text-decoration-none">
-                            <div class="text-success mb-2">
-                                <i class="fas fa-download fa-2x"></i>
-                            </div>
-                            <small class="text-dark">اکسل خروجی</small>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- System Status -->
-        <div class="col-xl-6 mb-4">
-            <div class="activity-card">
-                <h5 class="font-weight-bold text-primary mb-4">
-                    <i class="fas fa-server ml-2"></i>
-                    وضعیت سیستم
-                </h5>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-success rounded-circle mr-2" style="width: 10px; height: 10px;"></div>
-                            <span>پایگاه داده</span>
-                        </div>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-success" style="width: 95%"></div>
-                        </div>
-                        <small class="text-muted">۹۵٪ - سالم</small>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-success rounded-circle mr-2" style="width: 10px; height: 10px;"></div>
-                            <span>فضای ذخیره‌سازی</span>
-                        </div>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-success" style="width: 65%"></div>
-                        </div>
-                        <small class="text-muted">۶۵٪ - ۱۳GB از ۲۰GB</small>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-warning rounded-circle mr-2" style="width: 10px; height: 10px;"></div>
-                            <span>ترافیک امروز</span>
-                        </div>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-warning" style="width: 78%"></div>
-                        </div>
-                        <small class="text-muted">۷۸٪ - ۲.۴GB</small>
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-danger rounded-circle mr-2 pulse" style="width: 10px; height: 10px;"></div>
-                            <span>کاربران آنلاین</span>
-                        </div>
-                        <div class="progress progress-sm">
-                            <div class="progress-bar bg-danger" style="width: 30%"></div>
-                        </div>
-                        <small class="text-muted">۳ کاربر آنلاین</small>
-                    </div>
-                </div>
-                
-                <div class="mt-4 pt-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-0">آخرین به‌روزرسانی</h6>
-                            <small class="text-muted">۲ ساعت قبل</small>
+                            <span class="text-muted small d-block">کل اعلانات</span>
+                            <span class="fw-bold fs-4">{{ notifications|length }}</span>
                         </div>
-                        <div class="badge badge-success">به روز</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card-modern p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon-wrapper bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                            <i class="fas fa-envelope text-warning fa-2x"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">خوانده نشده</span>
+                            <span class="fw-bold fs-4">{{ unread_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card-modern p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">خوانده شده</span>
+                            <span class="fw-bold fs-4">{{ read_count }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Notification Cards View (Alternative to table) -->
+            <div class="row g-4" id="notificationGrid">
+                {% for not in notifications %}
+                {% with obj=not.content_object %}
+                <div class="col-xl-4 col-lg-6 col-md-6 notification-item" data-id="{{ not.id }}">
+                    <div class="card notification-card h-100 border-0 shadow-hover rounded-4 {% if not.is_read %}read-notification{% else %}unread-notification{% endif %}">
+                        <div class="card-body p-4">
+                            
+                            <!-- Header with Status and Date -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    {% if not.is_read %}
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i> خوانده شده
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning rounded-pill px-3 py-2 pulse-badge">
+                                        <i class="fas fa-bell me-1"></i> جدید
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Notification Icon and Title -->
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="notification-icon-wrapper me-3 
+                                    {% if not.is_read %}bg-light{% else %}bg-warning bg-opacity-10{% endif %} rounded-circle p-3">
+                                    {% if not.is_read %}
+                                    <i class="fas fa-bell-slash text-secondary fa-2x"></i>
+                                    {% else %}
+                                    <i class="fas fa-bell text-warning fa-2x"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">{{ not.title }}</h5>
+                                    <p class="text-muted small mb-0">{{ not.message|truncatechars:50 }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Related Object Details -->
+                            <div class="related-details bg-light bg-opacity-50 rounded-3 p-3 mb-3">
+                                <div class="row g-2">
+                                    {% if obj.student %}
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">دانش‌آموز</small>
+                                        <span class="fw-bold">{{ obj.student.name }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if obj.item %}
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">کتاب</small>
+                                        <span class="fw-bold">{{ obj.item.name }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if obj.st_class %}
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">صنف</small>
+                                        <span class="fw-bold">{{ obj.st_class.name }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if obj.end_date %}
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">تاریخ پایان</small>
+                                        <span class="fw-bold text-danger">{{ obj.end_date }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if obj.total_remain_item is not None %}
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">باقی‌مانده</small>
+                                        <span class="fw-bold {% if obj.total_remain_item < 10 %}text-danger{% else %}text-success{% endif %}">
+                                            {{ obj.total_remain_item }} عدد
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 justify-content-end mt-3">
+                                {% if not.is_read %}
+                                <a href="{% url 'home:mark_as_unread' not.id %}" class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                                    <i class="fas fa-envelope me-1"></i> علامت به عنوان نخوانده
+                                </a>
+                                {% else %}
+                                <a href="{% url 'home:mark_as_read' not.id %}" class="btn btn-sm btn-success rounded-pill px-3">
+                                    <i class="fas fa-check-circle me-1"></i> علامت به عنوان خوانده شده
+                                </a>
+                                {% endif %}
+                                <a href="{% if obj.student %}{% url 'students:student_detail' obj.student.id %}{% elif obj.item %}{% url 'library:item_info' obj.item.id %}{% else %}#{% endif %}" 
+                                class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="fas fa-eye me-1"></i> مشاهده
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+                {% empty %}
+                <!-- Empty State -->
+                <div class="col-12">
+                    <div class="empty-state-modern text-center p-5">
+                        <div class="empty-icon-wrapper mb-4">
+                            <i class="fas fa-bell-slash fa-5x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">هیچ اعلانی وجود ندارد</h4>
+                        <p class="text-muted mb-0">در حال حاضر هیچ اعلانی برای نمایش وجود ندارد</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Table View (Optional - if you prefer table) -->
+            <div class="card mt-4 d-none" id="tableView">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table notification-table-modern">
+                            <thead>
+                                <tr>
+                                    <th>وضعیت</th>
+                                    <th>عنوان</th>
+                                    <th>پیام</th>
+                                    <th>مرتبط با</th>
+                                    <th>صنف</th>
+                                    <th>تاریخ</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for not in notifications %}
+                                {% with obj=not.content_object %}
+                                <tr class="{% if not.is_read %}read-row{% else %}unread-row{% endif %}">
+                                    <td>
+                                        {% if not.is_read %}
+                                        <span class="badge bg-secondary">خوانده شده</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">جدید</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ not.title }}</strong>
+                                    </td>
+                                    <td>
+                                        <small>{{ not.message|truncatechars:30 }}</small>
+                                    </td>
+                                    <td>
+                                        {% if obj.student %}
+                                        {{ obj.student.name }}
+                                        {% elif obj.item %}
+                                        {{ obj.item.name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if obj.st_class %}
+                                        {{ obj.st_class.name }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light rounded-circle" type="button" 
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm p-2">
+                                                {% if not.is_read %}
+                                                <li>
+                                                    <a class="dropdown-item rounded-2" href="{% url 'home:mark_as_unread' not.id %}">
+                                                        <i class="fas fa-envelope text-warning me-2"></i> علامت به عنوان نخوانده
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li>
+                                                    <a class="dropdown-item rounded-2" href="{% url 'home:mark_as_read' not.id %}">
+                                                        <i class="fas fa-check-circle text-success me-2"></i> علامت به عنوان خوانده شده
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+                                                <li>
+                                                    <a class="dropdown-item rounded-2" href="{% if obj.student %}{% url 'students:student_detail' obj.student.id %}{% elif obj.item %}{% url 'library:item_info' obj.item.id %}{% else %}#{% endif %}">
+                                                        <i class="fas fa-eye text-primary me-2"></i> مشاهده
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Custom CSS -->
+        <style>
+            /* Modern Stats Card */
+            .stats-card-modern {
+                background: white;
+                border-radius: 16px;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+                transition: all 0.3s ease;
+            }
+
+            .stats-card-modern:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+            }
+
+            .stats-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Notification Cards */
+            .notification-card {
+                transition: all 0.3s ease;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            .shadow-hover {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .shadow-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            /* Unread Notification Style */
+            .unread-notification {
+                background: linear-gradient(145deg, #ffffff, #fff9e6);
+                border-right: 4px solid #ffc107;
+                animation: subtleGlow 2s ease-in-out infinite;
+            }
+
+            .unread-notification .notification-icon-wrapper {
+                animation: bellShake 2s ease-in-out infinite;
+            }
+
+            @keyframes subtleGlow {
+                0% {
+                    box-shadow: 0 0 0px rgba(255, 193, 7, 0.2);
+                }
+                50% {
+                    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+                }
+                100% {
+                    box-shadow: 0 0 0px rgba(255, 193, 7, 0.2);
+                }
+            }
+
+            @keyframes bellShake {
+                0%, 100% {
+                    transform: rotate(0);
+                }
+                10% {
+                    transform: rotate(10deg);
+                }
+                20% {
+                    transform: rotate(-10deg);
+                }
+                30% {
+                    transform: rotate(5deg);
+                }
+                40% {
+                    transform: rotate(-5deg);
+                }
+                50% {
+                    transform: rotate(0);
+                }
+            }
+
+            /* Read Notification Style */
+            .read-notification {
+                background: white;
+                border-right: 4px solid #6c757d;
+                opacity: 0.85;
+            }
+
+            .read-notification:hover {
+                opacity: 1;
+            }
+
+            /* Pulse Badge for New Notifications */
+            .pulse-badge {
+                animation: pulse 1.5s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            /* Related Details Section */
+            .related-details {
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                transition: all 0.2s ease;
+            }
+
+            .related-details:hover {
+                background: #f8f9fa !important;
+            }
+
+            /* Table Styles */
+            .notification-table-modern {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0 8px;
+            }
+
+            .notification-table-modern th {
+                padding: 12px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #6c757d;
+                border: none;
+            }
+
+            .notification-table-modern td {
+                padding: 15px 12px;
+                background: white;
+                border: none;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            }
+
+            .notification-table-modern tr:first-child td:first-child {
+                border-radius: 12px 0 0 12px;
+            }
+
+            .notification-table-modern tr:first-child td:last-child {
+                border-radius: 0 12px 12px 0;
+            }
+
+            .unread-row td {
+                background: linear-gradient(145deg, #fff9e6, #ffffff);
+                border-right: 3px solid #ffc107;
+                font-weight: 500;
+            }
+
+            .read-row td {
+                opacity: 0.7;
+            }
+
+            .read-row:hover td {
+                opacity: 1;
+            }
+
+            /* Empty State */
+            .empty-state-modern {
+                background: linear-gradient(145deg, #ffffff, #f8f9fc);
+                border-radius: 30px;
+                border: 2px dashed #dee2e6;
+            }
+
+            .empty-icon-wrapper {
+                width: 120px;
+                height: 120px;
+                background: linear-gradient(145deg, #f8f9fc, #e9ecef);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto;
+            }
+
+            /* RTL Fixes */
+            .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+            .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+            .me-3 { margin-left: 1rem !important; margin-right: 0 !important; }
+            .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
+            .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .notification-icon-wrapper {
+                    width: 50px;
+                    height: 50px;
+                }
+                
+                .notification-icon-wrapper i {
+                    font-size: 1.5rem !important;
+                }
+            }
+        </style>
+
+        <!-- JavaScript -->
+        <script>
+            // View toggle functionality
+            function showCards() {
+                document.getElementById('notificationGrid').classList.remove('d-none');
+                document.getElementById('tableView').classList.add('d-none');
+            }
+
+            function showTable() {
+                document.getElementById('notificationGrid').classList.add('d-none');
+                document.getElementById('tableView').classList.remove('d-none');
+            }
+
+            // Mark all as read
+            function markAllAsRead() {
+                Swal.fire({
+                    title: 'علامت همه به عنوان خوانده شده',
+                    text: 'آیا می‌خواهید همه اعلانات را به عنوان خوانده شده علامت بزنید؟',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'بله، علامت بزن',
+                    cancelButtonText: 'لغو'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{% url 'home:mark_all_as_read' %}";
+                    }
+                });
+            }
+
+            // Real-time unread counter update (optional)
+            function updateUnreadCount() {
+                fetch('/api/notifications/unread-count/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const unreadBadges = document.querySelectorAll('.unread-count');
+                        unreadBadges.forEach(badge => {
+                            badge.textContent = data.count;
+                        });
+                    });
+            }
+
+            // Auto-refresh every 30 seconds
+            setInterval(updateUnreadCount, 30000);
+        </script>
+
     </div>
 </div>
 
@@ -686,62 +968,93 @@
         const timeString = now.toLocaleTimeString('fa-IR');
         document.getElementById('liveTime').textContent = timeString;
     }
-    
-    // Update time every second
+
     setInterval(updateLiveTime, 1000);
-    updateLiveTime(); // Initial call
-    
-    // Add hover effects to stat cards
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add pulse animation to login card every 10 seconds
-        setInterval(function() {
-            const loginCard = document.querySelector('.stat-card.stat-primary.pulse');
-            if (loginCard) {
-                loginCard.classList.remove('pulse');
-                void loginCard.offsetWidth; // Trigger reflow
-                loginCard.classList.add('pulse');
-            }
-        }, 10000);
-        
-        // Add random number animations to stat cards
-        const statCards = document.querySelectorAll('.stat-card');
-        statCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                const numbers = this.querySelectorAll('.h2');
-                numbers.forEach(number => {
-                    const original = number.textContent;
-                    if (!isNaN(original.replace(/[^0-9]/g, ''))) {
-                        // Add a small random fluctuation for visual effect
-                        const originalNum = parseInt(original.replace(/[^0-9]/g, ''));
-                        const random = Math.floor(Math.random() * 5) + 1;
-                        const newNum = originalNum + random;
-                        number.textContent = newNum.toLocaleString('fa-IR');
-                        
-                        // Restore original after leaving
-                        setTimeout(() => {
-                            number.textContent = original;
-                        }, 500);
+    updateLiveTime();
+
+    // Filter tabs functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const notificationRows = document.querySelectorAll('.notification-row');
+        const searchInput = document.getElementById('studentSearch');
+
+        // Filter by tab
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                // Remove active class from all tabs
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.textContent.trim();
+
+                notificationRows.forEach(row => {
+                    const urgency = row.dataset.urgency;
+                    const status = row.dataset.status;
+
+                    if (filter === 'همه اعلانات') {
+                        row.style.display = '';
+                    } else if (filter === 'فوری' && urgency === 'high') {
+                        row.style.display = '';
+                    } else if (filter === 'امروز' && status === 'expiring-today') {
+                        row.style.display = '';
+                    } else if (filter === 'این هفته' && (status === 'expiring-tomorrow' || status === 'expiring-week')) {
+                        row.style.display = '';
+                    } else if (filter === 'پرداخت شده') {
+                        // This would need actual payment status
+                        row.style.display = 'none';
+                    } else {
+                        row.style.display = 'none';
                     }
                 });
             });
         });
-        
-        // Add click effect to quick action buttons
-        const quickActions = document.querySelectorAll('.quick-action-btn');
-        quickActions.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase().trim();
+
+                notificationRows.forEach(row => {
+                    const studentName = row.querySelector('.fw-bold').textContent.toLowerCase();
+                    const studentCode = row.querySelector('.text-muted').textContent.toLowerCase();
+
+                    if (studentName.includes(searchTerm) || studentCode.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Action button animations
+        const actionBtns = document.querySelectorAll('.action-btn');
+        actionBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
-                const icon = this.querySelector('i');
-                icon.style.transform = 'scale(1.2)';
+                this.style.transform = 'scale(0.95)';
                 setTimeout(() => {
-                    icon.style.transform = 'scale(1)';
-                }, 300);
-                
-                // Show loading effect
-                this.style.opacity = '0.7';
-                setTimeout(() => {
-                    this.style.opacity = '1';
-                }, 300);
+                    this.style.transform = '';
+                }, 200);
+
+                // Show notification based on button type
+                const action = this.classList.contains('btn-pay') ? 'پرداخت' :
+                    this.classList.contains('btn-view') ? 'مشاهده' : 'یادآوری';
+
+                alert(`عملیات ${action} با موفقیت انجام شد`);
+            });
+        });
+
+        // Row click effect
+        notificationRows.forEach(row => {
+            row.addEventListener('click', function (e) {
+                // Don't trigger if clicking on action buttons
+                if (!e.target.closest('.action-btn')) {
+                    this.style.backgroundColor = '#ffffff';
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                    }, 300);
+                }
             });
         });
     });

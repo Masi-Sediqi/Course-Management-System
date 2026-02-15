@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from management.models import *
 from django.http import HttpResponse
 from django.contrib import messages
+import jdatetime
 # Create your views here.
 
 def students_registration(request):
@@ -509,6 +510,28 @@ def student_purchased_items(request, student_id, item_id):
                 if total_item:
                     total_item.total_remain_item -= amount
                     total_item.save()
+
+                    # 🔔 اگر موجودی کم شد → ساخت Notification
+                    if total_item.total_remain_item <= 4:
+
+                        content_type = ContentType.objects.get_for_model(TotalItem)
+
+                        # جلوگیری از ثبت چندباره
+                        notif_exists = Notification.objects.filter(
+                            content_type=content_type,
+                            object_id=total_item.id,
+                            is_read=False
+                        ).exists()
+
+                        if not notif_exists:
+                            Notification.objects.create(
+                                title="کمبود موجودی کتاب",
+                                message=f"موجودی {item.name} به {total_item.total_remain_item} عدد رسید",
+                                notification_date=jdatetime.date.today().strftime("%Y/%m/%d"),
+                                content_type=content_type,
+                                object_id=total_item.id   # 👈 ذخیره آیتم در Generic FK
+                            )
+
 
                 # Update StudentBalance
                 if student_balance:

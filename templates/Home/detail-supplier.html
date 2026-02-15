@@ -362,116 +362,57 @@
                             </td>
                             <td class="text-center">
 
-                            {% if only_one_balance and calc.colculation_type == 'بیلانس' %}
+                                {% if calc.colculation_type == 'خریداری' %}
+                                    <!-- خریداری = همیشه قفل -->
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
 
-                                <!-- فقط وقتی یک balance داریم -->
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="{% url 'home:edit_balance' calc.id %}">
-                                            <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
-                                        </a>
-                                        <a class="dropdown-item text-danger" data-toggle="modal"
+                                {% elif calc.colculation_type == 'پرداخت' %}
+                                    <!-- همه پرداخت ها قابل ویرایش -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{% url 'home:edit_balance' calc.id %}">
+                                                <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
+                                            </a>
+                                            <a class="dropdown-item text-danger" data-toggle="modal"
                                             data-target="#deleteCalculationModal{{ calc.id }}">
-                                            <i class="fas fa-trash ml-2"></i>حذف
-                                        </a>
-                                    </div>
-                                </div>
-
-                                <div class="modal fade" id="deleteCalculationModal{{ calc.id }}" tabindex="-1" role="dialog">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">تأیید حذف محاسبه</h5>
-                                                <button type="button" class="close" data-dismiss="modal">
-                                                    <span>&times;</span>
-                                                </button>
-                                            </div>
-
-                                            <div class="modal-body">
-                                                <p>آیا مطمئن هستید که می‌خواهید این محاسبه بیلانس را حذف کنید؟</p>
-                                                <div class="alert alert-warning">
-                                                    <i class="fas fa-exclamation-triangle ml-2"></i>
-                                                    این عملیات قابل بازگشت نیست.
-                                                </div>
-                                            </div>
-
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                    انصراف
-                                                </button>
-                                                <a href="{% url 'home:delete_balance' calc.id %}" class="btn btn-danger">
-                                                    حذف
-                                                </a>
-                                            </div>
-
+                                                <i class="fas fa-trash ml-2"></i>حذف
+                                            </a>
                                         </div>
                                     </div>
-                                </div>
 
-                            {% elif calc.colculation_type == 'پرداخت' and latest_payment and calc.id == latest_payment.id %}
 
-                                <!-- فقط آخرین payment قابل ویرایش -->
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="{% url 'home:edit_balance' calc.id %}">
-                                            <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
-                                        </a>
-                                        <a class="dropdown-item text-danger" data-toggle="modal"
+
+                                {% elif calc.colculation_type == 'بیلانس' and only_one_balance %}
+                                    <!-- فقط وقتی یک بیلانس داریم -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{% url 'home:edit_balance' calc.id %}">
+                                                <i class="fas fa-edit ml-2 text-warning"></i>ویرایش
+                                            </a>
+                                            <a class="dropdown-item text-danger" data-toggle="modal"
                                             data-target="#deleteCalculationModal{{ calc.id }}">
-                                            <i class="fas fa-trash ml-2"></i>حذف
-                                        </a>
-                                    </div>
-                                </div>
-
-                                <div class="modal fade" id="deleteCalculationModal{{ calc.id }}" tabindex="-1" role="dialog">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">تأیید حذف محاسبه</h5>
-                                                <button type="button" class="close" data-dismiss="modal">
-                                                    <span>&times;</span>
-                                                </button>
-                                            </div>
-
-                                            <div class="modal-body">
-                                                <p>آیا مطمئن هستید که می‌خواهید این محاسبه بیلانس را حذف کنید؟</p>
-                                                <div class="alert alert-warning">
-                                                    <i class="fas fa-exclamation-triangle ml-2"></i>
-                                                    این عملیات قابل بازگشت نیست.
-                                                </div>
-                                            </div>
-
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                    انصراف
-                                                </button>
-                                                <a href="{% url 'home:delete_balance' calc.id %}" class="btn btn-danger">
-                                                    حذف
-                                                </a>
-                                            </div>
-
+                                                <i class="fas fa-trash ml-2"></i>حذف
+                                            </a>
                                         </div>
                                     </div>
-                                </div>
 
-                            {% else %}
-
-                                <!-- بقیه همه قفل -->
-                                <span class="text-muted">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-
-                            {% endif %}
+                                {% else %}
+                                    <!-- بقیه قفل -->
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                {% endif %}
 
                             </td>
+                            <div class="modal fade" id="deleteCalculationModal{{ calc.id }}" tabindex="-1" role="dialog"> <div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title">تأیید حذف محاسبه</h5> <button type="button" class="close" data-dismiss="modal"> <span>&times;</span> </button> </div> <div class="modal-body"> <p>آیا مطمئن هستید که می‌خواهید این محاسبه بیلانس را حذف کنید؟</p> <div class="alert alert-warning"> <i class="fas fa-exclamation-triangle ml-2"></i> این عملیات قابل بازگشت نیست. </div> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-dismiss="modal"> انصراف </button> <a href="{% url 'home:delete_balance' calc.id %}" class="btn btn-danger"> حذف </a> </div> </div> </div> </div>
                         </tr>
                         {% endfor %}
                         {% else %}

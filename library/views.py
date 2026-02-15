@@ -171,107 +171,120 @@ def purchase_item(request, id):
     return render(request, 'library/buy-book-again.html', context)
 
 
+def recalc_supplier_balances(supplier):
+    records = ColculationWithSupplier.objects.filter(
+        supplier=supplier
+    ).order_by('created_at')
+
+    current_balance = 0
+
+    for r in records:
+        if r.colculation_type == "بیلانس":
+            current_balance = r.remain_price
+
+        elif r.colculation_type == "پرداخت":
+            current_balance -= r.paid_price
+
+        elif r.colculation_type == "خریداری":
+            current_balance += r.remain_price
+
+        r.remain_balance = current_balance
+        r.save()
+
+
 def delete_purchase_item(request, id):
     purchase = get_object_or_404(Purchase, id=id)
     item = purchase.item
+    supplier = purchase.supplier
 
     item_balance = TotalItem.objects.filter(item=item).last()
 
-    # Update TotalItem
+    # Update stock
     item_balance.total_item -= purchase.number
     item_balance.total_remain_item -= purchase.number
     item_balance.save()
 
-    # Delete related finance record
+    # Delete finance record
     content_type = ContentType.objects.get_for_model(Purchase)
     FinanceRecord.objects.filter(
         content_type=content_type,
         object_id=purchase.id
     ).delete()
 
+    # Delete supplier calculation linked to this purchase
+    ColculationWithSupplier.objects.filter(
+        purchase_item=purchase
+    ).delete()
+
+    # 🔥 Recalculate ALL balances for this supplier
+    recalc_supplier_balances(supplier)
+
     SystemLog.objects.create(
         section="کتابخانه",
-        action=f"حذف خریداری کتاب:",
+        action="حذف خریداری کتاب:",
         description=f"خریداری کتاب {item.name} حذف شد",
         user=request.user if request.user.is_authenticated else None
     )
 
-    messages.success(request, 'ریکارد موفقانه حذف شد')
     purchase.delete()
-    return redirect("library:item_info", id=item.id)  
+
+    messages.success(request, 'ریکارد موفقانه حذف شد')
+    return redirect("library:item_info", id=item.id)
 
 
 def edit_purchase_item(request, id):
     purchase = get_object_or_404(Purchase, id=id)
     item = purchase.item
+    supplier = purchase.supplier
     item_balance = TotalItem.objects.filter(item=item).last()
 
     if request.method == "POST":
         form = PurchaseForm(request.POST, instance=purchase)
         if form.is_valid():
+
             old_number = purchase.number
-            old_paid_price = purchase.paid_price
-            old_remain_price = purchase.remain_price
 
-            updated_purchase = form.save(commit=False)
+            updated = form.save(commit=False)
+
             new_number = int(request.POST.get('number'))
-            new_paid_price = float(request.POST.get('paid_price'))
-            new_remain_price = float(request.POST.get('remain_price'))
+            updated.number = new_number
+            updated.save()
 
-            updated_purchase.number = new_number
-            updated_purchase.paid_price = new_paid_price
-            updated_purchase.remain_price = new_remain_price
-            updated_purchase.save()
-
-            # Update TotalItem
+            # Update stock
             item_balance.total_item += (new_number - old_number)
             item_balance.total_remain_item += (new_number - old_number)
             item_balance.save()
 
-            # -------------------------
-            # UPDATE FINANCE RECORD
-            # -------------------------
+            # Update finance
             content_type = ContentType.objects.get_for_model(Purchase)
-            finance_record = FinanceRecord.objects.filter(
+            finance = FinanceRecord.objects.filter(
                 content_type=content_type,
                 object_id=purchase.id
-            ).last()
+            ).first()
 
-            if finance_record:
-                finance_record.amount = float(updated_purchase.paid_price)
-                finance_record.date = updated_purchase.date
-                finance_record.title = f"خرید کتاب {item.name}"
-                finance_record.description = (
-                    f"خرید {updated_purchase.number} جلد کتاب {item.name} "
-                    f"از تامین کننده {updated_purchase.supplier.name}"
-                )
-                finance_record.save()
+            if finance:
+                finance.amount = float(updated.paid_price)
+                finance.date = updated.date
+                finance.save()
 
-            # -------------------------
-            # Recreate supplier calculation
-            # -------------------------
-            delete_old_colculation = ColculationWithSupplier.objects.get(purchase_item=purchase)
-            delete_old_colculation.delete()
+            # Delete old supplier calculation
+            ColculationWithSupplier.objects.filter(
+                purchase_item=purchase
+            ).delete()
 
-            latest_col = ColculationWithSupplier.objects.filter(
-                supplier=updated_purchase.supplier
-            ).last()
-
-            if latest_col:
-                remain_balance = latest_col.remain_balance - old_remain_price + new_remain_price
-            else:
-                remain_balance = new_remain_price
-
+            # Create new calculation
             ColculationWithSupplier.objects.create(
-                supplier=updated_purchase.supplier,
+                supplier=updated.supplier,
                 colculation_type='خریداری',
-                total_price=float(updated_purchase.total_price),
-                paid_price=float(updated_purchase.paid_price),
-                remain_price=float(updated_purchase.remain_price),
-                remain_balance=remain_balance,
-                purchase_item=updated_purchase,
-                date=updated_purchase.date
+                total_price=float(updated.total_price),
+                paid_price=float(updated.paid_price),
+                remain_price=float(updated.remain_price),
+                purchase_item=updated,
+                date=updated.date
             )
+
+            # 🔥 Recalculate ALL balances
+            recalc_supplier_balances(updated.supplier)
 
             SystemLog.objects.create(
                 section="کتابخانه",
@@ -285,9 +298,8 @@ def edit_purchase_item(request, id):
     else:
         form = PurchaseForm(instance=purchase)
 
-    context = {
+    return render(request, 'library/edit-purchase-item.html', {
         'form': form,
         'purchase': purchase,
         'item': item,
-    }
-    return render(request, 'library/edit-purchase-item.html', context)
+    })

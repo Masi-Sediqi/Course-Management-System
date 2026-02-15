@@ -1,16 +1,107 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from students.models import *
 from account.models import *
 from management.models import *
 from .forms import *
+from django.utils import timezone
+from settings.models import *
 from django.db.models import Sum
 from django.contrib import messages
+import jdatetime
+from decimal import Decimal
+from django.db import transaction
+
+# views.py
+from django.utils import timezone
+from datetime import datetime, timedelta
+from django.db.models import Q
+from .forms import DateFilterForm
+import jdatetime
 # Create your views here.
+
 
 @login_required
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    today = timezone.now().date()
+
+    notifications = Notification.objects.all().order_by('is_read', '-created_at')
+
+    visible_notifications = []
+    unread_count = 0
+    read_count = 0
+
+    for n in notifications:
+        obj = n.content_object
+        show = False
+
+        if obj:
+            # Tuition fee notification (Jalali end_date)
+            if hasattr(obj, "end_date") and obj.end_date:
+                try:
+                    # Convert Jalali string to Gregorian date
+                    day, month, year = map(int, obj.end_date.split('/'))
+                    jalali_date = jdatetime.date(year, month, day)
+                    due_date = jalali_date.togregorian()
+
+                    if due_date <= today:
+                        show = True
+                except Exception as e:
+                    print("Date conversion error:", e)
+
+            # Low stock notification
+            elif hasattr(obj, "total_remain_item"):
+                if obj.total_remain_item < 10:
+                    show = True
+
+        if show:
+            visible_notifications.append(n)
+            if not n.is_read:
+                unread_count += 1
+            else:
+                read_count += 1
+
+    context = {
+        "notifications": visible_notifications,
+        "unread_count": unread_count,
+        "read_count": read_count,
+        "total_count": len(visible_notifications),
+    }
+
+    return render(request, 'dashboard.html', context)
+
+
+@login_required
+def mark_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+    notification.is_read = True
+    notification.read_at = timezone.now()
+    notification.save()
+    
+    messages.success(request, 'اعلان با موفقیت به عنوان خوانده شده علامت خورد')
+    return redirect('home:dashboard')
+
+
+@login_required
+def mark_as_unread(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+    notification.is_read = False
+    notification.read_at = None
+    notification.save()
+    
+    messages.success(request, 'اعلان با موفقیت به عنوان نخوانده علامت خورد')
+    return redirect('home:dashboard')
+
+
+@login_required
+def mark_all_as_read(request):
+    Notification.objects.filter(is_read=False).update(
+        is_read=True, 
+        read_at=timezone.now()
+    )
+    
+    messages.success(request, 'همه اعلانات با موفقیت به عنوان خوانده شده علامت خوردند')
+    return redirect('home:dashboard')
 
 def supplier(request):
     if request.method == "POST":
@@ -79,7 +170,7 @@ def supplier_detail(request, id):
     supplier_colculation = ColculationWithSupplier.objects.filter(supplier=supplier).order_by('created_at')
 
     latest_record = supplier_colculation.last()
-    latest_payment = supplier_colculation.filter(colculation_type='پرداخت').last()
+
     only_one_balance = (
         supplier_colculation.count() == 1 and
         latest_record and
@@ -172,33 +263,61 @@ def supplier_detail(request, id):
         'supplier_colculation':supplier_colculation,
         'jdate_form':jdate_form,
         'latest_supplier_colculation':latest_supplier_colculation,
-        'latest_payment': latest_payment,
         'jdate_form1': jdate_form1,
         'only_one_balance': only_one_balance,
     }
     return render(request, 'home/detail-supplier.html', context)
 
 
+@transaction.atomic
 def delete_balance(request, id):
-    balance = ColculationWithSupplier.objects.get(id=id)
-    supplier = balance.supplier
+    record = ColculationWithSupplier.objects.get(id=id)
+    supplier = record.supplier
 
-    # Delete linked FinanceRecord(s)
+    # Delete linked FinanceRecord
     content_type = ContentType.objects.get_for_model(ColculationWithSupplier)
-    FinanceRecord.objects.filter(content_type=content_type, object_id=balance.id).delete()
+    FinanceRecord.objects.filter(
+        content_type=content_type,
+        object_id=record.id
+    ).delete()
 
-    balance.delete()
+    # Delete the selected record
+    record.delete()
+
+    # 🔥 Recalculate all remaining balances
+    calculations = ColculationWithSupplier.objects.filter(
+        supplier=supplier
+    ).order_by('created_at')
+
+    current_balance = 0
+
+    for calc in calculations:
+
+        if calc.colculation_type == 'بیلانس':
+            # Starting balance
+            current_balance = calc.remain_price or 0
+
+        elif calc.colculation_type == 'پرداخت':
+            current_balance -= calc.paid_price or 0
+
+        elif calc.colculation_type == 'خریداری':
+            current_balance += calc.total_price or 0
+
+        calc.remain_balance = current_balance
+        calc.save(update_fields=['remain_balance'])
 
     SystemLog.objects.create(
         section="تامین کننده‌ها",
-        action=f"حذف بیلانس تامین کننده:",
-        description=f"بیلانس تامین کننده {supplier.name} حذف شد.",
+        action="حذف رکورد و بروزرسانی بیلانس",
+        description=f"رکورد تامین کننده {supplier.name} حذف شد و بیلانس‌ها بروزرسانی شد.",
         user=request.user if request.user.is_authenticated else None
     )
-    messages.success(request, 'بیلانس تامین کننده با موفقیت حذف شد')
+
+    messages.success(request, 'رکورد حذف شد و بیلانس‌ها بروزرسانی شدند')
     return redirect('home:supplier_detail', id=supplier.id)
 
 
+@transaction.atomic
 def edit_balance(request, id):
     balance = ColculationWithSupplier.objects.get(id=id)
     supplier = balance.supplier
@@ -206,73 +325,66 @@ def edit_balance(request, id):
     if request.method == "POST":
         form = JDateForm(request.POST)
         if form.is_valid():
+
             date = form.cleaned_data.get('date')
-            last_paid = float(request.POST.get('last_paid'))
-            last_remain = float(request.POST.get('last_remain', 0))
+            last_paid = Decimal(request.POST.get('last_paid') or 0)
+            last_remain = Decimal(request.POST.get('last_remain') or 0)
 
-            # Store old values
-            old_paid = balance.paid_price
-            old_remain = balance.remain_price
+            old_total = (balance.paid_price or 0) + (balance.remain_price or 0)
 
-            # --- Recalculate remain_balance like in create ---
-            # Get the previous record (if exists)
-            previous_record = ColculationWithSupplier.objects.filter(
-                supplier=supplier,
-                id__lt=balance.id
-            ).order_by('-id').first()
-
-            if balance.colculation_type == "پرداخت":
-                prev_remain_balance = previous_record.remain_balance if previous_record else 0
-                new_remain_balance = prev_remain_balance - last_paid
-            else:  # بیلانس
-                new_remain_balance = last_remain
-
-            # Update balance
+            # --- Update current record values only ---
             balance.paid_price = last_paid
             balance.remain_price = last_remain
-            balance.remain_balance = new_remain_balance
             balance.date = date
             balance.save()
 
-            # Update linked FinanceRecord
+            # --- Recalculate ALL balances from start ---
+            calculations = ColculationWithSupplier.objects.filter(
+                supplier=supplier
+            ).order_by('created_at')
+
+            current_balance = Decimal('0')
+
+            for calc in calculations:
+
+                if calc.colculation_type == 'بیلانس':
+                    current_balance = Decimal(calc.remain_price or 0)
+
+                elif calc.colculation_type == 'پرداخت':
+                    current_balance -= Decimal(calc.paid_price or 0)
+
+                elif calc.colculation_type == 'خریداری':
+                    current_balance += Decimal(calc.total_price or 0)
+
+                calc.remain_balance = current_balance
+                calc.save(update_fields=['remain_balance'])
+
+            # --- Update linked FinanceRecord ---
             content_type = ContentType.objects.get_for_model(ColculationWithSupplier)
             finance_record = FinanceRecord.objects.filter(
                 content_type=content_type,
                 object_id=balance.id
             ).first()
+
             if finance_record:
-                finance_record.amount = last_paid + last_remain
+                finance_record.amount = last_paid
                 finance_record.date = date
-                finance_record.description = f"بیلانس تامین کننده {supplier.name} ایدیت شد"
+                finance_record.description = f"ویرایش رکورد تامین کننده {supplier.name}"
                 finance_record.save()
 
-            # Update all following records remain_balance
-            following_records = ColculationWithSupplier.objects.filter(
-                supplier=supplier,
-                id__gt=balance.id
-            ).order_by('id')
+            # --- Log ---
+            new_total = last_paid + last_remain
 
-            for record in following_records:
-                prev_record = ColculationWithSupplier.objects.filter(
-                    supplier=supplier,
-                    id__lt=record.id
-                ).order_by('-id').first()
-                if record.colculation_type == "پرداخت":
-                    record.remain_balance = (prev_record.remain_balance if prev_record else 0) - record.paid_price
-                else:  # بیلانس
-                    record.remain_balance = record.remain_price
-                record.save()
-
-            # Log
             SystemLog.objects.create(
                 section="تامین کننده‌ها",
-                action=f"ایدیت بیلانس تامین کننده",
-                description=f"بیلانس تامین کننده {supplier.name} از {old_paid + old_remain} به {last_paid + last_remain} ایدیت شد.",
+                action="ویرایش رکورد تامین کننده",
+                description=f"رکورد {supplier.name} از {old_total} به {new_total} تغییر یافت.",
                 user=request.user if request.user.is_authenticated else None
             )
 
-            messages.success(request, 'بیلانس تامین کننده با موفقیت ایدیت شد')
+            messages.success(request, 'رکورد با موفقیت ویرایش شد و بیلانس‌ها بروزرسانی شدند')
             return redirect('home:supplier_detail', id=supplier.id)
+
     else:
         form = JDateForm(initial={'date': balance.date})
 
@@ -284,8 +396,67 @@ def edit_balance(request, id):
 
 
 def history(request):
-    logs = SystemLog.objects.all()
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    logs = SystemLog.objects.all().select_related('user')
+    form = DateFilterForm(request.GET or None)
+    
+    # Get filter type from request
+    filter_type = request.GET.get('filter_type', 'all')
+    start_date = None
+    end_date = None
+    today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+    
+    # Apply filters based on type
+    if filter_type == 'today':
+        logs = logs.filter(timestamp__date=today)
+        start_date = today
+        end_date = today
+        
+    elif filter_type == 'yesterday':
+        logs = logs.filter(timestamp__date=yesterday)
+        start_date = yesterday
+        end_date = yesterday
+        
+    elif filter_type == 'last_week':
+        logs = logs.filter(timestamp__date__gte=week_ago)
+        start_date = week_ago
+        end_date = today
+        
+    elif filter_type == 'last_month':
+        logs = logs.filter(timestamp__date__gte=month_ago)
+        start_date = month_ago
+        end_date = today
+        
+    elif filter_type == 'custom' and form.is_valid():
+        start_date = form.cleaned_data.get('start_date')
+        end_date = form.cleaned_data.get('end_date')
+        
+        if start_date:
+            logs = logs.filter(timestamp__date__gte=start_date)
+        if end_date:
+            logs = logs.filter(timestamp__date__lte=end_date)
+    
+    # Order by latest first
+    logs = logs.order_by('-timestamp')
+    
     context = {
-        'logs':logs
+        'logs': logs,
+        'form': form,
+        'filter_type': filter_type,
+        'start_date': start_date,
+        'end_date': end_date,
+        'total_count': logs.count(),
+        'today': today,
+        'yesterday': yesterday,
+        'week_ago': week_ago,
+        'month_ago': month_ago,
     }
     return render(request, 'home/logs.html', context)
+
+def about_us(request):
+    return render(request, 'home/about-us.html')

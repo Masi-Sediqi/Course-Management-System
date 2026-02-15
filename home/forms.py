@@ -40,3 +40,23 @@ class JDateForm1(forms.Form):
         }),
         required=True
     )
+
+
+
+class DateFilterForm(forms.Form):
+    start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker',
+            'placeholder': '۱۴۰۴/۰۱/۰۱',
+            'autocomplete': 'off'
+        })
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker',
+            'placeholder': '۱۴۰۴/۱۲/۲۹',
+            'autocomplete': 'off'
+        })
+    )
