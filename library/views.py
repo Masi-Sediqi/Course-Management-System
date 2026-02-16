@@ -235,27 +235,50 @@ def delete_purchase_item(request, id):
 def edit_purchase_item(request, id):
     purchase = get_object_or_404(Purchase, id=id)
     item = purchase.item
-    supplier = purchase.supplier
+
     item_balance = TotalItem.objects.filter(item=item).last()
 
     if request.method == "POST":
         form = PurchaseForm(request.POST, instance=purchase)
         if form.is_valid():
 
+            # OLD VALUES
             old_number = purchase.number
+            old_paid = float(purchase.paid_price)
+            old_remain = float(purchase.remain_price)
+            old_supplier = purchase.supplier
 
             updated = form.save(commit=False)
 
+            # NEW VALUES
             new_number = int(request.POST.get('number'))
+            new_per_price = float(request.POST.get('per_price'))
+            new_total_price = float(request.POST.get('total_price'))
+            new_paid = float(request.POST.get('paid_price'))
+            new_remain = float(request.POST.get('remain_price'))
+            new_date = form.cleaned_data.get('date')
+            new_supplier = form.cleaned_data.get('supplier')
+
             updated.number = new_number
+            updated.per_price = new_per_price
+            updated.total_price = new_total_price
+            updated.paid_price = new_paid
+            updated.remain_price = new_remain
+            updated.date = new_date
             updated.save()
 
-            # Update stock
-            item_balance.total_item += (new_number - old_number)
-            item_balance.total_remain_item += (new_number - old_number)
+            # -----------------------------
+            # UPDATE STOCK (difference logic)
+            # -----------------------------
+            diff_number = new_number - old_number
+            item_balance.total_item += diff_number
+            item_balance.total_remain_item += diff_number
+            item_balance.per_price = new_per_price
             item_balance.save()
 
-            # Update finance
+            # -----------------------------
+            # UPDATE FINANCE RECORD
+            # -----------------------------
             content_type = ContentType.objects.get_for_model(Purchase)
             finance = FinanceRecord.objects.filter(
                 content_type=content_type,
@@ -263,29 +286,64 @@ def edit_purchase_item(request, id):
             ).first()
 
             if finance:
-                finance.amount = float(updated.paid_price)
-                finance.date = updated.date
+                finance.amount = new_paid
+                finance.date = new_date
+                finance.title = f"خرید کتاب {item.name}"
+                finance.description = f"خرید کتاب از تامین‌کننده {new_supplier.name} | تعداد: {new_number}"
                 finance.save()
+            else:
+                FinanceRecord.objects.create(
+                    date=new_date,
+                    title=f"خرید کتاب {item.name}",
+                    description=f"خرید کتاب از تامین‌کننده {new_supplier.name} | تعداد: {new_number}",
+                    amount=new_paid,
+                    type="expense",
+                    content_type=content_type,
+                    object_id=purchase.id,
+                )
 
-            # Delete old supplier calculation
+            # -----------------------------
+            # DELETE OLD SUPPLIER RECORD
+            # -----------------------------
             ColculationWithSupplier.objects.filter(
                 purchase_item=purchase
             ).delete()
 
-            # Create new calculation
+            # -----------------------------
+            # CREATE NEW SUPPLIER CALCULATION
+            # -----------------------------
+            latest_col = ColculationWithSupplier.objects.filter(
+                supplier=new_supplier
+            ).last()
+
+            if latest_col:
+                remain_balance = latest_col.remain_balance + new_remain
+            else:
+                remain_balance = new_remain
+
             ColculationWithSupplier.objects.create(
-                supplier=updated.supplier,
+                supplier=new_supplier,
                 colculation_type='خریداری',
-                total_price=float(updated.total_price),
-                paid_price=float(updated.paid_price),
-                remain_price=float(updated.remain_price),
+                total_price=new_total_price,
+                paid_price=new_paid,
+                remain_price=new_remain,
+                remain_balance=remain_balance,
                 purchase_item=updated,
-                date=updated.date
+                date=new_date
             )
 
-            # 🔥 Recalculate ALL balances
-            recalc_supplier_balances(updated.supplier)
+            # -----------------------------
+            # RECALCULATE BALANCES
+            # -----------------------------
+            recalc_supplier_balances(new_supplier)
 
+            # If supplier changed, also recalc old supplier
+            if old_supplier != new_supplier:
+                recalc_supplier_balances(old_supplier)
+
+            # -----------------------------
+            # SYSTEM LOG
+            # -----------------------------
             SystemLog.objects.create(
                 section="کتابخانه",
                 action="ایدیت خریداری کتاب:",
@@ -295,6 +353,7 @@ def edit_purchase_item(request, id):
 
             messages.success(request, "خرید با موفقیت ویرایش شد.")
             return redirect('library:item_info', id=item.id)
+
     else:
         form = PurchaseForm(instance=purchase)
 

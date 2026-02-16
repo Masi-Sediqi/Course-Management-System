@@ -427,6 +427,10 @@ def delete_student_improvment(request, id):
 
 def edit_student_improvement(request, id):
     student_improvement = StudentImporvment.objects.get(id=id)
+    student = student_improvement.student
+    paid_fess_classes = Student_fess_info.objects.filter(student=student)
+    records = StudentImporvment.objects.filter(student=student)
+
     if request.method == "POST":
         form = StudentImporvmentForm(request.POST, request.FILES, instance = student_improvement)
         if form.is_valid():
@@ -449,6 +453,8 @@ def edit_student_improvement(request, id):
     context = {
         'form':form,
         'student_improvement':student_improvement,
+        'paid_fess_classes':paid_fess_classes,
+        'records':records,
     }
     return render(request, 'students/edit-student-improve.html', context)
 
@@ -640,7 +646,7 @@ def edit_student_purchased_items(request, purchase_id):
             ).last()
             if finance_record:
                 # Update the amount
-                finance_record.amount = total_price
+                finance_record.amount = paid_price
                 finance_record.title = f"خرید کتاب توسط {purchase.student.first_name}"
                 finance_record.description = f"خرید {amount} عدد از کتاب {purchase.item.name} توسط شاگرد {purchase.student.first_name}"
                 finance_record.save()

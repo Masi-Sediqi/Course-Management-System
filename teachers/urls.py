@@ -7,6 +7,7 @@ urlpatterns = [
     path('teacher/registration/', views.teacher_registration, name="teacher_registration"),
     path('teacher/deactive/<int:id>/', views.deactive_teacher, name="deactive_teacher"),
     path('teacher/active/<int:id>/', views.active_teacher, name="active_teacher"),
+    path('teacher/delete/<int:id>/', views.delete_teacher, name="delete_teacher"),
     path('teacher/edit/section/<int:id>/', views.edit_teacher, name="edit_teacher"),
     path('teacher/caluculating/<int:id>/', views.teacher_remain_loan_caluculating, name="teacher_remain_loan_caluculating"),
     path('teacher/detail/<int:id>/', views.teacher_detail, name="teacher_detail"),

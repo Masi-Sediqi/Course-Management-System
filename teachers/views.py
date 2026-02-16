@@ -103,6 +103,15 @@ def edit_teacher(request, id):
     }
     return render(request, 'teachers/teacher-edit.html', context)
 
+
+def delete_teacher(request, id):
+    referer = request.META.get('HTTP_REFERER', '/')
+    teacher = Teacher.objects.get(id=id)
+    messages.success(request, f'استاد به اسم {teacher.name} موفقانه حذف شد')
+    teacher.delete()
+    return redirect(referer)
+
+
 def teacher_detail(request, id):
 
     teacher = Teacher.objects.get(id=id)
@@ -272,16 +281,6 @@ def edit_teacher_salary_record(request, salary_id):
 
     teacher_balance, _ = TeacherBalance.objects.get_or_create(teacher=teacher)
     # Get existing finance record
-    finance_record, _ = FinanceRecord.objects.get_or_create(
-        content_type=ContentType.objects.get_for_model(TeacherPaidSalary),
-        object_id=salary_instance.id,
-        defaults={
-            "date": salary_instance.date,
-            "title": f"پرداخت معاش استاد {teacher.name}",
-            "amount": salary_instance.paid_salary,
-            "type": "expense",
-        }
-    )
 
     old_paid = salary_instance.paid_salary
     old_loan = salary_instance.loan_amount
@@ -339,11 +338,28 @@ def edit_teacher_salary_record(request, salary_id):
             instance.loan_amount = new_loan
             instance.save()
 
-            # --- Update FinanceRecord ---
-            finance_record.date = instance.date
-            finance_record.amount = new_paid
-            finance_record.title = f"پرداخت معاش استاد {teacher.name}"
-            finance_record.save()
+            content_type = ContentType.objects.get_for_model(TeacherPaidSalary)
+
+            finance_record = FinanceRecord.objects.filter(
+                content_type=content_type,
+                object_id=salary_instance.id
+            ).first()
+
+            if finance_record:
+                finance_record.date = instance.date
+                finance_record.amount = new_paid  # just replace, do NOT add
+                finance_record.title = f"پرداخت معاش استاد {teacher.name}"
+                finance_record.save()
+            else:
+                # create only if not exists
+                FinanceRecord.objects.create(
+                    date=instance.date,
+                    title=f"پرداخت معاش استاد {teacher.name}",
+                    amount=new_paid,
+                    type="expense",
+                    content_type=content_type,
+                    object_id=salary_instance.id,
+                )
 
             messages.success(request, "ریکارد پرداخت معاش با موفقیت ویرایش شد")
             return redirect('teachers:teacher_paid_salary', id=teacher.id)
@@ -358,7 +374,6 @@ def edit_teacher_salary_record(request, salary_id):
         'form': form,
         'salary_id': salary_instance,
         'teacher_balance': teacher_balance,
-        'finance_record': finance_record,
         'loan':loan,
     }
     return render(request, 'teachers/edit-teacher-paid-salary.html', context)

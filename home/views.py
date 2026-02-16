@@ -284,24 +284,23 @@ def delete_balance(request, id):
     # Delete the selected record
     record.delete()
 
-    # 🔥 Recalculate all remaining balances
+    # 🔥 Recalculate all remaining balances correctly
     calculations = ColculationWithSupplier.objects.filter(
         supplier=supplier
     ).order_by('created_at')
 
-    current_balance = 0
+    current_balance = Decimal('0')
 
     for calc in calculations:
 
         if calc.colculation_type == 'بیلانس':
-            # Starting balance
-            current_balance = calc.remain_price or 0
+            current_balance = Decimal(calc.remain_price or 0)
 
         elif calc.colculation_type == 'پرداخت':
-            current_balance -= calc.paid_price or 0
+            current_balance -= Decimal(calc.paid_price or 0)
 
         elif calc.colculation_type == 'خریداری':
-            current_balance += calc.total_price or 0
+            current_balance += Decimal(calc.remain_price or 0)
 
         calc.remain_balance = current_balance
         calc.save(update_fields=['remain_balance'])
@@ -354,7 +353,7 @@ def edit_balance(request, id):
                     current_balance -= Decimal(calc.paid_price or 0)
 
                 elif calc.colculation_type == 'خریداری':
-                    current_balance += Decimal(calc.total_price or 0)
+                    current_balance += Decimal(calc.remain_price or 0)
 
                 calc.remain_balance = current_balance
                 calc.save(update_fields=['remain_balance'])

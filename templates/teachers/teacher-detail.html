@@ -479,6 +479,210 @@
                         </a>
                     {% endif %}
                     {% endif %}
+                    {% if system_permission and system_permission.delete_teacher %}
+                    <!-- Delete Button Trigger -->
+                    <button type="button" class="btn btn-delete btn-success" data-toggle="modal" data-target="#deleteTeacherModal{{ teacher.id }}">
+                        <i class="fas fa-user-slash me-1"></i> حذف کردن
+                    </button>
+
+                    <!-- Delete Confirmation Modal with Fade Effect -->
+                    <div class="modal fade" id="deleteTeacherModal{{ teacher.id }}" tabindex="-1" 
+                        aria-labelledby="deleteTeacherModalLabel{{ teacher.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg">
+                                
+                                <!-- Modal Header with Gradient -->
+                                <div class="modal-header border-0 bg-gradient-danger text-white" 
+                                    style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%); border-radius: 12px 12px 0 0;">
+                                    <h5 class="modal-title" id="deleteTeacherModalLabel{{ teacher.id }}">
+                                        <i class="fas fa-exclamation-triangle me-2 fa-spin" style="animation: fa-spin 2s infinite linear;"></i>
+                                        تأیید حذف معلم
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                
+                                <!-- Modal Body with Icon and Message -->
+                                <div class="modal-body text-center p-4">
+                                    <!-- Animated Warning Icon -->
+                                    <div class="mb-4">
+                                        <div class="delete-icon-wrapper mx-auto" 
+                                            style="width: 100px; height: 100px; background: #fee; border-radius: 50%; display: flex; 
+                                                    align-items: center; justify-content: center; animation: pulse 2s infinite;">
+                                            <i class="fas fa-user-slash text-danger" style="font-size: 3.5rem; opacity: 0.9;"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Teacher Name with Highlight -->
+                                    <h4 class="mb-3">
+                                        <span class="badge bg-light text-dark p-3 border" style="font-size: 1.2rem;">
+                                            <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>
+                                            {{ teacher.name }}
+                                        </span>
+                                    </h4>
+                                    
+                                    <!-- Warning Messages -->
+                                    <div class="alert alert-warning bg-soft-warning border-0 p-3 mb-3" style="background: #fff3cd;">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>آیا از حذف این معلم مطمئن هستید؟</strong>
+                                    </div>
+                               
+                                </div>
+                                
+                                <!-- Modal Footer with Action Buttons -->
+                                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
+                                    <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
+                                        <i class="fas fa-times me-2"></i>
+                                        انصراف
+                                    </button>
+                                    <a href="{% url 'teachers:delete_teacher' teacher.id %}" 
+                                    class="btn btn-danger px-4" 
+                                    style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%); border: none;">
+                                        <i class="fas fa-trash-alt me-2 fa-fade"></i>
+                                        بله، حذف شود
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add these animations in your CSS -->
+                    <style>
+                        /* Fade In Animation for Modal */
+                        .modal.fade .modal-dialog {
+                            transition: transform 0.3s ease-out, opacity 0.2s ease-out;
+                            transform: scale(0.95);
+                            opacity: 0;
+                        }
+                        
+                        .modal.show .modal-dialog {
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                        
+                        /* Pulse Animation for Icon */
+                        @keyframes pulse {
+                            0% {
+                                box-shadow: 0 0 0 0 rgba(238, 82, 83, 0.4);
+                            }
+                            70% {
+                                box-shadow: 0 0 0 15px rgba(238, 82, 83, 0);
+                            }
+                            100% {
+                                box-shadow: 0 0 0 0 rgba(238, 82, 83, 0);
+                            }
+                        }
+                        
+                        /* Fade Animation for Trash Icon */
+                        .fa-fade {
+                            animation: fade 1.5s infinite linear;
+                        }
+                        
+                        @keyframes fade {
+                            0% { opacity: 1; }
+                            50% { opacity: 0.4; }
+                            100% { opacity: 1; }
+                        }
+                        
+                        /* Modal Content Entrance Animation */
+                        .modal-content {
+                            animation: slideIn 0.3s ease-out;
+                        }
+                        
+                        @keyframes slideIn {
+                            from {
+                                transform: translateY(-30px);
+                                opacity: 0;
+                            }
+                            to {
+                                transform: translateY(0);
+                                opacity: 1;
+                            }
+                        }
+                        
+                        /* Hover Effect for Buttons */
+                        .btn-danger, .btn-secondary {
+                            transition: all 0.3s ease;
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        
+                        .btn-danger:hover, .btn-secondary:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                        }
+                        
+                        .btn-danger:hover {
+                            background: linear-gradient(135deg, #ee5253 0%, #ff6b6b 100%) !important;
+                        }
+                        
+                        /* Ripple Effect on Buttons */
+                        .btn-danger::after, .btn-secondary::after {
+                            content: '';
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            width: 5px;
+                            height: 5px;
+                            background: rgba(255, 255, 255, 0.5);
+                            opacity: 0;
+                            border-radius: 100%;
+                            transform: scale(1, 1) translate(-50%);
+                            transform-origin: 50% 50%;
+                        }
+                        
+                        .btn-danger:focus:not(:active)::after, .btn-secondary:focus:not(:active)::after {
+                            animation: ripple 1s ease-out;
+                        }
+                        
+                        @keyframes ripple {
+                            0% {
+                                transform: scale(0, 0);
+                                opacity: 1;
+                            }
+                            20% {
+                                transform: scale(25, 25);
+                                opacity: 1;
+                            }
+                            100% {
+                                opacity: 0;
+                                transform: scale(40, 40);
+                            }
+                        }
+                        
+                        /* Custom Styles */
+                        .bg-gradient-danger {
+                            background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+                        }
+                        
+                        .text-right {
+                            text-align: right;
+                        }
+                        
+                        /* Shake Animation for Icon on Hover */
+                        .delete-icon-wrapper:hover i {
+                            animation: shake 0.5s ease-in-out;
+                        }
+                        
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            25% { transform: translateX(-5px); }
+                            75% { transform: translateX(5px); }
+                        }
+                        
+                        /* Badge Hover Effect */
+                        .badge:hover {
+                            transform: scale(1.02);
+                            transition: transform 0.3s ease;
+                            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+                        }
+                        
+                        /* Modal Backdrop Customization */
+                        .modal-backdrop.show {
+                            opacity: 0.7;
+                            backdrop-filter: blur(3px);
+                        }
+                    </style>
+                    {% endif %}
                     {% if system_permission and system_permission.add_paid_salary_teacher or system_permission.view_paid_salary_teacher or system_permission.edit_paid_salary_teacher or system_permission.delete_paid_salary_teacher %}
                     <a href="{% url 'teachers:teacher_paid_salary' teacher.id %}" class="btn btn-salary btn-gradient">
                         <i class="fas fa-money-bill-wave me-1"></i> پرداخت معاش
