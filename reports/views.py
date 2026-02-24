@@ -298,9 +298,7 @@ def books_reports(request):
 
 
 def income_expenses(request):
-    from django.utils import timezone
-    from datetime import datetime, timedelta
-    
+
     title = "تمام عواید و مصارف"
     form = StudentFilterForm(request.GET or None)
     filter_active = False
@@ -308,27 +306,50 @@ def income_expenses(request):
     end_date = None
     
     # Quick filters
-    date_filter = request.GET.get('date_filter')
+    # date_filter = request.GET.get('date_filter')
 
-    if date_filter == 'today':
-        today = jdatetime.date.today()
+    # if date_filter == 'today':
+    #     today = jdatetime.date.today()
 
-        start_date = today.strftime('%d/%m/%Y')
-        end_date = today.strftime('%d/%m/%Y')
+    #     start_date = today.strftime('%d/%m/%Y')
+    #     end_date = today.strftime('%d/%m/%Y')
 
-        filter_active = True
-        title = f"عواید و مصارف امروز ({start_date})"
+    #     filter_active = True
+    #     title = f"عواید و مصارف امروز ({start_date})"
 
+    #     income_data = FinanceRecord.objects.filter(
+    #         type='income',
+    #         date__gte=start_date,
+    #         date__lte=end_date
+    #     ).order_by('-date')
+        
+    #     expense_data = FinanceRecord.objects.filter(
+    #         type='expense',
+    #         date__gte=start_date,
+    #         date__lte=end_date
+    #     ).order_by('-date')
 
-    elif date_filter == 'yesterday_today':
-        today = jdatetime.date.today()
-        yesterday = today - jdatetime.timedelta(days=1)
+    # elif date_filter == 'yesterday_today':
+    #     today = jdatetime.date.today()
+    #     yesterday = today - jdatetime.timedelta(days=1)
 
-        start_date = yesterday.strftime('%d/%m/%Y')
-        end_date = today.strftime('%d/%m/%Y')
+    #     start_date = yesterday.strftime('%d/%m/%Y')
+    #     end_date = today.strftime('%d/%m/%Y')
 
-        filter_active = True
-        title = f"عواید و مصارف امروز و دیروز ({start_date} تا {end_date})"
+    #     filter_active = True
+    #     title = f"عواید و مصارف امروز و دیروز ({start_date} تا {end_date})"
+
+    #     income_data = FinanceRecord.objects.filter(
+    #         type='income',
+    #         date__gte=start_date,
+    #         date__lte=end_date
+    #     ).order_by('-date')
+        
+    #     expense_data = FinanceRecord.objects.filter(
+    #         type='expense',
+    #         date__gte=start_date,
+    #         date__lte=end_date
+    #     ).order_by('-date')
     
     # Check for date range filter from form
     if form.is_valid():

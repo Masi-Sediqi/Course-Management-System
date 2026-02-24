@@ -13,7 +13,7 @@ class Teacher(models.Model):
     phone = models.CharField(max_length=10, blank=True)
     gender = models.CharField(max_length=120, choices=GENDER_CHOICES)
     image = models.ImageField(upload_to="teacher/", blank=True)
-    percentage = models.FloatField(blank=True)
+    percentage = models.FloatField(blank=True, default=0)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     deactivate_at = models.CharField(max_length=15, blank=True)

@@ -177,8 +177,8 @@ def teacher_paid_salary(request, id):
                 amount=get_paid_amount,
                 description=f"پرداخت معاش استاد {teacher.name} به مبلغ {get_paid_amount} افغانی.",
                 type='expense',
-                content_type=ContentType.objects.get_for_model(Teacher),
-                object_id=teacher.id,
+                content_type=ContentType.objects.get_for_model(TeacherPaidSalary),
+                object_id=instance.id,
             )
 
             SystemLog.objects.create(
@@ -211,34 +211,46 @@ def delete_teacher_salary_record(request, salary_id):
     teacher_balance = TeacherBalance.objects.filter(teacher=teacher).last()
     total_balance = TotalBalance.objects.last()
 
-    amount = salary.amount  
     paid_amount = salary.paid_salary or 0
-    remain_amount = salary.remain_salary
-    loan_deduction = getattr(salary, "loan_amount", 0) or 0
+    remain_amount = salary.remain_salary or 0
+    loan_amount = salary.loan_amount or 0
 
+    # -----------------------------
+    # FIX TEACHER BALANCE
+    # -----------------------------
     if teacher_balance:
         teacher_balance.total_paid -= paid_amount
         teacher_balance.total_remain -= remain_amount
-        teacher_balance.total_loan += loan_deduction
-        if teacher_balance.total_paid < 0:
-            teacher_balance.total_paid = 0
+        teacher_balance.total_loan += loan_amount
+
+        # prevent negative values
+        teacher_balance.total_paid = max(0, teacher_balance.total_paid)
+        teacher_balance.total_remain = max(0, teacher_balance.total_remain)
+
         teacher_balance.save()
 
+    # -----------------------------
+    # FIX TOTAL EXPENSES
+    # (only paid amount was expense)
+    # -----------------------------
     if total_balance:
-        total_balance.total_expenses -= amount
-        if total_balance.total_expenses < 0:
-            total_balance.total_expenses = 0
+        total_balance.total_expenses -= paid_amount
+        total_balance.total_expenses = max(0, total_balance.total_expenses)
         total_balance.save()
 
-    content_type = ContentType.objects.get_for_model(teacher)
+    # -----------------------------
+    # DELETE LINKED FINANCE RECORD
+    # -----------------------------
+    content_type = ContentType.objects.get_for_model(TeacherPaidSalary)
 
     FinanceRecord.objects.filter(
         content_type=content_type,
-        object_id=teacher.id,
-        amount=paid_amount + loan_deduction,
-        type='expense'
+        object_id=salary.id
     ).delete()
 
+    # -----------------------------
+    # DELETE SALARY RECORD
+    # -----------------------------
     salary.delete()
 
     messages.success(request, 'ریکارد پرداخت معاش موفقانه حذف شد')

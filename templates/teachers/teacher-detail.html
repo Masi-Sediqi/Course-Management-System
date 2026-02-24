@@ -179,11 +179,17 @@
                 <div class="teacher-header">
                     <div class="row align-items-center">
                         <div class="col-md-3 text-center">
+                            {% if teacher.image %}
+                            <img src="{{ teacher.image.url }}" alt="{{ student.first_name }}"
+                                class="rounded-circle border border-4 border-white" width="120" height="120">
+                            {% else %}
                             <div class="rounded-circle border border-4 border-white d-inline-flex align-items-center justify-content-center"
                                 style="width: 120px; height: 120px; background-color: white; color: #4e73df; font-size: 48px; font-weight: bold;">
                                 {{ teacher.name|first }}
                             </div>
+                            {% endif %}
                         </div>
+
                         <div class="col-md-9 text-right">
                             <h3 class="mb-2">{{ teacher.name }} {{ teacher.last_name }}</h3>
                             <p class="mb-1">
@@ -205,11 +211,12 @@
                                 <i class="fas fa-percentage ml-2"></i>
                                 فیصدی: <strong>{{ teacher.percentage }}%</strong>
                             </p>
-                         <p class="mb-0 mt-2">
-    <i class="fas fa-clock ml-2"></i>
-    غیر فعال شده در تاریخ: <strong>{{ teacher.deactivate_at }}</strong>
-</p>
-
+                            {% if not teacher.is_active and teacher.deactivate_at %}
+                                <p class="mb-0 mt-2">
+                                    <i class="fas fa-clock ml-2"></i>
+                                    غیر فعال شده در تاریخ: <strong>{{ teacher.deactivate_at }}</strong>
+                                </p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

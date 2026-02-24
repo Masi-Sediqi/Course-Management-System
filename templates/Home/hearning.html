@@ -1,0 +1,768 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    /* Modern Learning Page Styles */
+    .learning-header {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 50%, #075E54 100%);
+        color: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 20px 40px rgba(37, 211, 102, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .learning-header::before {
+        content: '\f19d';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        bottom: -30px;
+        right: -30px;
+        font-size: 200px;
+        opacity: 0.1;
+        color: white;
+        transform: rotate(10deg);
+    }
+
+    .header-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Video Player Container */
+    .video-player-container {
+        background: white;
+        border-radius: 2rem;
+        padding: 2rem;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(37, 211, 102, 0.1);
+    }
+
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    video {
+        width: 100%;
+        height: auto;
+        display: block;
+        pointer-events: all;
+    }
+
+    /* Custom Video Controls */
+    .custom-video-controls {
+        background: linear-gradient(135deg, #075E54, #128C7E);
+        padding: 1rem 1.5rem;
+        border-radius: 3rem;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .control-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .control-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: scale(0);
+        transition: transform 0.3s ease;
+    }
+
+    .control-btn:hover::before {
+        transform: scale(1);
+    }
+
+    .control-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .control-btn.play-pause {
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+        box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+    }
+
+    /* Progress Bar */
+    .progress-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #25D366, #128C7E);
+        border-radius: 10px;
+        width: 0%;
+        transition: width 0.1s linear;
+        position: relative;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 15px;
+        height: 15px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+    }
+
+    .time-display {
+        font-family: monospace;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.8);
+        min-width: 100px;
+        text-align: center;
+    }
+
+    /* Volume Control */
+    .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+    }
+
+    .volume-slider {
+        width: 80px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .volume-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #25D366, #128C7E);
+        border-radius: 5px;
+        width: 70%;
+        position: relative;
+    }
+
+    .volume-fill::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+    }
+
+    /* Speed Selector */
+    .speed-selector {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 2rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 70px;
+        text-align: center;
+    }
+
+    .speed-selector:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .speed-menu {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        background: #075E54;
+        border-radius: 1rem;
+        padding: 0.5rem;
+        display: none;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 10px;
+    }
+
+    .speed-menu.show {
+        display: block;
+    }
+
+    .speed-option {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        white-space: nowrap;
+    }
+
+    .speed-option:hover {
+        background: rgba(37, 211, 102, 0.3);
+    }
+
+    .speed-option.active {
+        background: linear-gradient(135deg, #25D366, #128C7E);
+    }
+
+    /* Fullscreen Button */
+    .fullscreen-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fullscreen-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Video Info Card */
+    .video-info-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(37, 211, 102, 0.1);
+        text-align: center;
+    }
+
+    .video-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #075E54;
+        margin-bottom: 1rem;
+    }
+
+    .video-description {
+        color: #495057;
+        line-height: 1.8;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* WhatsApp Button */
+    .whatsapp-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+        padding: 1.2rem 3rem;
+        border-radius: 3rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3);
+        margin-top: 1rem;
+    }
+
+    .whatsapp-btn i {
+        font-size: 1.8rem;
+        margin-left: 1rem;
+    }
+
+    .whatsapp-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(37, 211, 102, 0.4);
+        color: white;
+    }
+
+    .whatsapp-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Feature List */
+    .feature-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #128C7E;
+        font-weight: 500;
+    }
+
+    .feature-item i {
+        font-size: 1.3rem;
+    }
+
+    /* Keyboard Shortcuts Hint */
+    .shortcuts-hint {
+        background: #f8f9fa;
+        border-radius: 3rem;
+        padding: 1rem 1.5rem;
+        margin-top: 2rem;
+        border: 1px dashed #25D366;
+    }
+
+    .shortcut-item {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 2rem;
+        color: #6c757d;
+    }
+
+    .shortcut-key {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 0.2rem 0.6rem;
+        font-family: monospace;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #25D366;
+        margin-left: 0.5rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .custom-video-controls {
+            flex-wrap: wrap;
+            border-radius: 1.5rem;
+        }
+        
+        .progress-container {
+            order: -1;
+            width: 100%;
+        }
+        
+        .volume-control {
+            min-width: 100px;
+        }
+        
+        .video-title {
+            font-size: 1.4rem;
+        }
+        
+        .whatsapp-btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+        
+        .whatsapp-btn i {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y" style="font-family: 'Vazirmatn', sans-serif;">
+    
+    <!-- Learning Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="learning-header rounded-4 p-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon-wrapper me-3">
+                                <i class="fas fa-video fa-2x text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-white fw-bold mb-2">آموزش کار با سیستم</h1>
+                                <p class="text-white-50 mb-0">
+                                    <i class="fas fa-graduation-cap me-1"></i>
+                                    راهنمای کامل استفاده از سیستم مدیریت
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <div class="d-inline-flex align-items-center bg-white bg-opacity-10 rounded-pill py-2 px-4">
+                            <i class="fas fa-play-circle fs-5 ms-2"></i>
+                            <span>ویدیوی آموزشی</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Player Section -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="video-player-container">
+                <!-- Video Wrapper -->
+                <div class="video-wrapper" id="videoWrapper">
+                    <video id="learningVideo" controlslist="nodownload" disablepictureinpicture>
+                        <source src="{% static 'images/Untitled design (1).mp4' %}" type="video/mp4">
+                        مرورگر شما از نمایش ویدیو پشتیبانی نمی‌کند.
+                    </video>
+                </div>
+
+                <!-- Custom Controls -->
+                <div class="custom-video-controls" id="customControls">
+                    <!-- Play/Pause Button -->
+                    <button class="control-btn play-pause" id="playPauseBtn">
+                        <i class="fas fa-play"></i>
+                    </button>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <span class="time-display" id="currentTime">00:00</span>
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="time-display" id="duration">00:00</span>
+                    </div>
+
+                    <!-- Volume Control -->
+                    <div class="volume-control">
+                        <button class="control-btn" id="muteBtn">
+                            <i class="fas fa-volume-high"></i>
+                        </button>
+                        <div class="volume-slider" id="volumeSlider">
+                            <div class="volume-fill" id="volumeFill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Playback Speed -->
+                    <div class="position-relative">
+                        <div class="speed-selector" id="speedSelector">
+                            <span id="speedText">1x</span>
+                            <i class="fas fa-chevron-down ms-1" style="font-size: 0.7rem;"></i>
+                        </div>
+                        <div class="speed-menu" id="speedMenu">
+                            <div class="speed-option" data-speed="0.5">0.5x</div>
+                            <div class="speed-option active" data-speed="1">1x</div>
+                            <div class="speed-option" data-speed="1.5">1.5x</div>
+                            <div class="speed-option" data-speed="2">2x</div>
+                        </div>
+                    </div>
+
+                    <!-- Fullscreen Button -->
+                    <button class="fullscreen-btn" id="fullscreenBtn">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Video Info Card -->
+            <div class="video-info-card">
+                <h2 class="video-title">آموزش کامل کار با سیستم مدیریت</h2>
+                
+                <div class="feature-list">
+                    <span class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        ثبت نام دانش‌آموز
+                    </span>
+                    <span class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        مدیریت کلاس‌ها
+                    </span>
+                    <span class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        ثبت شهریه
+                    </span>
+                    <span class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        گزارش‌گیری
+                    </span>
+                </div>
+
+                <p class="video-description">
+                    در این ویدیوی آموزشی با تمام بخش‌های سیستم مدیریت آشنا می‌شوید. 
+                    از ثبت نام دانش‌آموزان و مدیریت کلاس‌ها تا ثبت شهریه و گزارش‌گیری. 
+                    این آموزش به شما کمک می‌کند تا به راحتی با سیستم کار کنید.
+                </p>
+
+                <!-- WhatsApp Button -->
+                <a href="https://wa.me/93786474605" target="_blank" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    ارتباط با پشتیبانی در واتساپ
+                </a>
+
+                <!-- Keyboard Shortcuts Hint -->
+                <div class="shortcuts-hint">
+                    <span class="shortcut-item">
+                        <span class="shortcut-key">Space</span>
+                        پخش/توقف
+                    </span>
+                    <span class="shortcut-item">
+                        <span class="shortcut-key">F</span>
+                        تمام صفحه
+                    </span>
+                    <span class="shortcut-item">
+                        <span class="shortcut-key">→</span>
+                        ۵ ثانیه جلو
+                    </span>
+                    <span class="shortcut-item">
+                        <span class="shortcut-key">←</span>
+                        ۵ ثانیه عقب
+                    </span>
+                    <span class="shortcut-item">
+                        <span class="shortcut-key">M</span>
+                        صدا قطع/وصل
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video Player JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('learningVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeFill = document.getElementById('volumeFill');
+        const speedSelector = document.getElementById('speedSelector');
+        const speedMenu = document.getElementById('speedMenu');
+        const speedOptions = document.querySelectorAll('.speed-option');
+        const speedText = document.getElementById('speedText');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const videoWrapper = document.getElementById('videoWrapper');
+
+        // Disable right click on video
+        video.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Format time function
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update play/pause button
+        function updatePlayButton() {
+            const icon = playPauseBtn.querySelector('i');
+            if (video.paused) {
+                icon.className = 'fas fa-play';
+            } else {
+                icon.className = 'fas fa-pause';
+            }
+        }
+
+        // Play/Pause
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+
+        video.addEventListener('play', updatePlayButton);
+        video.addEventListener('pause', updatePlayButton);
+
+        // Update progress bar
+        video.addEventListener('timeupdate', () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = `${percent}%`;
+            currentTimeEl.textContent = formatTime(video.currentTime);
+        });
+
+        // Set duration when metadata loaded
+        video.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(video.duration);
+        });
+
+        // Click on progress bar to seek
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        });
+
+        // Volume control
+        let lastVolume = 1;
+        
+        volumeSlider.addEventListener('click', (e) => {
+            const rect = volumeSlider.getBoundingClientRect();
+            const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            video.volume = pos;
+            volumeFill.style.width = `${pos * 100}%`;
+            
+            // Update mute button icon
+            const icon = muteBtn.querySelector('i');
+            if (pos === 0) {
+                icon.className = 'fas fa-volume-xmark';
+            } else if (pos < 0.5) {
+                icon.className = 'fas fa-volume-low';
+            } else {
+                icon.className = 'fas fa-volume-high';
+            }
+        });
+
+        muteBtn.addEventListener('click', () => {
+            if (video.volume > 0) {
+                lastVolume = video.volume;
+                video.volume = 0;
+                volumeFill.style.width = '0%';
+                muteBtn.querySelector('i').className = 'fas fa-volume-xmark';
+            } else {
+                video.volume = lastVolume || 0.7;
+                volumeFill.style.width = `${(lastVolume || 0.7) * 100}%`;
+                muteBtn.querySelector('i').className = 'fas fa-volume-high';
+            }
+        });
+
+        // Speed selector
+        speedSelector.addEventListener('click', () => {
+            speedMenu.classList.toggle('show');
+        });
+
+        speedOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const speed = parseFloat(option.dataset.speed);
+                video.playbackRate = speed;
+                speedText.textContent = `${speed}x`;
+                
+                speedOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                speedMenu.classList.remove('show');
+            });
+        });
+
+        // Close speed menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!speedSelector.contains(e.target)) {
+                speedMenu.classList.remove('show');
+            }
+        });
+
+        // Fullscreen
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                videoWrapper.requestFullscreen();
+                fullscreenBtn.querySelector('i').className = 'fas fa-compress';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.querySelector('i').className = 'fas fa-expand';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger if typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (video.paused) video.play(); else video.pause();
+                    break;
+                case 'ArrowRight':
+                    video.currentTime += 5;
+                    break;
+                case 'ArrowLeft':
+                    video.currentTime -= 5;
+                    break;
+                case 'f':
+                case 'F':
+                    if (!document.fullscreenElement) {
+                        videoWrapper.requestFullscreen();
+                    } else {
+                        document.exitFullscreen();
+                    }
+                    break;
+                case 'm':
+                case 'M':
+                    if (video.volume > 0) {
+                        lastVolume = video.volume;
+                        video.volume = 0;
+                        volumeFill.style.width = '0%';
+                        muteBtn.querySelector('i').className = 'fas fa-volume-xmark';
+                    } else {
+                        video.volume = lastVolume || 0.7;
+                        volumeFill.style.width = `${(lastVolume || 0.7) * 100}%`;
+                        muteBtn.querySelector('i').className = 'fas fa-volume-high';
+                    }
+                    break;
+            }
+        });
+
+        // Prevent download through context menu
+        video.addEventListener('contextmenu', (e) => e.preventDefault());
+        
+        // Prevent dragging
+        video.addEventListener('dragstart', (e) => e.preventDefault());
+    });
+</script>
+
+{% endblock %}

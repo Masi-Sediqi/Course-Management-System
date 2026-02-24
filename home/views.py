@@ -459,3 +459,6 @@ def history(request):
 
 def about_us(request):
     return render(request, 'home/about-us.html')
+
+def hearning(request):
+    return render(request, 'home/hearning.html')

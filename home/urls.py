@@ -16,4 +16,5 @@ urlpatterns = [
     path('notifications/mark-unread/<int:notification_id>/', views.mark_as_unread, name='mark_as_unread'),
     path('notifications/mark-all-read/', views.mark_all_as_read, name='mark_all_as_read'),
     path('about_us/', views.about_us, name='about_us'),
+    path('hearning/', views.hearning, name='hearning'),
 ]

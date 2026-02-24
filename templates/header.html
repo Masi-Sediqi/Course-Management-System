@@ -124,7 +124,7 @@
                         </a>
                     </li>
                     <li class="Ul_li--hover">
-                        <a href="{% url 'home:about_us' %}" class="d-flex align-items-center">
+                        <a href="{% url 'home:hearning' %}" class="d-flex align-items-center">
                             <img src="{% static 'icon/iconoir--learning.svg' %}" alt="" style="margin-left: 8px;">
                             <span class="item-name text-15 text-muted">آموزش</span>
                         </a>
@@ -139,13 +139,73 @@
                                     <div class="user-avatar-with-dot">
                                         {{ user.name|first|default:"U" }}
                                     </div>
-                                    <span class="status-dot-online"></span>
+                                    <span id="connection-status" class="status-dot-online"></span>
                                 </div>
 
                                 <!-- User Name at Bottom -->
                                 <div class="user-name-bottom mb-2">
                                     <h6 class="text-primary mb-0 font-weight-bold">{{ user.name }}</h6>
                                 </div>
+                                
+                                <div id="offline-icon" class="mt-2" style="display:none; cursor:pointer;">
+                                    <i class="fas fa-wifi text-danger"></i>
+                                </div>
+
+                                <script>
+                                function updateConnectionStatus() {
+                                    const statusDot = document.getElementById("connection-status");
+                                    const offlineIcon = document.getElementById("offline-icon");
+
+                                    if (navigator.onLine) {
+                                        statusDot.classList.remove("status-dot-offline");
+                                        statusDot.classList.add("status-dot-online");
+                                        offlineIcon.style.display = "none";
+                                    } else {
+                                        statusDot.classList.remove("status-dot-online");
+                                        statusDot.classList.add("status-dot-offline");
+                                        offlineIcon.style.display = "block";
+                                    }
+                                }
+
+                                // Run on page load
+                                updateConnectionStatus();
+
+                                // Listen for changes
+                                window.addEventListener("online", updateConnectionStatus);
+                                window.addEventListener("offline", updateConnectionStatus);
+
+                                // Click event
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    const offlineIcon = document.getElementById("offline-icon");
+                                    if (offlineIcon) {
+                                        offlineIcon.addEventListener("click", function() {
+                                            alert("سیستم آفلاین است. لطفاً اتصال اینترنت را بررسی کنید.");
+                                        });
+                                    }
+                                });
+                                </script>
+
+                                <style>
+                                .status-dot-online {
+                                    width: 12px;
+                                    height: 12px;
+                                    background-color: #28a745;
+                                    border-radius: 50%;
+                                    position: absolute;
+                                    bottom: 5px;
+                                    right: 5px;
+                                }
+
+                                .status-dot-offline {
+                                    width: 12px;
+                                    height: 12px;
+                                    background-color: red;
+                                    border-radius: 50%;
+                                    position: absolute;
+                                    bottom: 5px;
+                                    right: 5px;
+                                }
+                                </style>
 
                                 <!-- Logout Button -->
                                 <form method="post" action="{% url 'account:logout' %}" class="mt-2">
